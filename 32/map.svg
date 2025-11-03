@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://web.resource.org/cc/"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="640"
+   height="650"
+   id="svg2097"
+   sodipodi:version="0.32"
+   inkscape:version="0.44.1"
+   sodipodi:docbase="D:\Resimlerim\svg\maps"
+   sodipodi:docname="Isparta.svg"
+   version="1.0">
+  <defs
+     id="defsHarita">
+    <style
+       type="text/css"
+       id="styleHarita">
+    .textİl {font-size:16px;line-height:125%;opacity:1;fill:black;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1;font-family:Arial,Helvetica}
+    .textİlçe {font-size:12px;line-height:125%;opacity:1;fill:black;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1;font-family:Arial,Helvetica}
+    .pathİlçe {fill:#ffd392;fill-opacity:0.57254902;fill-rule:nonzero;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible}
+    .pathHavzalar {opacity:1;color:Blue;fill:#09d6e9;fill-opacity:0.57254902;fill-rule:nonzero;stroke:#063af9;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible}
+   </style>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     gridtolerance="10000"
+     guidetolerance="10"
+     objecttolerance="10"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="395.53233"
+     inkscape:cy="355.93497"
+     inkscape:document-units="px"
+     inkscape:current-layer="svg2097"
+     inkscape:window-width="1024"
+     inkscape:window-height="719"
+     inkscape:window-x="-4"
+     inkscape:window-y="-4"
+     width="640px"
+     height="650px" />
+  <metadata
+     id="metadataHarita">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/licenses/GPL/2.0/" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title>katpatuka</dc:title>
+          </cc:Agent>
+        </dc:creator>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>GNU GPL</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>Roman Neumüller</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:language>tr</dc:language>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>=&quot;textYenişarbademli&quot;&gt;</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <dc:description>Isparta ilinin ilçeleri</dc:description>
+        <dc:title>Isparta ilinin ilçeleri</dc:title>
+        <dc:date>2007-01-12</dc:date>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/licenses/GPL/2.0/">
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Reproduction" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Distribution" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/Notice" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/ShareAlike" />
+        <cc:requires
+           rdf:resource="http://web.resource.org/cc/SourceCode" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <path
+     d="M 379.78125,277.77175 L 375.5,286.3655 L 369.78125,286.3655 L 354.09375,309.20925 L 355.5,325.64675 L 348.375,342.08425 L 339.09375,344.20925 L 330.5,333.4905 L 330.5,324.20925 L 324.78125,324.928 L 318.375,320.64675 L 318.375,312.08425 L 313.375,307.77175 L 316.21875,299.928 L 309.78125,302.08425 L 301.21875,298.4905 L 301.21875,279.20925 L 304.09375,271.3655 L 319.09375,264.20925 L 319.09375,249.928 L 334.78125,225.64675 L 331.9375,222.08425 L 331.9375,207.77175 L 329.78125,202.08425 L 325.5,194.928 L 313.375,194.928 L 306.9375,190.64675 L 302.65625,191.3655 L 296.21875,185.64675 L 297.65625,172.77175 L 294.09375,162.08425 L 301.21875,139.928 L 313.36607,129.92857 L 331.22321,122.07143 L 352.65179,119.21429 L 357.65179,132.78572 L 346.22321,147.78572 L 344.08036,157.07143 L 344.08036,164.21429 L 336.22321,175.64286 L 332.65179,189.21429 L 341.22321,191.35715 L 346.9375,187.07143 L 346.9375,192.78572 L 350.50893,192.78572 L 364.79464,201.35715 L 374.79464,217.78572 L 371.9375,223.5 L 372.65179,229.92857 L 377.65179,241.35715 L 374.08036,242.07143 L 377.65179,257.07143 L 381.22321,259.21429 L 382.65179,265.64286 L 379.79464,270.64286 L 379.78125,277.77175 z "
+     id="pathEğirdirGölü"
+     sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+     class="pathHavzalar" />
+  <g
+     inkscape:label="Layer Harita"
+     inkscape:groupmode="layer"
+     id="layerHarita"
+     class="pathİlçe"
+     style="fill:#ffd392;fill-opacity:0.57254902;fill-rule:nonzero;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible"
+     transform="translate(-68.0625,-333.2907)">
+    <path
+       d="M 442.14286,951.79075 L 457.14286,945.36218 L 474.28571,925.36218 L 512.14286,906.79075 L 535.71429,907.50504 L 560,893.93361 L 582.85714,889.6479 L 596.42857,882.50504 L 600,873.21933 L 598.57143,866.07647 L 608.57143,828.21933 L 605,820.36218 L 600.71429,807.50504 L 576.42857,816.07647 L 546.42857,801.07647 L 520.71429,793.21933 L 516.42857,787.50504 L 519.28571,783.21933 L 507.14286,754.6479 L 475,752.50504 L 466.42857,755.36218 L 455.71429,766.79075 L 446.42857,783.93361 L 417.14286,798.93361 L 405.71429,816.07647 L 388.57143,851.07647 L 381.42857,855.36218 L 389.28571,881.79075 L 402.14286,892.50504 L 406.42857,900.36218 L 427.85714,926.07647 L 428.57143,942.50504 L 442.14286,951.79075 z "
+       id="pathSütçüler" />
+    <path
+       d="M 600.71429,807.50504 L 576.42857,816.07647 L 546.42857,801.07647 L 520.71429,793.21933 L 516.42857,787.50504 L 519.28571,783.21933 L 507.14286,754.6479 L 504.28571,748.93361 L 500,746.79075 L 498.57143,734.6479 L 492.85714,722.50504 L 479.28571,707.50504 L 457.14286,708.21933 L 450,703.93361 L 448.57143,694.6479 L 467.85714,677.50504 L 489.28571,678.21933 L 505.71429,685.36218 L 537.85714,688.21933 L 547.14286,688.21933 L 552.14286,700.36218 L 567.14286,711.79075 L 577.85714,736.07647 L 576.42857,754.6479 L 569.28571,773.21933 L 571.42857,785.36218 L 577.85714,786.07647 L 594.28571,778.21933 L 595,795.36218 L 600.71429,807.50504 z "
+       id="pathAksu"
+       sodipodi:nodetypes="ccccccc" />
+    <path
+       d="M 547.14286,688.21933 L 552.14286,700.36218 L 567.14286,711.79075 L 577.85714,736.07647 L 576.42857,754.6479 L 569.28571,773.21933 L 571.42857,785.36218 L 577.85714,786.07647 L 594.28571,778.21933 L 595.71429,761.79075 L 609.28571,750.36218 L 629.28571,750.36218 L 637.14286,753.21933 L 637.14286,732.50504 L 635,706.07647 L 625.71429,683.21933 L 616.42857,670.36218 L 618.57143,656.79075 L 590,647.50504 L 546.42857,672.50504 L 547.14286,688.21933 z "
+       id="pathYenişarbademli"
+       sodipodi:nodetypes="ccccccccc" />
+    <path
+       d="M 546.4375,672.5 L 547.15625,688.21875 L 537.84375,688.21875 L 505.71875,685.375 L 489.28125,678.21875 L 467.84375,677.5 L 448.5625,694.65625 L 450,703.9375 L 457.15625,708.21875 L 479.28125,707.5 L 492.84375,722.5 L 498.5625,734.65625 L 500,746.78125 L 504.28125,748.9375 L 507.15625,754.65625 L 475,752.5 L 466.4375,755.375 L 455.71875,766.78125 L 446.4375,783.9375 L 417.15625,798.9375 L 405.71875,816.0625 L 388.5625,851.0625 L 381.4375,855.375 L 364.28571,831.07647 L 359.28571,815.36218 L 355,809.6479 L 373.57143,803.21933 L 385.71429,787.50504 L 392.85714,772.50504 L 390.71429,754.6479 L 380.71429,726.07647 L 377.14286,701.79075 L 371.42857,687.50504 L 360,674.6479 L 360,666.79075 L 354.28571,654.6479 L 342.85714,647.50504 L 355.71429,638.93361 L 350.71429,623.93361 L 335,606.79075 L 336.42857,603.21932 L 345,603.21932 L 354.28571,597.50504 L 354.28571,593.21932 L 363.57143,586.07647 L 382.14286,557.50504 L 400,541.07647 L 400,555.36218 L 402.85714,558.93361 L 387.14286,583.21932 L 387.14286,597.50504 L 372.14286,604.6479 L 369.28571,612.50504 L 369.28571,631.79075 L 377.85714,635.36218 L 384.28571,633.21933 L 381.42857,641.07647 L 386.42857,645.36218 L 386.42857,653.93361 L 392.85714,658.21933 L 398.57143,657.50504 L 398.57143,666.79075 L 407.14286,677.50504 L 416.42857,675.36218 L 423.57143,658.93361 L 422.14286,642.50504 L 437.85714,619.6479 L 443.57143,619.6479 L 447.85714,611.07647 L 467.14286,617.50504 L 480,617.50504 L 494.28571,622.50504 L 517.14286,623.21933 L 532.85714,620.36218 L 526.42857,628.93361 L 520.71429,643.21933 L 541.42857,663.21933 L 546.4375,672.5 z "
+       id="pathEğirdir"
+       sodipodi:nodetypes="ccccccccccccccccccccccc" />
+    <path
+       d="M 355,809.6479 L 373.57143,803.21933 L 385.71429,787.50504 L 392.85714,772.50504 L 390.71429,754.6479 L 380.71429,726.07647 L 377.14286,701.79075 L 371.42857,687.50504 L 360,674.6479 L 360,666.79075 L 354.28571,654.6479 L 342.85714,647.50504 L 342.85714,648.21933 L 332.85714,644.6479 L 329.28571,651.07647 L 302.85714,652.50504 L 299.28571,656.07647 L 279.28571,656.07647 L 273.57143,658.21933 L 259.28571,658.21933 L 220,685.36218 L 223.57143,688.93361 L 223.57143,700.36218 L 228.57143,705.36218 L 230,723.93361 L 249.28571,742.50504 L 264.28571,744.6479 L 289.28571,756.79075 L 300.71429,771.07647 L 314.28571,770.36218 L 337.14286,776.79075 L 342.14286,783.93361 L 345,799.6479 L 355,809.6479 z "
+       id="pathIsparta"
+       sodipodi:nodetypes="cccccccccccc" />
+    <path
+       d="M 336.4375,603.21875 L 335,606.78125 L 350.71875,623.9375 L 355.71875,638.9375 L 342.84375,647.5 L 342.84375,648.21875 L 332.84375,644.65625 L 329.28125,651.0625 L 302.84375,652.5 L 299.28125,656.0625 L 279.28125,656.0625 L 280,656.79075 L 273.57143,638.21933 L 275.71429,618.93361 L 270,597.50504 L 293.57143,601.07647 L 317.14286,602.50504 L 324.28571,597.50504 L 334.28571,596.79075 L 336.4375,603.21875 z "
+       id="pathAtabey"
+       sodipodi:nodetypes="ccccccccccc" />
+    <path
+       d="M 270,597.5 L 275.71875,618.9375 L 273.5625,638.21875 L 279.75,656.0625 L 279.28125,656.0625 L 273.5625,658.21875 L 259.28125,658.21875 L 220,685.375 L 212.85714,677.50504 L 221.96609,661.88298 L 218.73662,643.2377 L 218.90233,623.22214 L 212.33714,606.78406 L 212.14286,580.36218 L 235.71429,586.07647 L 257.85714,596.79075 L 265.71429,598.93361 L 270,597.5 z "
+       id="pathGönen"
+       sodipodi:nodetypes="cccccccccccccccccc" />
+    <path
+       d="M 158.5625,572.5 L 152.15625,578.21875 L 148.5625,593.9375 L 140.71875,614.65625 L 125.71875,626.0625 L 115,649.65625 L 110,651.78125 L 102.15625,671.0625 L 86.4375,688.9375 L 73.5625,696.78125 L 80,714.65625 L 92.84375,726.0625 L 100.71875,729.65625 L 111.4375,716.78125 L 102.84375,706.0625 L 94.28125,703.21875 L 91.4375,697.5 L 99.28125,688.21875 L 124.28125,699.65625 L 139.28125,704.65625 L 157.15625,701.0625 L 175.71875,691.78125 L 179.28125,685.375 L 200.71875,677.5 L 212.84375,677.5 L 221.96875,661.875 L 218.75,643.25 L 218.90625,623.21875 L 212.34375,606.78125 L 212.15625,580.375 L 203.5625,575.375 L 187.84375,573.21875 L 169.28125,578.9375 L 158.5625,572.5 z "
+       id="pathKeçiborlu" />
+    <path
+       d="M 293.5625,601.0625 L 270,597.5 L 265.71875,598.9375 L 257.84375,596.78125 L 235.71875,586.0625 L 212.15625,580.375 L 203.5625,575.375 L 187.84375,573.21875 L 197.85714,563.21932 L 224.28571,520.36218 L 247.14286,496.07647 L 275.71429,478.93361 L 299.28571,485.36218 L 303.57143,490.36218 L 299.28571,503.93361 L 290.71429,514.6479 L 276.42857,514.6479 L 268.57143,518.21932 L 265,523.93361 L 267.14286,535.36218 L 262.14286,538.93361 L 262.14286,544.6479 L 283.57143,578.93361 L 293.5625,601.0625 z "
+       id="pathUluborlu"
+       sodipodi:nodetypes="cccccccc" />
+    <path
+       d="M 400,541.0625 L 382.15625,557.5 L 363.5625,586.0625 L 354.28125,593.21875 L 354.28125,597.5 L 345,603.21875 L 336.4375,603.21875 L 334.28125,596.78125 L 324.28125,597.5 L 317.15625,602.5 L 293.5625,601.0625 L 283.5625,578.9375 L 262.15625,544.65625 L 262.15625,538.9375 L 267.15625,535.375 L 265,523.9375 L 268.5625,518.21875 L 276.4375,514.65625 L 290.71875,514.65625 L 299.28125,503.9375 L 303.5625,490.375 L 299.28125,485.375 L 300,485.36218 L 309.28571,485.36218 L 322.14286,481.79075 L 346.42857,454.6479 L 358.57143,448.93361 L 360,456.79075 L 369.28571,473.21932 L 362.14286,495.36218 L 365.71429,506.07647 L 364.28571,518.93361 L 370.71429,524.6479 L 375,523.93361 L 381.42857,528.21932 L 393.57143,528.21932 L 397.85714,535.36218 L 400,541.0625 z "
+       id="pathSenirkent"
+       sodipodi:nodetypes="cccccccccccccccccccccc" />
+    <path
+       d="M 532.84375,620.375 L 517.15625,623.21875 L 494.28125,622.5 L 480,617.5 L 467.15625,617.5 L 447.84375,611.0625 L 447.84375,603.9375 L 450.71875,598.9375 L 449.28125,592.5 L 445.71875,590.375 L 442.15625,575.375 L 445.71875,574.65625 L 440.71875,563.21875 L 440,556.78125 L 442.84375,551.0625 L 432.84375,534.65625 L 418.5625,526.0625 L 420,526.07647 L 431.42857,507.50504 L 450.71429,494.6479 L 468.57143,487.50504 L 491.42857,493.21932 L 508.57143,505.36218 L 530,524.6479 L 535,536.79075 L 540.71429,540.36218 L 522.85714,568.93361 L 520,581.79075 L 540.71429,594.6479 L 543.57143,608.21933 L 532.84375,620.375 z "
+       id="pathGelendost"
+       sodipodi:nodetypes="ccccccccccccccccc" />
+    <path
+       d="M 540.71875,540.375 L 535,536.78125 L 530,524.65625 L 508.5625,505.375 L 491.4375,493.21875 L 468.5625,487.5 L 450.71875,494.65625 L 431.4375,507.5 L 420,526.0625 L 418.5625,526.0625 L 415,526.0625 L 415,520.375 L 409.28125,524.65625 L 400.71875,522.5 L 404.28125,508.9375 L 412.15625,497.5 L 412.15625,490.375 L 414.28125,481.0625 L 425.71875,466.0625 L 420.71875,452.5 L 399.28125,455.375 L 381.4375,463.21875 L 369.28125,473.21875 L 360,456.78125 L 358.5625,448.9375 L 358.57143,449.6479 L 382.14286,438.93361 L 396.42857,430.36218 L 408.57143,408.21932 L 425,395.36218 L 447.14286,386.79075 L 462.14286,376.79075 L 467.14286,364.6479 L 474.28571,346.07647 L 480.71429,346.07647 L 490.71429,336.79075 L 497.85714,336.79075 L 501.42857,341.07647 L 518.57143,340.36218 L 521.42857,342.50504 L 523.57143,353.21932 L 530,356.79075 L 537.85714,368.93361 L 545,374.6479 L 565,381.07647 L 560,395.36218 L 567.85714,406.79075 L 578.57143,411.07647 L 578.57143,416.79075 L 582.85714,440.36218 L 590,455.36218 L 605,466.07647 L 635.71429,481.79075 L 643.57143,486.79075 L 611.42857,518.21932 L 586.42857,521.07647 L 565,532.50504 L 544.28571,536.07647 L 540.71875,540.375 z "
+       id="pathYalvaç"
+       sodipodi:nodetypes="ccccccccccccccccccccccccc" />
+    <path
+       d="M 618.5625,656.78125 L 590,647.5 L 546.4375,672.5 L 541.4375,663.21875 L 520.71875,643.21875 L 526.4375,628.9375 L 532.84375,620.375 L 543.5625,608.21875 L 540.71875,594.65625 L 520,581.78125 L 522.84375,568.9375 L 540.71875,540.375 L 544.28125,536.0625 L 565,532.5 L 586.4375,521.0625 L 611.4375,518.21875 L 643.5625,486.78125 L 644.28571,486.07647 L 652.85714,496.79075 L 664.28571,510.36218 L 679.28571,517.50504 L 685,528.21932 L 685,533.21932 L 692.85714,542.50504 L 696.42857,545.36218 L 692.14286,553.93361 L 682.14286,561.07647 L 677.85714,576.07647 L 661.42857,581.79075 L 655.71429,589.6479 L 662.85714,608.93361 L 657.14286,624.6479 L 652.14286,630.36218 L 622.85714,646.79075 L 618.5625,656.78125 z "
+       id="pathŞarkikaraağaç"
+       sodipodi:nodetypes="ccccccccccccccccc" />
+  </g>
+  <g
+     id="gMetre"
+     transform="translate(-347.0212,216.3578)">
+    <rect
+       y="424.38562"
+       x="374.01392"
+       height="6.0103631"
+       width="275"
+       id="rectSiyah"
+       style="color:black;fill:black;fill-opacity:1;fill-rule:nonzero;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible" />
+    <rect
+       y="424.14789"
+       x="648.29285"
+       height="6.0103631"
+       width="274"
+       id="rectBeyaz"
+       style="color:black;fill:white;fill-opacity:1;fill-rule:nonzero;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible" />
+    <text
+       id="text0km"
+       y="420.70361"
+       x="371.53903"
+       style="font-size:12px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:black;fill:white;fill-opacity:1;fill-rule:nonzero;stroke:black;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;font-family:Arial Unicode MS"
+       xml:space="preserve"><tspan
+         style="font-size:8px;fill:black;fill-opacity:1;stroke:none"
+         y="420.70361"
+         x="371.53903"
+         id="tspan2097"
+         sodipodi:role="line">0</tspan></text>
+    <text
+       id="text60km"
+       y="421.20361"
+       x="642.63031"
+       style="font-size:6px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:black;fill:black;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;font-family:Arial Unicode MS"
+       xml:space="preserve"><tspan
+         style="font-size:8px"
+         y="421.20361"
+         x="642.63031"
+         id="tspan2101"
+         sodipodi:role="line">60</tspan></text>
+    <text
+       id="text120km"
+       y="421.20361"
+       x="915.17072"
+       style="font-size:6px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-indent:0;text-align:start;text-decoration:none;line-height:normal;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;text-anchor:start;color:black;fill:black;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;marker:none;marker-start:none;marker-mid:none;marker-end:none;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;visibility:visible;display:inline;overflow:visible;font-family:Arial Unicode MS"
+       xml:space="preserve"><tspan
+         style="font-size:8px"
+         y="421.20361"
+         x="915.17072"
+         id="tspan2105"
+         sodipodi:role="line">120 km</tspan></text>
+  </g>
+  <text
+     xml:space="preserve"
+     x="138.28418"
+     y="95.888268"
+     id="textIspartaİli"
+     class="textİl"
+     sodipodi:linespacing="125%"
+     style="font-size:16px;line-height:125%;opacity:1;fill:black;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1;font-family:Arial, Helvetica"><tspan
+       sodipodi:role="line"
+       id="tspan2029"
+       x="138.28418"
+       y="95.888268">Isparta İli</tspan></text>
+  <g
+     inkscape:groupmode="layer"
+     id="layerMetin"
+     class="textİlçe"
+     style="font-size:12px;line-height:125%;opacity:1;fill:black;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-opacity:1;font-family:Arial, Helvetica"
+     transform="translate(-68.0625,-333.2907)">
+    <text
+       xml:space="preserve"
+       x="462.28571"
+       y="853.21936"
+       id="textSütçüler"><tspan
+         sodipodi:role="line"
+         id="tspan1970"
+         x="462.28571"
+         y="853.21936">Sütçüler</tspan></text>
+    <text
+       xml:space="preserve"
+       x="516.42859"
+       y="741.79077"
+       id="textAksu"><tspan
+         sodipodi:role="line"
+         id="tspan1998"
+         x="516.42859"
+         y="741.79077">Aksu</tspan></text>
+    <text
+       xml:space="preserve"
+       x="564.28571"
+       y="695.36218"
+       id="textYenişarbademli"><tspan
+         sodipodi:role="line"
+         id="tspan2004"
+         x="564.28571"
+         y="695.36218">Yenişarbademli</tspan></text>
+    <text
+       xml:space="preserve"
+       x="384.28571"
+       y="691.79077"
+       id="textEğirdir"><tspan
+         sodipodi:role="line"
+         id="tspan2019"
+         x="384.28571"
+         y="691.79077">Eğirdir</tspan></text>
+    <text
+       xml:space="preserve"
+       x="272.85715"
+       y="716.79077"
+       id="textIsparta"><tspan
+         sodipodi:role="line"
+         id="tspan2025"
+         x="272.85715"
+         y="716.79077">Isparta</tspan></text>
+    <text
+       xml:space="preserve"
+       x="291.42856"
+       y="630.36218"
+       id="textAtabey"><tspan
+         sodipodi:role="line"
+         id="tspan2040"
+         x="291.42856"
+         y="630.36218">Atabey</tspan></text>
+    <text
+       xml:space="preserve"
+       x="230"
+       y="626.07648"
+       id="textGönen"><tspan
+         sodipodi:role="line"
+         id="tspan2068"
+         x="230"
+         y="626.07648">Gönen</tspan></text>
+    <text
+       xml:space="preserve"
+       x="133.57143"
+       y="645.36218"
+       id="textKeçiborlu"><tspan
+         sodipodi:role="line"
+         id="tspan2064"
+         x="133.57143"
+         y="645.36218">Keçiborlu</tspan></text>
+    <text
+       xml:space="preserve"
+       x="213.57143"
+       y="561.79077"
+       id="textUluborlu"><tspan
+         sodipodi:role="line"
+         id="tspan2079"
+         x="213.57143"
+         y="561.79077">Uluborlu</tspan></text>
+    <text
+       xml:space="preserve"
+       x="300"
+       y="544.64789"
+       id="textSenirkent"><tspan
+         sodipodi:role="line"
+         id="tspan2090"
+         x="300"
+         y="544.64789">Senirkent</tspan></text>
+    <text
+       xml:space="preserve"
+       x="395"
+       y="606.07648"
+       id="textEğirdirGölü"><tspan
+         sodipodi:role="line"
+         id="tspan2099"
+         x="395"
+         y="606.07648">Eğirdir</tspan><tspan
+         sodipodi:role="line"
+         x="395"
+         y="621.07648"
+         id="tspan2102">Gölü</tspan></text>
+    <text
+       xml:space="preserve"
+       x="461.42856"
+       y="553.2193"
+       id="textGelendost"><tspan
+         sodipodi:role="line"
+         id="tspan2111"
+         x="461.42856"
+         y="553.2193">Gelendost</tspan></text>
+    <text
+       xml:space="preserve"
+       x="480"
+       y="435.36218"
+       id="textYalvaç"><tspan
+         sodipodi:role="line"
+         id="tspan2122"
+         x="480"
+         y="435.36218">Yalvaç</tspan></text>
+    <text
+       xml:space="preserve"
+       x="557.85712"
+       y="576.79077"
+       id="textŞarkikaraağaç"><tspan
+         sodipodi:role="line"
+         id="tspan2136"
+         x="557.85712"
+         y="576.79077">Şarkikaraağaç</tspan></text>
+  </g>
+</svg>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>İznik Etkinliği - Sürükle Bırak</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .images-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 1200px;
+        }
+
+        .image-slot {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .image-slot img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .drop-area {
+            width: 200px;
+            height: 40px;
+            border: 2px dashed #3498db;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #7f8c8d;
+            background: #ecf0f1;
+        }
+
+        .drop-area.filled {
+            border: 2px solid #27ae60;
+            background: #d5f5e3;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .draggables-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+
+        .draggable {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: move;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .draggable:hover {
+            background: #2980b9;
+        }
+
+        .draggable.dragging {
+            opacity: 0.6;
+        }
+
+        /* Tebrik mesajı */
+        #congrats {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            z-index: 1000;
+            display: none;
+        }
+
+        #congrats button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>İznik Tarihi Yerleri Eşleştirme</h1>
+
+    <div class="container">
+        <!-- Resim ve hedef alanlar (SABİT SIRADA) -->
+        <div class="images-container">
+            <div class="image-slot" data-id="1">
+                <img src="images/1.jpg" alt="İznik Kalesi">
+                <div class="drop-area" data-target="1"></div>
+            </div>
+            <div class="image-slot" data-id="2">
+                <img src="images/2.jpg" alt="Ayasofya Orhan Camii">
+                <div class="drop-area" data-target="2"></div>
+            </div>
+            <div class="image-slot" data-id="3">
+                <img src="images/3.jpg" alt="Süleyman Paşa Medresesi">
+                <div class="drop-area" data-target="3"></div>
+            </div>
+            <div class="image-slot" data-id="4">
+                <img src="images/4.jpg" alt="İznik Yeşil Camii">
+                <div class="drop-area" data-target="4"></div>
+            </div>
+            <div class="image-slot" data-id="5">
+                <img src="images/5.jpg" alt="İznik Roma Tiyatrosu">
+                <div class="drop-area" data-target="5"></div>
+            </div>
+            <div class="image-slot" data-id="6">
+                <img src="images/6.jpg" alt="İznik Gölü">
+                <div class="drop-area" data-target="6"></div>
+            </div>
+            <div class="image-slot" data-id="7">
+                <img src="images/7.jpg" alt="Aziz Neophytos Bazilikası">
+                <div class="drop-area" data-target="7"></div>
+            </div>
+            <div class="image-slot" data-id="8">
+                <img src="images/8.jpg" alt="İznik Çinisi">
+                <div class="drop-area" data-target="8"></div>
+            </div>
+        </div>
+
+        <!-- Sürüklenebilir etiketler (HER SAYFA AÇILIŞINDA RASTGELE SIRADA) -->
+        <div class="draggables-container" id="draggables-container">
+            <!-- Burası JavaScript ile doldurulacak -->
+        </div>
+    </div>
+
+    <audio id="correctSound" src="ses/dogru.mp3"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('draggables-container');
+
+            // Etiketler (her seferinde karışacak)
+            const items = [
+                "İznik Kalesi",
+                "Ayasofya Orhan Camii",
+                "Süleyman Paşa Medresesi",
+                "İznik Yeşil Camii",
+                "İznik Roma Tiyatrosu",
+                "İznik Gölü",
+                "Aziz Neophytos Bazilikası",
+                "İznik Çinisi"
+            ];
+
+            // Diziyi karıştır
+            const shuffled = [...items].sort(() => Math.random() - 0.5);
+
+            // Karışık etiketleri ekle
+            shuffled.forEach(text => {
+                const div = document.createElement('div');
+                div.className = 'draggable';
+                div.draggable = true;
+                div.dataset.value = text;
+                div.textContent = text;
+                container.appendChild(div);
+            });
+
+            // Artık sürüklenebilir öğeler DOM'a eklendi, event listener'ları bağla
+            const draggables = document.querySelectorAll('.draggable');
+            const dropAreas = document.querySelectorAll('.drop-area');
+            const correctSound = document.getElementById('correctSound');
+
+            // Doğru eşleşmeler (resim ID -> doğru isim) — resim sırası SABİT
+            const correctMatches = {
+                1: "İznik Kalesi",
+                2: "Ayasofya Orhan Camii",
+                3: "Süleyman Paşa Medresesi",
+                4: "İznik Yeşil Camii",
+                5: "İznik Roma Tiyatrosu",
+                6: "İznik Gölü",
+                7: "Aziz Neophytos Bazilikası",
+                8: "İznik Çinisi"
+            };
+
+            let completedCount = 0;
+
+            draggables.forEach(draggable => {
+                draggable.addEventListener('dragstart', () => {
+                    draggable.classList.add('dragging');
+                });
+
+                draggable.addEventListener('dragend', () => {
+                    draggable.classList.remove('dragging');
+                });
+            });
+
+            dropAreas.forEach(area => {
+                area.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    const dragging = document.querySelector('.dragging');
+                    if (dragging) {
+                        area.style.backgroundColor = '#e8f4fd';
+                    }
+                });
+
+                area.addEventListener('dragleave', () => {
+                    area.style.backgroundColor = '';
+                });
+
+                area.addEventListener('drop', e => {
+                    e.preventDefault();
+                    const dragging = document.querySelector('.dragging');
+                    if (!dragging) return;
+
+                    const targetId = area.dataset.target;
+                    const correctValue = correctMatches[targetId];
+                    const droppedValue = dragging.dataset.value;
+
+                    if (correctValue === droppedValue) {
+                        // Doğru eşleşme
+                        area.textContent = droppedValue;
+                        area.classList.add('filled');
+                        dragging.style.display = 'none'; // Etiketi gizle
+                        completedCount++;
+
+                        // Ses çal
+                        if (correctSound) {
+                            correctSound.currentTime = 0;
+                            correctSound.play().catch(e => console.log("Ses çalınamadı:", e));
+                        } else {
+                            console.log("Doğru! 🎉");
+                        }
+
+                        // Tüm eşleşmeler tamam mı?
+                        if (completedCount === Object.keys(correctMatches).length) {
+                            setTimeout(() => {
+                                showCongrats();
+                            }, 500);
+                        }
+                    } else {
+                        // Yanlış eşleşme - etiket eski yerine döner
+                        alert("Yanlış eşleştirme! Tekrar deneyin.");
+                    }
+
+                    area.style.backgroundColor = '';
+                });
+            });
+
+            function showCongrats() {
+                const congrats = document.createElement('div');
+                congrats.id = 'congrats';
+                congrats.innerHTML = `
+                    <h2>🎉 Tebrikler! 🎉</h2>
+                    <p>Tüm eşleştirmeleri doğru yaptınız!</p>
+                    <button onclick="location.reload()">Yeniden Oyna</button>
+                `;
+                document.body.appendChild(congrats);
+                congrats.style.display = 'flex';
+            }
+        });
+    </script>
+</body>
+</html>

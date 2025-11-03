@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zıt Anlamlı Kelimeler Oyunu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .score, .timer, .level {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 900px;
+            min-height: 400px;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        .words-column {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 15px;
+            padding: 20px;
+            min-height: 300px;
+        }
+
+        .column-title {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #2d3748;
+            font-weight: bold;
+        }
+
+        .word-item {
+            background: white;
+            margin: 10px 0;
+            padding: 15px 20px;
+            border-radius: 15px;
+            cursor: move;
+            transition: all 0.3s ease;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2d3748;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+
+        .word-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .word-item.dragging {
+            opacity: 0.7;
+            transform: rotate(5deg) scale(1.05);
+            z-index: 1000;
+        }
+
+        .drop-zone {
+            background: rgba(255,255,255,0.3);
+            border: 3px dashed #cbd5e0;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            color: #718096;
+        }
+
+        .drop-zone.drag-over {
+            border-color: #4299e1;
+            background: rgba(66, 153, 225, 0.1);
+            transform: scale(1.02);
+        }
+
+        .drop-zone.filled {
+            border-color: #48bb78;
+            background: rgba(72, 187, 120, 0.1);
+        }
+
+        .drop-zone.wrong {
+            border-color: #f56565;
+            background: rgba(245, 101, 101, 0.1);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .feedback {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            z-index: 2000;
+            display: none;
+            animation: fadeInOut 1.5s ease-in-out;
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .feedback.wrong {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .game-complete {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 20px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .game-complete h2 {
+            color: #2d3748;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .game-info {
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎯 Zıt Anlamlı Kelimeler Oyunu</h1>
+        <div class="game-info">
+            <div class="score">Puan: <span id="score">0</span></div>
+            <div class="timer">Süre: <span id="time">60</span></div>
+            <div class="level">Seviye: <span id="level">1</span></div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="game-area">
+            <div class="words-column">
+                <div class="column-title">📝 Kelimeler</div>
+                <div id="words-list"></div>
+            </div>
+            <div class="words-column">
+                <div class="column-title">🎯 Zıt Anlamları</div>
+                <div id="drop-zones"></div>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn" onclick="startGame()">🚀 Oyunu Başlat</button>
+            <button class="btn" onclick="resetGame()">🔄 Yeniden Başlat</button>
+        </div>
+    </div>
+
+    <div class="game-complete" id="gameComplete">
+        <h2>🎉 Tebrikler!</h2>
+        <p>Oyunu başarıyla tamamladınız!</p>
+        <p>Toplam Puanınız: <span id="finalScore">0</span></p>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <script>
+        const antonymPairs = [
+            ['büyük', 'küçük'], ['uzun', 'kısa'], ['sıcak', 'soğuk'],
+            ['hızlı', 'yavaş'], ['açık', 'kapalı'], ['doğru', 'yanlış'],
+            ['mutlu', 'üzgün'], ['güçlü', 'zayıf'], ['yeni', 'eski'],
+            ['temiz', 'kirli'], ['kolay', 'zor'], ['yukarı', 'aşağı'],
+            ['gece', 'gündüz'], ['ağır', 'hafif'], ['güzel', 'çirkin'],
+            ['içeri', 'dışarı'], ['tatlı', 'ekşi'], ['yakın', 'uzak'],
+            ['kalın', 'ince'], ['sessiz', 'gürültülü']
+        ];
+
+        let currentLevel = 1;
+        let score = 0;
+        let timeLeft = 60;
+        let gameTimer;
+        let isGameActive = false;
+        let currentPairs = [];
+        let completedPairs = 0;
+
+        // Ses efektleri için AudioContext
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, duration, type = 'sine') {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        function playCorrectSound() {
+            playSound(523, 0.2); // C5
+            setTimeout(() => playSound(659, 0.2), 100); // E5
+            setTimeout(() => playSound(784, 0.3), 200); // G5
+        }
+
+        function playWrongSound() {
+            playSound(200, 0.1, 'sawtooth');
+            setTimeout(() => playSound(180, 0.1, 'sawtooth'), 100);
+            setTimeout(() => playSound(160, 0.2, 'sawtooth'), 200);
+        }
+
+        function vibrateDevice() {
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function startGame() {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            isGameActive = true;
+            score = 0;
+            timeLeft = 60;
+            currentLevel = 1;
+            completedPairs = 0;
+            
+            updateDisplay();
+            setupLevel();
+            startTimer();
+        }
+
+        function setupLevel() {
+            const wordsPerLevel = Math.min(5 + currentLevel, 10);
+            const shuffledPairs = shuffleArray(antonymPairs);
+            currentPairs = shuffledPairs.slice(0, wordsPerLevel);
+            
+            createGameElements();
+        }
+
+        function createGameElements() {
+            const wordsList = document.getElementById('words-list');
+            const dropZones = document.getElementById('drop-zones');
+            
+            wordsList.innerHTML = '';
+            dropZones.innerHTML = '';
+            
+            const allWords = [];
+            const antonyms = [];
+            
+            currentPairs.forEach(pair => {
+                allWords.push(pair[0]);
+                antonyms.push(pair[1]);
+            });
+            
+            const shuffledWords = shuffleArray(allWords);
+            
+            shuffledWords.forEach(word => {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'word-item';
+                wordElement.textContent = word;
+                wordElement.draggable = true;
+                wordElement.dataset.word = word;
+                
+                wordElement.addEventListener('dragstart', handleDragStart);
+                wordElement.addEventListener('dragend', handleDragEnd);
+                
+                wordsList.appendChild(wordElement);
+            });
+            
+            currentPairs.forEach(pair => {
+                const dropZone = document.createElement('div');
+                dropZone.className = 'drop-zone';
+                dropZone.textContent = `${pair[1]} için zıt anlamlısını sürükle`;
+                dropZone.dataset.antonym = pair[1];
+                dropZone.dataset.correctWord = pair[0];
+                
+                dropZone.addEventListener('dragover', handleDragOver);
+                dropZone.addEventListener('drop', handleDrop);
+                dropZone.addEventListener('dragleave', handleDragLeave);
+                
+                dropZones.appendChild(dropZone);
+            });
+        }
+
+        function handleDragStart(e) {
+            if (!isGameActive) return;
+            
+            e.dataTransfer.setData('text/plain', e.target.dataset.word);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            if (!isGameActive) return;
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            if (!isGameActive) return;
+            
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            const droppedWord = e.dataTransfer.getData('text/plain');
+            const correctWord = e.currentTarget.dataset.correctWord;
+            
+            if (droppedWord === correctWord) {
+                // Doğru eşleştirme
+                e.currentTarget.classList.add('filled');
+                e.currentTarget.textContent = `${e.currentTarget.dataset.antonym} ⟷ ${droppedWord}`;
+                
+                // Kelimeyi listeden kaldır
+                const wordElement = document.querySelector(`[data-word="${droppedWord}"]`);
+                if (wordElement) {
+                    wordElement.style.display = 'none';
+                }
+                
+                score += 10;
+                completedPairs++;
+                
+                showFeedback('Doğru! 🎉', 'correct');
+                playCorrectSound();
+                
+                if (completedPairs === currentPairs.length) {
+                    levelComplete();
+                }
+            } else {
+                // Yanlış eşleştirme
+                e.currentTarget.classList.add('wrong');
+                setTimeout(() => {
+                    e.currentTarget.classList.remove('wrong');
+                }, 500);
+                
+                showFeedback('Yanlış! Tekrar dene 😔', 'wrong');
+                playWrongSound();
+                vibrateDevice();
+                
+                if (score > 0) score -= 2;
+            }
+            
+            updateDisplay();
+        }
+
+        function levelComplete() {
+            currentLevel++;
+            completedPairs = 0;
+            score += timeLeft; // Bonus puan
+            
+            showFeedback(`Seviye ${currentLevel - 1} Tamamlandı! 🌟`, 'correct');
+            
+            setTimeout(() => {
+                if (currentLevel > 5) {
+                    gameComplete();
+                } else {
+                    setupLevel();
+                }
+            }, 2000);
+        }
+
+        function gameComplete() {
+            isGameActive = false;
+            clearInterval(gameTimer);
+            
+            document.getElementById('finalScore').textContent = score;
+            document.getElementById('gameComplete').style.display = 'block';
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.style.display = 'block';
+            
+            setTimeout(() => {
+                feedback.style.display = 'none';
+            }, 1500);
+        }
+
+        function startTimer() {
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateDisplay();
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            isGameActive = false;
+            clearInterval(gameTimer);
+            showFeedback('Süre Doldu! ⏰', 'wrong');
+            playWrongSound();
+        }
+
+        function resetGame() {
+            isGameActive = false;
+            clearInterval(gameTimer);
+            
+            score = 0;
+            timeLeft = 60;
+            currentLevel = 1;
+            completedPairs = 0;
+            
+            document.getElementById('gameComplete').style.display = 'none';
+            document.getElementById('words-list').innerHTML = '';
+            document.getElementById('drop-zones').innerHTML = '';
+            
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('time').textContent = timeLeft;
+            document.getElementById('level').textContent = currentLevel;
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDisplay();
+        });
+    </script>
+</body>
+</html>
