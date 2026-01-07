@@ -3,29 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa 02</title>
+    <title>Sayfa 01</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
         }
-        a {
+
+        /* Logo kapsayıcı */
+        .logo-wrapper {
             display: inline-block;
-            margin-top: 20px;
+            position: relative;
+        }
+
+        /* Logo */
+        .logo {
+            max-width: 220px;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Hover efekti */
+        .logo-wrapper:hover .logo {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #333;
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Tooltip ok */
+        .tooltip::after {
+            content: "";
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent #333 transparent;
+        }
+
+        /* Hover’da tooltip görünür */
+        .logo-wrapper:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* Buton */
+        a.button {
+            display: inline-block;
+            margin-top: 40px;
             padding: 10px 20px;
             background-color: #3498db;
             color: white;
             text-decoration: none;
             border-radius: 5px;
         }
-        a:hover {
+
+        a.button:hover {
             background-color: #2980b9;
         }
     </style>
 </head>
 <body>
-    <h1>Bu sayfa henüz tasarım aşamasında: 02</h1>
-    <a href="http://memleketim.github.io/">Anasayfaya Dön</a>
+
+    <!-- Logo + Tooltip -->
+    <a href="https://ulkemyanimda.eba.gov.tr/moodle/mod/assign/view.php?id=4931" target="_blank"  class="logo-wrapper">
+        <img src="http://memleketim.github.io/icons/katkiekle.jpg" alt="Katkı Ekle" class="logo">
+        <span class="tooltip">Katkı Ekle</span>
+	
+    </a>
+
+    <!-- Anasayfaya dönüş -->
+    <br>
+		
+		
+		<div style="
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 1vh;
+">
+  <div style="
+    border: 2px dashed #4fb3a2;
+    border-radius: 12px;
+    padding: 18px 22px;
+    background-color: #f4fbfa;
+    max-width: 520px;
+    font-family: Arial, sans-serif;
+    color: #2c3e3a;
+    text-align: center;
+  ">
+    <strong style="font-size: 1.1em;">Bu illerin hikâyesi henüz yazılmadı.</strong>
+    <p style="margin: 10px 0 0 0; line-height: 1.6;">
+      Haritamız, sizler anlattıkça tamamlanıyor.
+<br>      
+      Sen de kendi ilinin sesini ekleyebilirsin.
+    </p>
+  </div>
+</div>
+
+
+    <a class="button" href="http://memleketim.github.io/">Anasayfaya Dön</a>
+
 </body>
 </html>
