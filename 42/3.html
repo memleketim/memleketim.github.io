@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mevlana Kelime Kaşifi</title>
+    <style>
+        :root {
+            --mevlana-green: #1e5631;
+            --soft-green: #e8f5e9;
+            --accent-gold: #d4af37;
+            --clue-turquoise: #00ced1; /* İpucu için Turkuaz */
+            --text-dark: #2c3e50;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--soft-green) 0%, #ffffff 100%);
+            overflow-y: auto; display: flex; flex-direction: column; align-items: center;
+        }
+
+        header {
+            width: 100%; background: var(--mevlana-green); color: white;
+            text-align: center; padding: 15px 0; font-size: 2em; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            width: 90%; max-width: 800px; padding: 20px; box-sizing: border-box; margin-top: 20px;
+        }
+
+        /* GİRİŞ EKRANI */
+        #intro-page { background: white; border-radius: 20px; padding: 30px; border: 4px solid var(--mevlana-green); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .info-box { text-align: justify; font-size: 1.1em; line-height: 1.7; color: var(--text-dark); margin-bottom: 20px; }
+        
+        /* Yeni Fotoğraf Yerleşimi */
+        .intro-img { width: 100%; max-height: 300px; object-fit: cover; border-radius: 15px; margin: 15px 0; border: 2px solid var(--mevlana-green); }
+        
+        .student-link { display: block; margin: 15px 0; color: #2e7d32; font-weight: bold; text-decoration: none; border-bottom: 2px dashed #2e7d32; padding-bottom: 5px; }
+        
+        .btn-start {
+            background: var(--mevlana-green); color: white; border: none; padding: 15px 40px;
+            border-radius: 30px; font-size: 1.2em; cursor: pointer; transition: 0.3s; font-weight: bold;
+        }
+
+        /* OYUN EKRANI */
+        #game-page { display: none; background: white; border-radius: 20px; padding: 25px; border: 3px solid var(--mevlana-green); flex-direction: column; align-items: center; gap: 20px; }
+        .stats { width: 100%; display: flex; justify-content: space-between; font-weight: bold; color: var(--mevlana-green); font-size: 1.2em; }
+        
+        .clue-box { background: #f1f8e9; padding: 15px; border-radius: 10px; border-left: 5px solid var(--mevlana-green); width: 100%; box-sizing: border-box; font-size: 1.1em; }
+        
+        .slots, .letters { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 20px 0; }
+        
+        .letter-box {
+            width: 45px; height: 45px; border: 2px solid var(--mevlana-green);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 1.5em; font-weight: bold; cursor: pointer; background: white; transition: 0.2s;
+        }
+        .letter-box.empty { background: #eee; border-style: dashed; }
+        .letters .letter-box { background: var(--mevlana-green); color: white; }
+        .letters .letter-box:hover { transform: scale(1.1); background: #2e7d32; }
+
+        .game-buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+        .btn-game { padding: 12px 25px; border-radius: 10px; font-weight: bold; cursor: pointer; border: none; font-size: 1em; }
+        .btn-check { background: #4caf50; color: white; }
+        .btn-hint { background: var(--clue-turquoise); color: white; } /* Turkuaz Buton */
+        .btn-clear { background: #f44336; color: white; }
+
+        .feedback { font-weight: bold; margin-top: 10px; min-height: 24px; font-size: 1.2em; text-align: center; }
+    </style>
+</head>
+<body>
+
+<header>MEVLANA MÜZESİ</header>
+
+<div class="container">
+    <div id="intro-page">
+        <div class="info-box">
+            Mevlana Müzesi, Konya’nın en meşhur yeridir. Burada çok eski zamanlarda yaşamış olan <b>Hz. Mevlana</b>'nın kabri bulunur. Mevlana, insanlara her zaman sevgiyle yaklaşmayı ve dürüst olmayı öğütlemiştir. Müzenin üzerindeki <b>Yeşil Kubbe</b> şehrin her yerinden görülür. İçeride Mevlana’nın yazdığı çok değerli kitapları ve o dönemde kullanılan eşyaları görebilirsiniz. Dünyanın her yerinden insanlar bu güzel yeri ziyaret etmeye gelirler.
+        </div>
+
+        <img src="mevlanamuzesi.png" alt="Mevlana Müzesi" class="intro-img">
+        
+        <a href="https://drive.google.com/file/d/193s0aB43W268mfglbm1qfQ0hArJoBzma/view?usp=sharing" target="_blank" class="student-link">
+            📄 Yaman Demirkıran'ın çalışmasının tamamına ulaşmak için tıklayın.
+        </a>
+
+        <button class="btn-start" onclick="startGame()">Yönergeyi Oku ve Etkinliğe Başla ▶</button>
+    </div>
+
+    <div id="game-page">
+        <div class="stats">
+            <span id="word-count">Kelime: 1 / 10</span>
+            <span id="score-display">Puan: 0</span>
+        </div>
+
+        <div class="clue-box" id="clue-text">İpucu buraya gelecek.</div>
+
+        <div class="slots" id="slots"></div>
+        <div class="letters" id="letters"></div>
+
+        <div class="game-buttons">
+            <button class="btn-game btn-hint" onclick="getHint()">İpucu Al (-1 Puan)</button>
+            <button class="btn-game btn-clear" onclick="clearAnswer()">Temizle</button>
+            <button class="btn-game btn-check" onclick="checkAnswer()">Kontrol Et</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+    </div>
+</div>
+
+<audio id="sound-correct" src="sesler/dogru.mp3"></audio>
+<audio id="sound-wrong" src="sesler/yanlis.mp3"></audio>
+
+<script>
+    const allWords = [
+        { word: "MEVLANA", clue: "1200'lü yıllarda yaşamış, sevgi ve barış öğütleyen büyük düşünür." },
+        { word: "KONYA", clue: "Mevlana'nın yaşadığı ve kabrinin bulunduğu güzel şehrimiz." },
+        { word: "ŞEMS", clue: "Mevlana'nın yakın dostu olan kişi." },
+        { word: "SEMAZEN", clue: "Beyaz kıyafetler içinde sema eşliğinde dönen kişi." },
+        { word: "NEY", clue: "Sesi insana huzur veren, üflenerek çalınan müzik aleti." },
+        { word: "MESNEVİ", clue: "Mevlana'nın içinde öğütler ve hikâyeler olan en ünlü kitabı." },
+        { word: "SEMA", clue: "Kollar iki yana açılarak yapılan huzur ile dönme anı." },
+        { word: "HOŞGÖRÜ", clue: "İnsanları olduğu gibi kabul etmek ve onlara sevgiyle bakmak." },
+        { word: "ŞEBİARUZ", clue: "'Düğün Gecesi' ismi verilen Mevlana'nın vefat ettiği gecenin adı." },
+        { word: "DERGÂH", clue: "Mevlana ve öğrencilerinin birlikte yaşadığı ve ders yaptığı yer." }
+    ];
+
+    let currentWordIndex = 0;
+    let totalScore = 0;
+    let currentWordPoints = 10;
+    let userLetters = [];
+
+    function startGame() {
+        document.getElementById('intro-page').style.display = 'none';
+        document.getElementById('game-page').style.display = 'flex';
+        loadWord();
+    }
+
+    function loadWord() {
+        if (currentWordIndex >= allWords.length) {
+            document.getElementById('game-page').innerHTML = `<h2>Maşallah! Hazreti Mevlana'yı tanıyorsun. 🎉<br>Toplam Puanın: ${totalScore}</h2><button class='btn-start' onclick='location.reload()'>Tekrar Oyna</button>`;
+            return;
+        }
+
+        const data = allWords[currentWordIndex];
+        document.getElementById('word-count').innerText = `Kelime: ${currentWordIndex + 1} / 10`;
+        document.getElementById('clue-text').innerText = data.clue;
+        document.getElementById('feedback').innerText = "";
+        currentWordPoints = 10;
+        userLetters = [];
+
+        const slotsDiv = document.getElementById('slots');
+        slotsDiv.innerHTML = "";
+        for (let i = 0; i < data.word.length; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'letter-box empty';
+            slot.id = 'slot-' + i;
+            slotsDiv.appendChild(slot);
+        }
+
+        const lettersDiv = document.getElementById('letters');
+        lettersDiv.innerHTML = "";
+        const scrambled = data.word.replace('Â','A').split('').sort(() => Math.random() - 0.5);
+        scrambled.forEach((char) => {
+            const box = document.createElement('div');
+            box.className = 'letter-box';
+            box.innerText = char;
+            box.onclick = () => selectLetter(char, box);
+            lettersDiv.appendChild(box);
+        });
+    }
+
+    function selectLetter(char, element) {
+        if (userLetters.length < allWords[currentWordIndex].word.length) {
+            userLetters.push(char);
+            const slotIdx = userLetters.length - 1;
+            const slot = document.getElementById('slot-' + slotIdx);
+            slot.innerText = char;
+            slot.className = 'letter-box';
+            element.style.visibility = 'hidden';
+            element.dataset.slotIndex = slotIdx;
+        }
+    }
+
+    function clearAnswer() {
+        userLetters = [];
+        const slots = document.querySelectorAll('.slots .letter-box');
+        slots.forEach(s => { s.innerText = ""; s.className = 'letter-box empty'; });
+        const letters = document.querySelectorAll('.letters .letter-box');
+        letters.forEach(l => l.style.visibility = 'visible');
+    }
+
+    // Gelişmiş İpucu Mantığı
+    function getHint() {
+        const correctWord = allWords[currentWordIndex].word.replace('Â','A');
+        const nextLetterIdx = userLetters.length;
+
+        if (nextLetterIdx < correctWord.length) {
+            if (currentWordPoints > 1) currentWordPoints--;
+            
+            const nextChar = correctWord[nextLetterIdx];
+            const ordinal = ["birinci", "ikinci", "üçüncü", "dördüncü", "beşinci", "altıncı", "yedinci", "sekizinci", "dokuzuncu"];
+            
+            alert(`Yardım: Aranan kelimenin ${ordinal[nextLetterIdx]} harfi "${nextChar}"`);
+        } else {
+            alert("Tüm harfleri dizdiniz, Kontrol Et butonuna basabilirsiniz!");
+        }
+    }
+
+    function checkAnswer() {
+        const answer = userLetters.join('');
+        const correct = allWords[currentWordIndex].word.replace('Â','A');
+        const feedback = document.getElementById('feedback');
+
+        if (answer === correct) {
+            document.getElementById('sound-correct').play();
+            feedback.innerText = `Harika! +${currentWordPoints} Puan 🎉`;
+            feedback.style.color = "green";
+            totalScore += currentWordPoints;
+            document.getElementById('score-display').innerText = `Puan: ${totalScore}`;
+            
+            setTimeout(() => {
+                currentWordIndex++;
+                loadWord();
+            }, 2000);
+        } else {
+            document.getElementById('sound-wrong').play();
+            feedback.innerText = "Hatalı dizilim, tekrar dene! 🧐";
+            feedback.style.color = "red";
+            clearAnswer();
+        }
+    }
+</script>
+
+</body>
+</html>
