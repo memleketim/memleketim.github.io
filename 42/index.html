@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konya'nın Kültürel Zenginlikleri</title>
     <style>
-        /* DENİZLİ İLE AYNI RENK TEMASI */
+        /* DENİZLİ İLE AYNI MOR-MAVİ TEMA */
         body {
             margin: 0; padding: 20px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,9 +26,8 @@
         h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
 
         .instructions {
-            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
+            text-align: center; color: white; margin-bottom: 20px;
             background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .map-container {
@@ -40,14 +39,13 @@
 
         .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
 
-        /* İKONLARIN ZIPLAMA VE PARLAMA EFEKTLERİ */
+        /* ZIPLAYAN İKONLAR */
         .quiz-point {
             position: absolute; width: 80px; height: 80px; border-radius: 50%;
             background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
             backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.4);
             cursor: pointer; transition: all 0.3s ease;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             animation: pulse 2s infinite;
         }
 
@@ -55,26 +53,24 @@
 
         .quiz-point-icon {
             width: 105px; height: 105px; object-fit: contain;
-            animation: bounce 1s infinite alternate; /* Zıplama efekti */
+            animation: bounce 1s infinite alternate;
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 0 0 rgba(255,255,255,0.4); }
-            100% { box-shadow: 0 4px 15px rgba(0,0,0,0.2), 0 0 0 20px rgba(255,255,255,0); }
+            0% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(255,255,255,0.4); }
+            100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 0 20px rgba(255,255,255,0); }
         }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
 
-        /* TOOLTIP (Üzerine gelince çıkan isim) */
         .tooltip {
             position: absolute; background: rgba(0, 0, 0, 0.8); color: white;
             padding: 6px 10px; border-radius: 6px; font-size: 12px;
             top: -35px; left: 50%; transform: translateX(-50%);
-            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+            opacity: 0; transition: opacity 0.3s; white-space: nowrap;
         }
         .quiz-point:hover .tooltip { opacity: 1; }
 
-        /* MODAL */
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;
@@ -93,55 +89,37 @@
         <a href="https://memleketim.github.io" class="btn btn-primary">Ana Sayfa</a>
     </div>
 
-    <div class="instructions">Haritadaki ikonlara tıklayarak Konya'nın kültürel zenginlikleri hakkında bilgi alabilirsiniz.</div>
+    <div class="instructions">Haritadaki ikonlara tıklayarak Konya'nın değerlerini keşfedebilirsiniz.</div>
 
     <div class="map-container">
         <img src="map.png" alt="Konya Haritası" class="map-image">
 
-        <div class="quiz-point" style="top: 48%; left: 45%;" 
-             data-title="🕌 Mevlana Müzesi" 
-             data-description="Hz. Mevlana'nın dergâhı olan bu yapı, Konya'nın en önemli simgesidir. Yeşil Kubbesi ile dünyanın her yerinden ziyaretçi ağırlar."
-             data-link="3.html">
+        <div class="quiz-point" style="top: 48%; left: 45%;" data-title="Mevlana Müzesi" data-description="Hz. Mevlana'nın dergâhı olan bu yapı, Konya'nın kalbidir." data-link="3.html">
             <div class="tooltip">Mevlana Müzesi</div>
             <img src="0.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 35%; left: 32%;" 
-             data-title="🥘 Konya Etli Ekmek" 
-             data-description="Konya mutfağının vazgeçilmezi! İncecik açılan hamur üzerine yayılan özel kıymalı harcıyla taş fırınlarda pişen dünyaca ünlü lezzetimizdir."
-             data-link="4.html">
+        <div class="quiz-point" style="top: 35%; left: 32%;" data-title="Etli Ekmek" data-description="Konya mutfağının dünyaca ünlü lezzeti." data-link="4.html">
             <div class="tooltip">Etli Ekmek</div>
             <img src="1.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 68%; left: 54%;" 
-             data-title="🏛 Çatalhöyük" 
-             data-description="İnsanlığın ilk yerleşim yerlerinden biri! UNESCO Dünya Mirası Listesi'nde yer alan bu antik kent, 9 bin yıllık geçmişiyle büyüleyicidir."
-             data-link="5.html">
+        <div class="quiz-point" style="top: 68%; left: 54%;" data-title="Çatalhöyük" data-description="9 bin yıllık geçmişiyle UNESCO Dünya Mirası." data-link="5.html">
             <div class="tooltip">Çatalhöyük</div>
             <img src="2.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 42%; left: 40%;" 
-             data-title="📚 İnce Minareli Medrese" 
-             data-description="Selçuklu taş işçiliğinin şaheseridir. Günümüzde Taş ve Ahşap Eserler Müzesi olarak hizmet vermektedir."
-             data-link="6.html">
+        <div class="quiz-point" style="top: 42%; left: 40%;" data-title="İnce Minareli Medrese" data-description="Selçuklu taş işçiliğinin şaheseridir." data-link="6.html">
             <div class="tooltip">İnce Minareli Medrese</div>
             <img src="3.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 52%; left: 38%;" 
-             data-title="🌳 Alaaddin Tepesi Parkı" 
-             data-description="Şehrin göbeğinde, Selçuklu Sultanlarının sarayının bulunduğu tarihi bir mesire ve park alanıdır."
-             data-link="7.html">
+        <div class="quiz-point" style="top: 52%; left: 38%;" data-title="Alaaddin Tepesi Parkı" data-description="Selçuklu Sultanlarının sarayının bulunduğu tarihi mesire alanı." data-link="7.html">
             <div class="tooltip">Alaaddin Tepesi</div>
             <img src="4.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 25%; left: 50%;" 
-             data-title="🦋 Tropikal Kelebekler Bahçesi" 
-             data-description="Avrupa'nın en büyük kelebek uçuş alanına sahip, binlerce renkli kelebeğin yuvasıdır."
-             data-link="8.html">
+        <div class="quiz-point" style="top: 25%; left: 50%;" data-title="Kelebekler Bahçesi" data-description="Avrupa'nın en büyük tropikal kelebek uçuş alanı." data-link="8.html">
             <div class="tooltip">Kelebekler Bahçesi</div>
             <img src="5.png" class="quiz-point-icon">
         </div>
