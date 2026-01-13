@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Konya'nın Kültürel Zenginlikleri</title>
     <style>
-        /* DENİZLİ İLE AYNI MOR-MAVİ TEMA */
         body {
             margin: 0; padding: 20px;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -23,11 +22,14 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
+        /* BAŞLIK ORTALANDI */
         h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
 
+        /* YENİ TALİMAT METNİ */
         .instructions {
-            text-align: center; color: white; margin-bottom: 20px;
+            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
             background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .map-container {
@@ -39,13 +41,13 @@
 
         .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
 
-        /* ZIPLAYAN İKONLAR */
         .quiz-point {
             position: absolute; width: 80px; height: 80px; border-radius: 50%;
             background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
             backdrop-filter: blur(8px); border: 3px solid rgba(255, 255, 255, 0.4);
             cursor: pointer; transition: all 0.3s ease;
             display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             animation: pulse 2s infinite;
         }
 
@@ -67,7 +69,7 @@
             position: absolute; background: rgba(0, 0, 0, 0.8); color: white;
             padding: 6px 10px; border-radius: 6px; font-size: 12px;
             top: -35px; left: 50%; transform: translateX(-50%);
-            opacity: 0; transition: opacity 0.3s; white-space: nowrap;
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
         }
         .quiz-point:hover .tooltip { opacity: 1; }
 
@@ -75,8 +77,10 @@
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;
         }
-        .modal-content { background: white; padding: 20px; border-radius: 15px; text-align: center; max-width: 500px; width: 90%; }
-        .btn { padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; max-width: 550px; width: 90%; }
+        .modal-content h2 { color: #333; margin-bottom: 15px; font-size: 1.5em; }
+        .modal-content p { color: #555; line-height: 1.6; text-align: justify; font-size: 1.05em; margin-bottom: 25px; }
+        .btn { padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; }
         .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; }
         .btn-secondary { background: #f8f9fa; color: #666; border: 1px solid #ddd; margin-left: 10px; }
     </style>
@@ -84,43 +88,61 @@
 <body>
 
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h1 style="margin: 0;">Konya'nın Kültürel Zenginlikleri</h1>
-        <a href="https://memleketim.github.io" class="btn btn-primary">Ana Sayfa</a>
+    <div style="width: 100%; position: relative;">
+        <h1>Konya'nın Kültürel Zenginlikleri</h1>
+        <a href="https://memleketim.github.io" class="btn btn-primary" style="position: absolute; top: 0; right: 0;">Ana Sayfa</a>
     </div>
 
-    <div class="instructions">Haritadaki ikonlara tıklayarak Konya'nın değerlerini keşfedebilirsiniz.</div>
+    <div class="instructions">Haritadaki ikonlara tıklayarak Konya'nın kültürel zenginlikleri hakkında bilgi alabilirsiniz.</div>
 
     <div class="map-container">
         <img src="map.png" alt="Konya Haritası" class="map-image">
 
-        <div class="quiz-point" style="top: 48%; left: 45%;" data-title="Mevlana Müzesi" data-description="Hz. Mevlana'nın dergâhı olan bu yapı, Konya'nın kalbidir." data-link="3.html">
+        <div class="quiz-point" style="top: 48%; left: 47%;" 
+             data-title="🕌 Mevlana Müzesi" 
+             data-description="'Gel, ne olursan ol yine gel' çağrısıyla dünyaya barış ve sevgi mesajları yayan Hz. Mevlana'nın dergâhı, Konya’nın manevi kalbidir. Yeşil Kubbe (Kubbe-i Hadra), şehrin en önemli simgesi olup müzede Selçuklu dönemine ait nadide eserler, el yazmaları ve derviş hücreleri sergilenmektedir. Her yıl milyonlarca ziyaretçiyi ağırlayan bu kutsal mekan, mistik atmosferiyle insanı derinden etkiler."
+             data-link="3.html">
             <div class="tooltip">Mevlana Müzesi</div>
             <img src="0.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 35%; left: 32%;" data-title="Etli Ekmek" data-description="Konya mutfağının dünyaca ünlü lezzeti." data-link="4.html">
+        <div class="quiz-point" style="top: 30%; left: 31%;" 
+             data-title="🥘 Konya Etli Ekmek" 
+             data-description="Konya denilince akla gelen ilk lezzet olan etli ekmek, incecik açılmış hamur üzerine yayılan özel kıyma harcıyla meşe odunu fırınlarında pişirilir. Uzunluğu ve çıtırlığıyla ünlü bu geleneksel lezzet, Konya mutfak kültürünün ayrılmaz bir parçasıdır. Yerli ve yabancı turistlerin uğrak noktası olan Konya lokantalarında en taze haliyle ikram edilen bu yemek, tam bir damak çatlatır."
+             data-link="4.html">
             <div class="tooltip">Etli Ekmek</div>
             <img src="1.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 68%; left: 54%;" data-title="Çatalhöyük" data-description="9 bin yıllık geçmişiyle UNESCO Dünya Mirası." data-link="5.html">
+        <div class="quiz-point" style="top: 75%; left: 53%;" 
+             data-title="🏛 Çatalhöyük Neolitik Kenti" 
+             data-description="9 bin yıllık geçmişiyle insanlık tarihinin ilk şehir yerleşimi olarak kabul edilen Çatalhöyük, UNESCO Dünya Mirası Listesi'nde yer almaktadır. Duvar resimleri, kerpiç evleri ve sosyal düzeniyle yerleşik hayata geçişin en çarpıcı kanıtlarını sunan bu antik bölge, arkeoloji dünyasının en önemli keşiflerindendir. Tarihin sıfır noktasına yolculuk yapmak isteyenler için eşsiz bir duraktır."
+             data-link="5.html">
             <div class="tooltip">Çatalhöyük</div>
             <img src="2.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 42%; left: 40%;" data-title="İnce Minareli Medrese" data-description="Selçuklu taş işçiliğinin şaheseridir." data-link="6.html">
+        <div class="quiz-point" style="top: 29%; left: 49%;" 
+             data-title="📚 İnce Minareli Medrese" 
+             data-description="Selçuklu Devleti'nin taş işçiliğindeki ustalığını sergileyen bu şaheser, 13. yüzyılda hadis ilmi öğretilmek üzere inşa edilmiştir. Özellikle görkemli kapısındaki geometrik motifler ve ayet işlemeleri dünya çapında bir sanat eseridir. Bugün Taş ve Ahşap Eserler Müzesi olarak hizmet veren yapı, Konya’nın tarihi silüetindeki en zarif parçalardan biridir ve Selçuklu ruhunu günümüze taşır."
+             data-link="6.html">
             <div class="tooltip">İnce Minareli Medrese</div>
             <img src="3.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 52%; left: 38%;" data-title="Alaaddin Tepesi Parkı" data-description="Selçuklu Sultanlarının sarayının bulunduğu tarihi mesire alanı." data-link="7.html">
+        <div class="quiz-point" style="top: 48%; left: 30%;" 
+             data-title="🌳 Alaaddin Tepesi Parkı" 
+             data-description="Konya'nın tam merkezinde bulunan bu höyük tipi tepe, Anadolu Selçuklu sultanlarının sarayına ev sahipliği yapmış tarihi bir alandır. İçerisinde Selçuklu hanedanının türbelerinin bulunduğu kentin en eski camilerinden biri olan Alaaddin Camii yer alır. Günümüzde şehrin ortasında yemyeşil bir vaha gibi hizmet veren park, hem tarih kokan köşeleri hem de dinlenme alanlarıyla Konya’nın buluşma noktasıdır."
+             data-link="7.html">
             <div class="tooltip">Alaaddin Tepesi</div>
             <img src="4.png" class="quiz-point-icon">
         </div>
 
-        <div class="quiz-point" style="top: 25%; left: 50%;" data-title="Kelebekler Bahçesi" data-description="Avrupa'nın en büyük tropikal kelebek uçuş alanı." data-link="8.html">
-            <div class="tooltip">Kelebekler Bahçesi</div>
+        <div class="quiz-point" style="top: 75%; left: 42%;" 
+             data-title="🦋 Tropikal Kelebek Bahçesi" 
+             data-description="Avrupa’nın en büyük tropikal kelebek uçuş alanına sahip olan bu devasa müze, binlerce farklı türde kelebeğe ve egzotik bitkiye ev sahipliği yapar. İçerideki özel iklimlendirme sayesinde yılın her günü tropikal bir orman atmosferi sunan bahçe, özellikle çocuklar için masalsı bir keşif alanıdır. Kelebeklerin kozadan çıkış anlarına tanıklık edebileceğiniz bu merkez, Konya’nın modern yüzünü temsil eder."
+             data-link="8.html">
+            <div class="tooltip">Tropikal Kelebek Bahçesi</div>
             <img src="5.png" class="quiz-point-icon">
         </div>
     </div>
