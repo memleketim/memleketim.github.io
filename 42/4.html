@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Etli Ekmek Kaşifi</title>
+    <style>
+        :root {
+            --konya-orange: #FF8C00;
+            --soft-white: #FFF5E6;
+            --text-dark: #4A2C00;
+            --check-green: #28a745;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--soft-white);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .blur { filter: blur(8px); pointer-events: none; }
+
+        header {
+            background-color: var(--konya-orange);
+            color: white; padding: 20px; text-align: center;
+            font-size: 2.5em; font-weight: bold; position: relative;
+        }
+
+        /* Metni Dinle Butonu */
+        .audio-btn {
+            position: absolute; right: 270px; top: 25px; 
+            background: #fff; color: var(--konya-orange);
+            border: none; padding: 8px 15px; border-radius: 20px;
+            cursor: pointer; font-weight: bold; font-size: 0.9em;
+            transition: 0.3s;
+        }
+        .audio-btn:hover { background: #fdf2e9; }
+
+        .instruction-btn {
+            position: absolute; right: 20px; top: 25px;
+            background: white; color: var(--konya-orange);
+            border: none; padding: 8px 15px; border-radius: 20px;
+            cursor: pointer; font-weight: bold; font-size: 0.9em;
+        }
+
+        .container { max-width: 900px; margin: 20px auto; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        .top-image { width: 100%; border-radius: 10px; margin-bottom: 20px; border: 4px solid var(--konya-orange); }
+
+        .info-text { line-height: 1.6; text-align: justify; margin-bottom: 30px; font-size: 1.1em; border-bottom: 2px solid var(--soft-white); padding-bottom: 20px; }
+        
+        .student-link { display: block; text-align: center; color: var(--konya-orange); font-weight: bold; margin: 15px 0; text-decoration: none; }
+
+        .quiz-section { background: #fffcf5; padding: 20px; border-radius: 10px; border: 2px dashed var(--konya-orange); }
+
+        .option-item {
+            display: flex; align-items: center; background: white; margin-bottom: 10px;
+            padding: 12px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; transition: 0.2s;
+        }
+        .option-item:hover { background: #fff4e6; }
+        .option-item input { width: 20px; height: 20px; margin-right: 15px; cursor: pointer; }
+
+        .btn-check {
+            display: block; width: 200px; margin: 20px auto;
+            background-color: var(--check-green); color: white;
+            border: none; padding: 15px; border-radius: 30px;
+            font-size: 1.2em; font-weight: bold; cursor: pointer;
+        }
+
+        .limit-info { text-align: center; font-weight: bold; color: #d9534f; margin-top: 10px; }
+
+        #modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 20px; max-width: 500px; text-align: center; position: relative; }
+        .btn-close { background: var(--konya-orange); color: white; border: none; padding: 10px 25px; border-radius: 10px; cursor: pointer; margin-top: 20px; font-weight: bold; }
+
+        .result-box { margin-top: 20px; text-align: center; font-size: 1.3em; font-weight: bold; min-height: 40px; }
+    </style>
+</head>
+<body>
+
+<div id="main-content">
+    <header>
+        ETLİ EKMEK
+        <button class="audio-btn" id="audioBtn" onclick="playTextAudio()">Metni Dinle 🎧</button>
+        <button class="instruction-btn" onclick="toggleInstructions(true)">📖 Yönerge</button>
+    </header>
+
+    <div class="container">
+        <img src="etliekmek.png" alt="Konya Etli Ekmek" class="top-image">
+
+        <div class="info-text">
+    <strong>Konya’nın en meşhur lezzeti olan Etli Ekmek</strong>, sadece bir yemek değil, <b>yüzlerce yıllık bir geleneğin parçasıdır.</b> Bu eşsiz lezzeti tanımak için bilinmesi gerekenler:<br><br>
+
+    <strong>Tarihi ve Konya İçin Önemi</strong><br>
+    Etli ekmeğin geçmişi, Konya’nın <b>Selçuklu Devleti’ne başkentlik</b> yaptığı zamanlara kadar uzanır. Eskiden insanlar evlerinde hazırladıkları iç harcı mahallelerindeki fırınlara götürür, orada taze hamurla pişirtirlerdi. Bu yüzden etli ekmek, Konya’da <b>komşuluk ve paylaşma kültürünü</b> temsil eder.<br><br>
+
+    <strong>Etli Ekmeğin Farkı Nedir?</strong><br>
+    Etli ekmeği diğer şehirlerde yediğimiz pidelerden ayıran en önemli özellikler şunlardır:<br>
+    • <b>İnce ve Çıtır:</b> Hamuru kağıt kadar ince açılır ve fırından çıtır çıtır çıkar.<br>
+    • <b>Boyu Çok Uzun:</b> Gerçek bir etli ekmek yaklaşık <b>1 metre uzunluğundadır.</b> Masaya koca bir tahtanın üzerinde boylu boyunca gelir.<br>
+    • <b>Kenarsız Tasarım:</b> Diğer pidelerin kenarları hamurla kapatılırken, etli ekmeğin kenarları açık bırakılır; böylece her lokmada bol malzeme gelir.<br>
+    • <b>Özel Hazırlık:</b> İçindeki etler makinede değil, <b>"zırh"</b> denilen büyük bıçaklarla elle doğranır. Bu da ona özel bir lezzet katar.<br><br>
+
+    <strong>Coğrafi İşaretli Bir Miras</strong><br>
+    Etli ekmek, <b>"Coğrafi İşaret"</b> belgesine sahiptir. Bu, onun sadece belirli kurallara göre (<b>meşe odunu ateşinde, taş fırınlarda ve özel etlerle</b>) pişirilebileceği anlamına gelen resmi bir tescildir. Yani gerçek etli ekmek, belli bir kalite standardını her zaman korur.<br><br>
+
+    <strong>Çeşitlerini Tanıyalım</strong><br>
+    Konya fırınlarında sadece tek bir çeşit yoktur:<br>
+    1. <b>Etli Ekmek:</b> Klasik kıymalı ve sebzeli karışım.<br>
+    2. <b>Mevlana:</b> İçine Konya’nın özel peynirleri eklenerek hazırlanan türü.<br>
+    3. <b>Bıçakarası:</b> Etin kıyma olarak değil, küçük kuşbaşı parçalar halinde kullanıldığı daha yoğun etli versiyonu.<br><br>
+
+    Konya’da bir sofraya oturduğunuzda, bu uzun ve lezzetli ekmeklerin yanına mutlaka <b>buz gibi bir ayran ve közlenmiş biber</b> eşlik eder.
+</div>
+
+        <a href="https://drive.google.com/file/d/193s0aB43W268mfglbm1qfQ0hArJoBzma/view?usp=sharing" target="_blank" class="student-link">
+            🔗 Yaman Demirkıran'ın çalışmasının tamamına ulaşmak için tıklayın.
+        </a>
+
+        <div class="quiz-section">
+            <h3 style="text-align: center;">Verilen bilgilere bakarak doğru olan ifadeleri işaretleyiniz.</h3>
+            <div id="options-container"></div>
+            <p class="limit-info">En fazla 6 seçenek işaretleyebilirsiniz.</p>
+        </div>
+
+        <button class="btn-check" onclick="checkResult()">KONTROL ET</button>
+        <div id="result" class="result-box"></div>
+    </div>
+</div>
+
+<div id="modal-overlay">
+    <div class="modal-content">
+        <h2>Yönerge</h2>
+        <p>Yukarıdaki metni dikkatle okuyunuz. Aşağıda yer alan 10 cümleden <b>doğru olan 6 tanesini</b> bulup işaretleyiniz. İşaretleme yaparken duyduğunuz seslere dikkat edin. Tüm seçimleriniz bittiğinde Kontrol Et butonuna basınız!</p>
+        <button class="btn-close" onclick="toggleInstructions(false)">Anladım, Başla!</button>
+    </div>
+</div>
+
+<audio id="snd-tik" src="sesler/tik.mp3"></audio>
+<audio id="snd-cin" src="sesler/cinlama.mp3"></audio>
+<audio id="snd-dong" src="sesler/dong.mp3"></audio>
+<audio id="snd-text-audio" src="sesler/etliekmek.mp3"></audio>
+
+<script>
+    const quizData = [
+        { text: "Etli ekmeğin geçmişi Selçuklu Devleti'ne kadar dayanır.", correct: true },
+        { text: "Gerçek bir etli ekmek yaklaşık 1 metre uzunluğundadır.", correct: true },
+        { text: "Etleri 'zırh' adı verilen büyük bıçaklarla elle doğranır.", correct: true },
+        { text: "Coğrafi İşaret belgesi ile resmi bir kalite standardına sahiptir.", correct: true },
+        { text: "İçinde Konya'nın özel peynirleri olan türüne 'Mevlana' denir.", correct: true },
+        { text: "Hamuru çok ince açılır ve kenarları kapatılmaz.", correct: true },
+        { text: "Etli ekmek hamuru poğaça gibi yumuşak ve çok kalın hazırlanır.", correct: false },
+        { text: "Etler makinelerde kıyma haline getirilerek içine mısır eklenir.", correct: false },
+        { text: "Sadece tavuk eti kullanılarak normal ev fırınlarında pişirilir.", correct: false },
+        { text: "İçinde peynir olan çeşidine sadece 'Bıçakarası' adı verilir.", correct: false }
+    ];
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    function renderQuiz() {
+        const container = document.getElementById('options-container');
+        container.innerHTML = "";
+        shuffle(quizData);
+        quizData.forEach((item, index) => {
+            const div = document.createElement('div');
+            div.className = 'option-item';
+            div.innerHTML = `<input type="checkbox" id="opt${index}" data-correct="${item.correct}" onchange="handleTick()"> <label for="opt${index}">${item.text}</label>`;
+            container.appendChild(div);
+        });
+    }
+
+    function handleTick() {
+        const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+        if (checked.length > 6) {
+            event.target.checked = false;
+            alert("En fazla 6 seçenek işaretleyebilirsiniz!");
+            return;
+        }
+        document.getElementById('snd-tik').play();
+    }
+
+    function toggleInstructions(show) {
+        const modal = document.getElementById('modal-overlay');
+        const content = document.getElementById('main-content');
+        if (show) {
+            modal.style.display = 'flex';
+            content.classList.add('blur');
+        } else {
+            modal.style.display = 'none';
+            content.classList.remove('blur');
+        }
+    }
+
+    function playTextAudio() {
+        const audio = document.getElementById('snd-text-audio');
+        const btn = document.getElementById('audioBtn');
+        
+        if (audio.paused) {
+            audio.play();
+            btn.innerHTML = "Durdur ⏹️";
+        } else {
+            audio.pause();
+            btn.innerHTML = "Metni Dinle 🎧";
+        }
+    }
+
+    document.getElementById('snd-text-audio').onended = function() {
+        document.getElementById('audioBtn').innerHTML = "Metni Dinle 🎧";
+    };
+
+    function checkResult() {
+        const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+        const resultDiv = document.getElementById('result');
+        
+        let correctCount = 0;
+        let isError = false;
+
+        checked.forEach(input => {
+            if (input.getAttribute('data-correct') === "true") {
+                correctCount++;
+            } else {
+                isError = true;
+            }
+        });
+
+        if (correctCount === 6 && checked.length === 6) {
+            document.getElementById('snd-cin').play();
+            resultDiv.innerHTML = "<span style='color:green;'>🎉 Tebrikler, hepsini doğru bildin! Gerçek bir Etli Ekmek uzmanısın.</span>";
+        } else {
+            document.getElementById('snd-dong').play();
+            resultDiv.innerHTML = "<span style='color:red;'>⚠️ Bazı cevaplar yanlış veya eksik. Soruların yerini değiştirip tekrar deniyoruz!</span>";
+            setTimeout(() => {
+                renderQuiz();
+                resultDiv.innerHTML = "";
+            }, 3000);
+        }
+    }
+
+    renderQuiz();
+</script>
+
+</body>
+</html>
