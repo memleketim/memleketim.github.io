@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çatalhöyük: İlk Şehir Macerası</title>
+    <style>
+        :root {
+            --clay-brown: #a67c52;
+            --soft-tan: #f5e6d3;
+            --dark-earth: #4e342e;
+            --correct-green: #2ecc71;
+            --wrong-red: #e74c3c;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--soft-tan);
+            overflow-x: hidden;
+        }
+
+        .blur { filter: blur(8px); pointer-events: none; }
+
+        /* GİRİŞ EKRANI */
+        #intro-screen {
+            display: flex; flex-direction: column; align-items: center;
+            padding: 20px; max-width: 850px; margin: 0 auto;
+        }
+
+        header {
+            width: 100%; display: flex; justify-content: center; align-items: center;
+            padding: 20px 0; position: relative;
+        }
+
+        header h1 { margin: 0; font-size: 2.8em; font-weight: bold; color: var(--dark-earth); }
+
+        .btn-audio {
+            margin-left: 20px; background: #00bcd4; color: white;
+            padding: 10px 20px; border-radius: 20px; border: none;
+            cursor: pointer; font-weight: bold; font-size: 0.9em; transition: 0.3s;
+        }
+
+        .info-card {
+            background: white; border-radius: 20px; padding: 35px;
+            border: 6px solid var(--clay-brown); box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .verbatim-text {
+            white-space: pre-wrap; 
+            line-height: 1.6;
+            text-align: left;
+            font-size: 1.15em;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        /* Başlıkları Kalın Yapan Stil */
+        .info-title { font-weight: bold; display: block; margin-top: 15px; color: var(--dark-earth); }
+
+        .main-img { width: 100%; border-radius: 15px; margin-bottom: 25px; border: 3px solid var(--clay-brown); }
+
+        .btn-start {
+            display: block; width: fit-content; margin: 30px auto 0;
+            padding: 15px 45px; border-radius: 35px; border: none;
+            background: var(--dark-earth); color: white;
+            cursor: pointer; font-weight: bold; font-size: 1.2em; transition: 0.3s;
+        }
+
+        .student-link { display: block; text-align: center; color: #8d6e63; font-weight: bold; margin: 25px 0; text-decoration: underline; font-size: 1.1em; }
+
+        /* OYUN EKRANI */
+        #game-screen { display: none; position: relative; width: 100vw; height: 100vh; background: #fff; overflow: hidden; }
+        .map-container { position: relative; width: 100%; height: 100%; }
+        .map-bg { width: 100%; height: 100%; object-fit: contain; }
+
+        /* Kesikli Çizgiler (SVG) */
+        .map-lines {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
+        }
+
+        .stop {
+            position: absolute; width: 45px; height: 45px; background: white;
+            border: 4px solid var(--clay-brown); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.2em; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s; z-index: 10;
+        }
+        .stop.locked { opacity: 0.4; cursor: not-allowed; }
+        .stop.active { animation: pulse 1.5s infinite; background: var(--clay-brown); color: white; }
+        .stop.completed { background: var(--correct-green); color: white; border-color: white; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+
+        .lives-container { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 8px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 20px; border: 2px solid var(--clay-brown); z-index: 20; }
+        .flower { width: 35px; height: 35px; }
+
+        #q-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center;
+        }
+        .modal-box { background: white; padding: 30px; border-radius: 25px; width: 85%; max-width: 450px; text-align: center; border: 8px solid var(--clay-brown); }
+        .ans-btn { display: block; width: 100%; padding: 15px; margin: 12px 0; border-radius: 12px; border: 2px solid #ddd; background: #fdfdfd; cursor: pointer; font-size: 1.1em; font-weight: bold; }
+        .ans-btn.wrong { background: var(--wrong-red) !important; color: white; }
+
+        .final-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 200; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div id="main-wrapper">
+    <header>
+        <h1>ÇATALHÖYÜK</h1>
+        <button class="btn-audio" id="audioBtn" onclick="toggleAudio()">Metni Dinle 🎧</button>
+    </header>
+    
+    <div id="intro-screen">
+        <div class="info-card">
+            <img src="catalhoyuk.png" class="main-img" alt="Çatalhöyük">
+            
+            <div class="verbatim-text"><span class="info-title">🏛️ ÇATALHÖYÜK: DÜNYANIN İLK VE EN SIRADIŞI ŞEHRİ</span>Bugün seni tam 9.400 yıl öncesine, Konya'nın kalbinde yer alan, dünyanın en eski şehirlerinden birine götürüyoruz: Çatalhöyük! Henüz ortada büyük devletlerin, kralların hatta yazı ve tekerleğin bile olmadığı o çok uzak zamanlarda, binlerce insan burada bir arada yaşıyordu.
+İşte bu gizemli şehri bu kadar özel yapan ilginç gerçekler:
+
+<span class="info-title">🪜 Kapısı ve Penceresi Olmayan Evler</span>Çatalhöyük’te evlerin kapıları veya pencereleri yoktu! "Peki, içeri nasıl giriyorlardı?" dediğini duyar gibiyim. İnsanlar evlerine çatıda açılan bir delikten, tahta bir merdivenle inerek girerlerdi. Bu delik hem evin kapısıydı hem de içerideki ocağın dumanının çıkmasını sağlayan bir bacaydı.
+
+<span class="info-title">🏘️ Sokaksız Şehir ve Çatıdaki Yaşam</span>Bu şehirde bizdeki gibi cadde veya sokaklar yoktu. Evler birbirine tıpkı bir bal peteği gibi bitişik inşa edilmişti. Bu yüzden insanlar sokaklarda değil, çatıların üzerinde yürürlerdi! Arkadaşlarına gitmek, oyun oynamak veya komşularla sohbet etmek için damların üzerinde geziniyorlardı. Şehir, dışarıdan bakıldığında devasa bir kale gibi görünüyordu ve bu sayede kendilerini vahşi hayvanlardan koruyorlardı.
+
+<span class="info-title">🌾 Dünyanın İlk Çiftçileri ve İlk Ekmek</span>Çatalhöyük sakinleri tarihin ilk büyük çiftçilerindendi. Burada buğday, arpa, mercimek ve bezelye yetiştiriyorlardı. Belki de dünyanın ilk mis gibi kokan ekmekleri burada pişirilmişti! Ayrıca yan taraftaki odalarında yiyeceklerini sakladıkları özel kilerleri bile vardı.
+
+<span class="info-title">🎨 Duvarlardaki Renkli Dünyalar</span>Çatalhöyük halkı sanata bayılırdı! Evlerinin duvarlarını kırmızı, kahverengi ve siyah boyalarla harika resimlerle süslemişlerdi. Bu duvarlarda leoparlar, dev boğalar, geyik avlayan insanlar ve kuş resimleri vardı. Hatta arkeologlar burada dünyanın bilinen ilk manzara resmini ve haritasını bile buldular!
+
+<span class="info-title">🤝 Herkes Eşit, Herkes Arkadaş</span>Bu şehrin en güzel özelliği ise herkesin birbirine çok benzer evlerde yaşamasıydı. Büyük saraylar yoktu. Herkes eşitti ve bir sorun olduğunda muhtemelen ortak akılla karar veriyorlardı. 2.000 yıl boyunca bu şehirde kavgasız ve barış içinde yaşadılar.</div>
+
+            <a href="https://drive.google.com/file/d/14vbxtcfPl-tSGl5HpRrUXtDCQwSlq7lp/view" target="_blank" class="student-link">
+                📄 Ahmet Efe ve Cansu Örs'ün çalışmasının tamamına ulaşmak için tıklayın.
+            </a>
+
+            <button class="btn btn-start" onclick="startAdventure()">Maceraya Başla ▶</button>
+        </div>
+    </div>
+</div>
+
+<div id="game-screen">
+    <div class="map-container">
+        <img src="oyun_haritasi.jpg" class="map-bg">
+        
+        <svg class="map-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="M15,25 L35,30 L55,20 L50,45 L32,65 L45,85 L75,70" 
+                  fill="none" stroke="#a67c52" stroke-width="0.8" 
+                  stroke-dasharray="2,2" />
+        </svg>
+        
+        <div id="stop-1" class="stop active" style="top: 25%; left: 15%;" onclick="showQ(0)">1</div>
+        <div id="stop-2" class="stop locked" style="top: 30%; left: 35%;" onclick="showQ(1)">2</div>
+        <div id="stop-3" class="stop locked" style="top: 20%; left: 55%;" onclick="showQ(2)">3</div>
+        <div id="stop-4" class="stop locked" style="top: 45%; left: 50%;" onclick="showQ(3)">4</div>
+        <div id="stop-5" class="stop locked" style="top: 65%; left: 32%;" onclick="showQ(4)">5</div>
+        <div id="stop-6" class="stop locked" style="top: 85%; left: 45%;" onclick="showQ(5)">6</div>
+        <div id="stop-7" class="stop locked" style="top: 70%; left: 75%;" onclick="showQ(6)">7</div>
+    </div>
+
+    <div class="lives-container">
+        <img src="flower.png" class="flower" id="f1">
+        <img src="flower.png" class="flower" id="f2">
+        <img src="flower.png" class="flower" id="f3">
+    </div>
+</div>
+
+<div id="q-modal">
+    <div class="modal-box">
+        <h2 id="q-text">Soru?</h2>
+        <button class="ans-btn" id="a0" onclick="handleAns(0)"></button>
+        <button class="ans-btn" id="a1" onclick="handleAns(1)"></button>
+    </div>
+</div>
+
+<div id="win-screen" class="final-screen">
+    <h1 style="font-size: 4em;">🎉 TEBRİKLER!</h1>
+    <p style="font-size: 1.5em;">Çatalhöyük macerasını başarıyla tamamladın!</p>
+    <button class="btn btn-start" onclick="location.reload()">Tekrar Oyna</button>
+</div>
+
+<div id="lose-screen" class="final-screen">
+    <h1 style="font-size: 4em;">❌ OYUN BİTTİ</h1>
+    <p style="font-size: 1.5em;">Çiçeklerin soldu ama kaşifler asla pes etmez!</p>
+    <button class="btn btn-start" onclick="location.reload()">Yeniden Dene</button>
+</div>
+
+<audio id="snd-info" src="sesler/catalhoyuk.mp3"></audio>
+<audio id="snd-turn" src="sesler/cevirme.mp3"></audio>
+<audio id="snd-click" src="sesler/tik.mp3"></audio>
+<audio id="snd-win" src="sesler/cinlama.mp3"></audio>
+<audio id="snd-lose" src="sesler/dong.mp3"></audio>
+
+<script>
+    let current = 0;
+    let lives = 3;
+    const questions = [
+        { q: "Çatalhöyük kaç yaşındadır?", a: ["9.400 Yıl", "1.000 Yıl"], c: 0 },
+        { q: "Evlerin kapıları neredeydi?", a: ["Yan tarafta", "Çatıda"], c: 1 },
+        { q: "İnsanlar evlere neyle girerdi?", a: ["Tahta Merdiven", "Asansör"], c: 0 },
+        { q: "İnsanlar yollarda değil nerede yürürdü?", a: ["Tünellerde", "Çatıların üstünde"], c: 1 },
+        { q: "Duvarlarda en çok hangi resimler vardı?", a: ["Hayvan resimleri", "Şehir resimleri"], c: 0 },
+        { q: "Evlerin şekli neye benziyordu?", a: ["Bal peteğine", "Yıldızlara"], c: 0 },
+        { q: "Çatalhöyük'te toplum yapısı nasıldı?", a: ["Kral yönetirdi", "Herkes eşitti"], c: 1 }
+    ];
+
+    function toggleAudio() {
+        const s = document.getElementById('snd-info');
+        const b = document.getElementById('audioBtn');
+        if(s.paused){ s.play(); b.innerText="Durdur ⏹️"; }
+        else { s.pause(); b.innerText="Metni Dinle 🎧"; }
+    }
+
+    function startAdventure() {
+        document.getElementById('snd-info').pause();
+        document.getElementById('snd-turn').play();
+        document.getElementById('main-wrapper').classList.add('blur');
+        setTimeout(() => {
+            document.getElementById('main-wrapper').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+        }, 500);
+    }
+
+    function showQ(idx) {
+        if(idx !== current) return;
+        document.getElementById('snd-click').play();
+        const data = questions[idx];
+        document.getElementById('q-text').innerText = data.q;
+        document.getElementById('a0').innerText = data.a[0];
+        document.getElementById('a1').innerText = data.a[1];
+        document.getElementById('a0').className = "ans-btn";
+        document.getElementById('a1').className = "ans-btn";
+        document.getElementById('q-modal').style.display = 'flex';
+    }
+
+    function handleAns(choice) {
+        if(choice === questions[current].c) {
+            document.getElementById('snd-win').play();
+            document.getElementById(`stop-${current+1}`).className = "stop completed";
+            document.getElementById('q-modal').style.display = 'none';
+            current++;
+            if(current < 7) {
+                document.getElementById(`stop-${current+1}`).className = "stop active";
+                document.getElementById('snd-turn').play();
+            } else {
+                setTimeout(() => document.getElementById('win-screen').style.display='flex', 500);
+            }
+        } else {
+            document.getElementById('snd-lose').play();
+            document.getElementById(`a${choice}`).classList.add('wrong');
+            lives--;
+            document.getElementById(`f${lives+1}`).style.opacity = '0.1';
+            if(lives === 0) setTimeout(() => document.getElementById('lose-screen').style.display='flex', 800);
+        }
+    }
+</script>
+</body>
+</html>
