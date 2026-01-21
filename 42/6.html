@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnce Minareli Medrese - Paragraf Sıralama</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Nunito', sans-serif; }
+        
+        header {
+            background-color: #a67c52;
+            color: white; padding: 25px; text-align: center;
+            font-size: 2.5em; font-weight: bold;
+            border-radius: 0 0 25px 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 30px;
+        }
+
+        .paragraph-card {
+            cursor: grab; transition: all 0.3s ease; user-select: none;
+        }
+        .paragraph-card:active { cursor: grabbing; }
+        .paragraph-card.dragging { opacity: 0.5; transform: scale(1.02); }
+        .paragraph-card.drag-over { border-top: 4px solid #f59e0b; margin-top: -4px; }
+        
+        .correct {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+            border-color: #10b981 !important;
+        }
+        .incorrect {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+            border-color: #ef4444 !important;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .main-img { width: 100%; max-width: 800px; border-radius: 20px; margin: 0 auto 20px; border: 5px solid #a67c52; display: block; }
+        
+        .student-link-box {
+            background: #f5e6d3; color: #5d4037; padding: 12px 25px;
+            border-radius: 30px; font-weight: bold; text-decoration: none;
+            display: inline-flex; align-items: center; gap: 10px;
+            transition: 0.3s; border: 2px solid #a67c52;
+        }
+        .student-link-box:hover { background: #e6d5c1; transform: translateY(-2px); }
+
+        .number-badge {
+            min-width: 35px; height: 35px; display: flex;
+            align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-amber-50 to-orange-50 min-h-screen">
+
+    <header>İNCE MİNARELİ MEDRESE</header>
+
+    <div class="max-w-4xl mx-auto px-4 pb-12 text-center">
+        <img src="inceminareli.jpg" alt="İnce Minareli Medrese" class="main-img shadow-2xl">
+
+        <div class="mb-10">
+            <a href="https://drive.google.com/file/d/14vbxtcfPl-tSGl5HpRrUXtDCQwSlq7lp/view" target="_blank" class="student-link-box shadow-md">
+                📄 Ahmet Efe ve Cansu Örs'ün çalışmasının tamamına ulaşmak için tıklayın.
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </a>
+        </div>
+
+        <p class="text-amber-800 text-xl font-bold mb-6">Paragrafları sürükleyerek doğru sıraya koyun!</p>
+
+        <div id="success-banner" class="hidden bg-green-500 text-white rounded-2xl p-6 mb-8 shadow-xl animate-bounce">
+            <h2 class="text-2xl font-bold">✨ Tebrikler! Harikasın! ✨</h2>
+            <p>Tüm bilgileri doğru sıraya dizdin.</p>
+        </div>
+
+        <div id="paragraphs-container" class="space-y-4 mb-10 text-left"></div>
+
+        <div class="flex justify-center gap-4">
+            <button id="check-button" class="bg-gradient-to-r from-amber-600 to-orange-600 text-white font-bold text-xl px-12 py-4 rounded-2xl shadow-lg hover:scale-105 transition-all active:scale-95">
+                Kontrol Et
+            </button>
+            <button id="reset-button" class="bg-gray-500 text-white font-bold text-lg px-8 py-4 rounded-2xl shadow-lg hover:bg-gray-600 transition-all">
+                Karıştır
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSnd(freqs, type, dur) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = type;
+            freqs.forEach((f, i) => osc.frequency.setValueAtTime(f, audioCtx.currentTime + (i * 0.1)));
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + dur);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        }
+    </script>
+
+    <script>
+        const correctOrder = [
+            { id: 1, text: "İnce Minareli Medrese, Konya'da bulunan çok eski ve güzel bir yapıdır. Yaklaşık 760 yıl önce, Selçuklu döneminde yapılmıştır. Adını ince ve uzun minaresinden almıştır. Bu medresede öğrenciler, din ve bilim dersleri alırlardı." },
+            { id: 2, text: "Medresenin en dikkat çekici yeri, süslemeli kapısıdır. Kapının üzerinde çiçek ve geometrik şekiller oyulmuştur. Taşların üzerine işlenen bu süslemeler, o dönemin ustalarının ne kadar yetenekli olduğunu gösterir." },
+            { id: 3, text: "Yapının içinde kubbeli bir avlu ve öğrenci odaları bulunur. Minare, turkuaz renkli tuğlalarla örülmüştür. Maalesef 1901 yılında yıldırım düşmesi sonucu minarenin bir kısmı yıkılmıştır." },
+            { id: 4, text: "Bugün İnce Minareli Medrese, bir müze olarak kullanılmaktadır. Müzede Selçuklu dönemine ait taş heykeller, ahşap kapılar ve çift başlı kartal figürleri sergilenmektedir. Konya'yı ziyaret eden herkesin görmesi gereken önemli bir tarihi eserdir." }
+        ];
+
+        let draggedItem = null;
+
+        function shuffle(array) {
+            let s = [...array];
+            for (let i = s.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [s[i], s[j]] = [s[j], s[i]];
+            }
+            return s.every((v,i) => v.id === i+1) ? shuffle(array) : s;
+        }
+
+        function render() {
+            const container = document.getElementById('paragraphs-container');
+            container.innerHTML = '';
+            shuffle(correctOrder).forEach((p, i) => {
+                const card = document.createElement('div');
+                card.className = 'paragraph-card bg-white rounded-2xl p-6 shadow-md border-2 border-amber-100 flex items-start gap-4';
+                card.draggable = true;
+                card.dataset.id = p.id;
+                card.innerHTML = `
+                    <div class="number-badge bg-amber-500 text-white font-bold rounded-full shadow-inner">${i + 1}</div>
+                    <p class="text-gray-700 leading-relaxed text-lg flex-1">${p.text}</p>
+                    <div class="text-amber-300">☰</div>
+                `;
+                card.addEventListener('dragstart', () => { draggedItem = card; card.classList.add('dragging'); });
+                card.addEventListener('dragend', () => { card.classList.remove('dragging'); document.querySelectorAll('.paragraph-card').forEach(c => c.classList.remove('drag-over')); });
+                card.addEventListener('dragover', (e) => { e.preventDefault(); card.classList.add('drag-over'); });
+                card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+                card.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    if (draggedItem !== card) {
+                        const all = Array.from(container.children);
+                        const dIdx = all.indexOf(draggedItem);
+                        const tIdx = all.indexOf(card);
+                        if (dIdx < tIdx) card.parentNode.insertBefore(draggedItem, card.nextSibling);
+                        else card.parentNode.insertBefore(draggedItem, card);
+                        Array.from(container.children).forEach((c, i) => c.querySelector('.number-badge').textContent = i + 1);
+                        document.querySelectorAll('.paragraph-card').forEach(c => c.classList.remove('correct', 'incorrect'));
+                        document.getElementById('success-banner').classList.add('hidden');
+                    }
+                });
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('check-button').addEventListener('click', () => {
+            const current = Array.from(document.getElementById('paragraphs-container').children);
+            let win = true;
+            current.forEach((c, i) => {
+                c.classList.remove('correct', 'incorrect');
+                if (parseInt(c.dataset.id) === i + 1) c.classList.add('correct');
+                else { c.classList.add('incorrect'); win = false; }
+            });
+            if (win) { playSnd([523, 659, 783, 1046], 'sine', 0.6); document.getElementById('success-banner').classList.remove('hidden'); }
+            else playSnd([200, 150], 'sawtooth', 0.3);
+        });
+
+        document.getElementById('reset-button').addEventListener('click', () => { 
+            document.getElementById('success-banner').classList.add('hidden');
+            render(); 
+        });
+
+        render();
+    </script>
+</body>
+</html>
