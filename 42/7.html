@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alaaddin Tepesi: Zaman Yolculuğu</title>
+    <style>
+        :root {
+            --park-green: #2e7d32;
+            --soft-green: #f1f8e9;
+            --earth-brown: #795548;
+            --text-color: #1b5e20;
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--soft-green);
+            color: #333;
+        }
+
+        /* GİRİŞ EKRANI */
+        #intro-screen {
+            max-width: 900px; margin: 0 auto; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        header {
+            width: 100%; text-align: center; padding: 20px 0;
+            font-size: 2.8em; font-weight: bold; color: var(--park-green);
+        }
+
+        .main-img { width: 100%; max-width: 750px; border-radius: 20px; border: 5px solid var(--park-green); margin-bottom: 25px; }
+
+        .info-card {
+            background: white; border-radius: 25px; padding: 35px;
+            border: 6px solid var(--park-green); box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            line-height: 1.8; text-align: justify; font-size: 1.15em;
+        }
+
+        .info-card h2 { color: var(--park-green); border-bottom: 2px solid var(--soft-green); padding-bottom: 10px; }
+        .info-card h3 { color: var(--earth-brown); margin-top: 25px; }
+
+        .student-link {
+            display: block; text-align: center; color: var(--earth-brown);
+            font-weight: bold; margin: 25px 0; text-decoration: underline; font-size: 1.1em;
+        }
+
+        .btn-start {
+            display: block; margin: 40px auto; padding: 18px 55px;
+            background: var(--park-green); color: white;
+            border: none; border-radius: 40px; font-size: 1.4em;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .btn-start:hover { transform: scale(1.05); background: #1b5e20; }
+
+        /* OYUN EKRANI */
+        #game-screen {
+            display: none; max-width: 950px; margin: 0 auto; padding: 20px;
+            text-align: center;
+        }
+
+        .game-grid {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;
+            margin-top: 30px; perspective: 1000px;
+        }
+
+        @media (max-width: 700px) { .game-grid { grid-template-columns: repeat(2, 1fr); } }
+
+        .card {
+            width: 100%; height: 200px; position: relative;
+            transform-style: preserve-3d; transition: transform 0.6s;
+            cursor: pointer;
+        }
+        .card.flipped { transform: rotateY(180deg); }
+
+        .card-face {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 15px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid var(--park-green);
+        }
+
+        .card-front { background: var(--park-green); color: white; font-size: 4em; font-weight: bold; }
+        .card-back {
+            background: white; transform: rotateY(180deg);
+            padding: 15px; font-weight: bold; font-size: 1em; color: var(--text-color);
+            text-align: center;
+        }
+        .card-back img { max-width: 100%; max-height: 100%; border-radius: 10px; object-fit: contain; }
+
+        .success-msg { font-size: 2.2em; font-weight: bold; color: var(--park-green); margin-top: 30px; display: none; }
+    </style>
+</head>
+<body>
+
+<div id="main-content">
+    <header>ALAADDİN TEPESİ</header>
+
+    <div id="intro-screen">
+        <img src="alaeddin.png" alt="Alaaddin Tepesi" class="main-img">
+        
+        <a href="https://drive.google.com/file/d/1HJyk8I1rCdvFq-trA65Ld3u-TJU0O5VW/view" target="_blank" class="student-link">
+            📄 Halid Yazıcı'nın çalışmasının tamamına ulaşmak için tıklayın.
+        </a>
+
+        <div class="info-card">
+            <h2>Konya’nın Kalbi: Alaaddin Tepesi 🌳✨</h2>
+            <p>Konya şehir merkezindeki en yeşil ve en huzurlu alanlardan biri Alaaddin Tepesi’dir. Burası en yaşlısından en gencine kadar herkesin çimlerde oturup sohbet ettiği, yaz sıcağında ağaç gölgesinde serinlediği harika bir yerdir! 🍃👨‍👩‍👧‍👦</p>
+
+            <h3>Bu Tepe Nasıl Oluştu? 🤔🌋</h3>
+            <p>Peki, bu tepe doğal mıdır? Hayır! Dümdüz Konya ovasında böyle bir tümsek tepe aslında bir <b>"Höyük"</b>dür. Höyük; binlerce yıl boyunca insanların aynı yere üst üste evler yapması, bu yapıların yıkılıp kalıntılarının üst üste birikmesiyle zamanla yükselen yapay bir tepedir. 🏗️📜</p>
+            <p>Alaaddin Tepesi'nde yaşam tam 10.000 yıl önce, yani Neolitik Çağ’da başlamıştır! Önce kerpiçten minik evler yapılmış, sonra Romalılar gelip tiyatrolar kurmuş, daha sonra ise Selçuklular burayı başkent yaparak saraylar inşa etmişlerdir. Kısacası bu tepe, tarihin üst üste dizilmiş bir pastası gibidir! 🍰🛡️</p>
+
+            <h3>Tepedeki Tarihi Hazineler 🕌💎</h3>
+            <p>Günümüzde tepede görebileceğimiz çok önemli yapılar vardır:</p>
+            <ul>
+                <li><b>🕌 Alaeddin Camii:</b> Konya'nın en eski ve en büyük camisidir. Selçuklu sultanları tarafından yaptırılmıştır.</li>
+                <li><b>👑 Selçuklu Sultanları Türbesi:</b> Caminin avlusunda bulunan, on köşeli yapısıyla dikkat çeken bu türbede sekiz büyük Selçuklu sultanının mezarı bulunur.</li>
+                <li><b>💧 Su Deposu:</b> Konya'nın su sıkıntısını çözmek için 1902 yılında halkın yardımlarıyla açılmış tarihi bir yapıdır.</li>
+                <li><b>🏰 Alaeddin Köşkü:</b> Eskiden sultanların yaşadığı devasa sarayın bir parçasıdır. Bugün sadece küçük bir bölümü ayakta kalmıştır ama bir zamanlar Topkapı Sarayı'na bile ilham verdiği söylenir!</li>
+            </ul>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">Bilgileri Öğrendim, Oyuna Başla! ▶</button>
+    </div>
+</div>
+
+<div id="game-screen">
+    <h1 style="color: var(--park-green);">Yapıları ve İsimlerini Eşleştir! 🧩</h1>
+    <div class="game-grid" id="grid"></div>
+    <div id="success" class="success-msg">🎉 TEBRİKLER! <br> Konya'nın Tarihini Keşfettin! 🎉</div>
+    <button class="btn-start" style="display:none;" id="reloadBtn" onclick="location.reload()">Tekrar Oyna 🔄</button>
+</div>
+
+<audio id="snd-tik" src="sesler/tik.mp3"></audio>
+<audio id="snd-cin" src="sesler/cinlama.mp3"></audio>
+<audio id="snd-dong" src="sesler/dong.mp3"></audio>
+
+<script>
+    const cardsData = [
+        { type: 'text', content: 'ALAEDDİN CAMİİ', match: 'mosque' },
+        { type: 'img', content: 'alaeddincami.png', match: 'mosque' },
+        { type: 'text', content: '2. KILIÇARSLAN TÜRBESİ', match: 'tomb' },
+        { type: 'img', content: 'kilicarslanturbesi.png', match: 'tomb' },
+        { type: 'text', content: 'ALAEDDİN SU DEPOSU', match: 'water' },
+        { type: 'img', content: 'sudeposu.png', match: 'water' },
+        { type: 'text', content: 'ALAEDDİN KÖŞKÜ', match: 'palace' },
+        { type: 'img', content: 'alaeddinkosku.png', match: 'palace' }
+    ];
+
+    let flippedCards = [];
+    let matchedCount = 0;
+    let busy = false;
+
+    function startGame() {
+        document.getElementById('main-content').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        initGrid();
+    }
+
+    function initGrid() {
+        const grid = document.getElementById('grid');
+        const shuffled = cardsData.sort(() => Math.random() - 0.5);
+        
+        shuffled.forEach((data) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.dataset.match = data.match;
+            card.innerHTML = `
+                <div class="card-face card-front">?</div>
+                <div class="card-face card-back">
+                    ${data.type === 'text' ? '<span>' + data.content + '</span>' : '<img src="' + data.content + '">'}
+                </div>
+            `;
+            card.onclick = () => flipCard(card);
+            grid.appendChild(card);
+        });
+    }
+
+    function flipCard(card) {
+        if (busy || card.classList.contains('flipped') || flippedCards.length === 2) return;
+        
+        document.getElementById('snd-tik').play();
+        card.classList.add('flipped');
+        flippedCards.push(card);
+
+        if (flippedCards.length === 2) {
+            checkMatch();
+        }
+    }
+
+    function checkMatch() {
+        busy = true;
+        const [c1, c2] = flippedCards;
+        const isMatch = c1.dataset.match === c2.dataset.match;
+
+        setTimeout(() => {
+            if (isMatch) {
+                document.getElementById('snd-cin').play();
+                matchedCount++;
+                if (matchedCount === 4) {
+                    document.getElementById('success').style.display = 'block';
+                    document.getElementById('reloadBtn').style.display = 'block';
+                }
+            } else {
+                document.getElementById('snd-dong').play();
+                c1.classList.remove('flipped');
+                c2.classList.remove('flipped');
+            }
+            flippedCards = [];
+            busy = false;
+        }, 1200);
+    }
+</script>
+
+</body>
+</html>
