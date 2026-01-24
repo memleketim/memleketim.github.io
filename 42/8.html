@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelebek Bahçesi Macerası</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.85.2/dist/phaser.min.js"></script>
+    <style>
+        :root {
+            --garden-green: #2e7d32;
+            --soft-turquoise: #40E0D0; /* Arka Plan */
+            --butterfly-orange: #FF8C00; /* Normal Tuğlalar */
+            --question-blue: #3498db; /* Soru Tuğlaları */
+        }
+
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0fdfa;
+            display: flex; flex-direction: column; align-items: center;
+            overflow-x: hidden;
+        }
+
+        header {
+            width: 100%; text-align: center; padding: 20px 0;
+            font-size: 2.5em; font-weight: bold; color: var(--garden-green);
+        }
+
+        #intro-screen {
+            max-width: 800px; width: 90%; text-align: center;
+            background: white; padding: 30px; border-radius: 25px;
+            border: 5px solid var(--garden-green); box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .student-link {
+            display: block; color: #5d4037; font-weight: bold;
+            margin: 20px 0; text-decoration: underline; font-size: 1.1em;
+        }
+
+        /* YENİ GÖRSEL STİLİ */
+        .intro-img {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 20px;
+            border: 4px solid var(--garden-green);
+            margin-bottom: 25px;
+        }
+
+        /* YENİ BİLGİ METNİ STİLİ */
+        .info-text {
+            text-align: left;
+            line-height: 1.6;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 25px;
+            background: #f9fbe7; /* Açık yeşilimsi arka plan */
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid var(--garden-green);
+        }
+        .info-text strong {
+            color: var(--garden-green);
+            font-weight: bold;
+        }
+
+        .btn-start {
+            padding: 15px 45px; background: var(--garden-green); color: white;
+            border: none; border-radius: 40px; font-size: 1.3em;
+            font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-start:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3); }
+
+        #game-container { display: none; margin-top: 20px; position: relative; }
+        
+        #question-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .question-box {
+            background: white; padding: 35px; border-radius: 25px; width: 85%; max-width: 500px;
+            text-align: center; border: 8px solid var(--question-blue);
+        }
+        .ans-btn {
+            display: block; width: 100%; padding: 15px; margin: 15px 0;
+            border-radius: 15px; border: 2px solid #ddd; background: #fdfdfd;
+            cursor: pointer; font-size: 1.15em; font-weight: bold; transition: 0.2s;
+        }
+        .ans-btn:hover { background: #ebf8ff; border-color: var(--question-blue); }
+    </style>
+</head>
+<body>
+
+    <header>TROPİKAL KELEBEK BAHÇESİ</header>
+
+    <div id="intro-screen">
+        <a href="https://drive.google.com/file/d/1HJyk8I1rCdvFq-trA65Ld3u-TJU0O5VW/view" target="_blank" class="student-link">
+            📄 Halid Yazıcı'nın çalışmasının tamamına ulaşmak için tıklayın.
+        </a>
+
+        <img src="tropikal.png" alt="Konya Tropikal Kelebek Bahçesi" class="intro-img">
+
+        <div class="info-text">
+            <h3 style="text-align: center; color: var(--garden-green); margin-top: 0;">🦋 Kelebeklerin Büyülü Dünyasına Hoş Geldin! 🌿</h3>
+            <p>Konya Tropikal Kelebek Bahçesi, şehrimizin Selçuklu ilçesinde yer alan harika bir yerdir. Bahçenin binasına dışarıdan baktığında, kocaman bir kelebek şeklinde tasarlandığını hemen fark edersin. 🏛️🦋</p>
+            <p>İçeri girdiğinde ise seni tropikal bir hava karşılar. Kelebeklerin sağlıklı yaşayabilmesi ve uçabilmesi için içerideki sıcaklık, yaz kış demeden her zaman sabit 26 °C'de tutulur. 🌡️☀️</p>
+            <p>Burada kelebeklerin sevdiği binlerce çeşit bitki vardır ve onlara çok iyi bakılır. Ama dikkat! Bitkileri korurken kelebeklere zarar verebilecek kimyasal ilaçlar kesinlikle kullanılmaz. Bunun yerine, bitkilere zarar veren minik böcekleri yemeleri için uğur böcekleri gibi doğal yardımcılar kullanılır. Yani her şey doğaldır! 🐞🌿</p>
+            <p style="text-align: center; font-weight: bold; margin-top: 20px; color: #d35400;">Yukarıdaki bilgileri dikkatlice okuduysan, tuğlaların arkasındaki soruları kolayca cevaplayabilirsin!</p>
+        </div>
+
+        <button class="btn-start" onclick="startGame()">Macerayı Başlat ▶</button>
+    </div>
+
+    <div id="game-container">
+        <div id="phaser-game"></div>
+    </div>
+
+    <div id="question-overlay">
+        <div class="question-box">
+            <h2 id="q-text" style="color: #2c5282; margin-bottom: 20px;">Soru?</h2>
+            <button class="ans-btn" id="optA" onclick="handleAnswer('A')"></button>
+            <button class="ans-btn" id="optB" onclick="handleAnswer('B')"></button>
+        </div>
+    </div>
+
+    <audio id="snd-tik" src="sesler/tik.mp3"></audio>
+    <audio id="snd-correct" src="sesler/cinlama.mp3"></audio>
+    <audio id="snd-wrong" src="sesler/dong.mp3"></audio>
+
+    <script>
+        let game;
+        let scene;
+        let timerEvent;
+        let timeLeft = 120;
+        let lives = 5;
+        let currentQuestionIdx = 0;
+        // Sorular metne göre doğrulandı
+        const questions = [
+            { q: "Konya Tropikal Kelebek Bahçesi hangi ilçededir?", a: "Selçuklu", b: "Meram", correct: "A" },
+            { q: "Bahçenin mimari tasarımı hangi canlı şeklindedir?", a: "Kelebek", b: "Uğur Böceği", correct: "A" },
+            { q: "Bahçe sıcaklığı yıl boyu kaç derecede tutulur?", a: "26 °C", b: "10 °C", correct: "A" },
+            { q: "Bakımda hangisi kelebekler için KULLANILMAZ?", a: "Doğal Yöntemler", b: "Kimyasal İlaçlar", correct: "B" }
+        ];
+
+        function startGame() {
+            document.getElementById('intro-screen').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            
+            const config = {
+                type: Phaser.AUTO,
+                width: 800, height: 600,
+                parent: 'phaser-game',
+                backgroundColor: '#40E0D0', // Turkuaz Arka Plan
+                physics: { default: 'arcade', arcade: { gravity: { y: 0 } } },
+                scene: { preload: preload, create: create, update: update }
+            };
+            game = new Phaser.Game(config);
+        }
+
+        function preload() {
+            this.load.setBaseURL('https://cdn.phaserfiles.com/v385');
+            this.load.atlas('assets', 'assets/games/breakout/breakout.png', 'assets/games/breakout/breakout.json');
+        }
+
+        function create() {
+            scene = this;
+            this.physics.world.setBoundsCollision(true, true, true, false);
+
+            // Yuvarlak Top Dokusu
+            let graphics = this.make.graphics({ x: 0, y: 0, add: false });
+            graphics.fillStyle(0xffffff, 1);
+            graphics.fillCircle(10, 10, 10);
+            graphics.generateTexture('ballCircle', 20, 20);
+
+            this.bricks = this.physics.add.staticGroup();
+            let qIndices = [];
+            while(qIndices.length < 4) {
+                let r = Math.floor(Math.random() * 60);
+                if(!qIndices.includes(r)) qIndices.push(r);
+            }
+
+            for (let i = 0; i < 60; i++) {
+                let x = 112 + (i % 10) * 64;
+                let y = 100 + Math.floor(i / 10) * 32;
+                let isQ = qIndices.includes(i);
+                
+                // Tuğla oluşturma ve renklendirme
+                let brick = this.bricks.create(x, y, 'assets', 'blue1'); // Baz doku
+                if(isQ) {
+                    brick.setTint(0x3498db); // Mavi Soru Tuğlası
+                    let emo = this.add.text(x - 12, y - 12, '🦋', { fontSize: '22px' });
+                    brick.setData('emoji', emo);
+                } else {
+                    brick.setTint(0xFF8C00); // Turuncu Normal Tuğla
+                }
+                brick.setData('isQuestion', isQ);
+            }
+
+            // Siyah Yuvarlak Top ve Uzatılmış Raket
+            this.ball = this.physics.add.image(400, 500, 'ballCircle').setCollideWorldBounds(true).setBounce(1).setTint(0x000000);
+            this.paddle = this.physics.add.image(400, 550, 'assets', 'paddle1').setImmovable().setTint(0x000000);
+            this.paddle.setDisplaySize(160, 24); // Raket boyu
+            
+            this.ball.setData('onPaddle', true);
+
+            this.physics.add.collider(this.ball, this.bricks, hitBrick, null, this);
+            this.physics.add.collider(this.ball, this.paddle, hitPaddle, null, this);
+
+            this.input.on('pointermove', function (p) {
+                this.paddle.x = Phaser.Math.Clamp(p.x, 80, 720);
+                if (this.ball.getData('onPaddle')) this.ball.x = this.paddle.x;
+            }, this);
+
+            this.input.on('pointerup', () => {
+                if (this.ball.getData('onPaddle')) {
+                    this.ball.setVelocity(-75, -350);
+                    this.ball.setData('onPaddle', false);
+                }
+            });
+
+            this.timeText = this.add.text(620, 20, 'Süre: 120', { fontSize: '28px', fill: '#000', fontWeight: 'bold' });
+            this.livesText = this.add.text(20, 560, 'Canlar: 🦋🦋🦋🦋🦋', { fontSize: '24px', fill: '#000' });
+
+            timerEvent = this.time.addEvent({ delay: 1000, callback: () => {
+                timeLeft--;
+                this.timeText.setText('Süre: ' + timeLeft);
+                if(timeLeft <= 0) restartGame("Süre bitti!");
+            }, callbackScope: this, loop: true });
+        }
+
+        function update() {
+            if (this.ball.y > 600) {
+                lives--;
+                updateLives(this);
+                document.getElementById('snd-wrong').play();
+                if (lives <= 0) restartGame("Canların bitti!");
+                else resetBall(this);
+            }
+        }
+
+        function hitBrick(ball, brick) {
+            document.getElementById('snd-tik').play();
+            if(brick.getData('isQuestion')) {
+                brick.getData('emoji').destroy();
+                this.physics.pause();
+                showQuestion();
+            }
+            brick.disableBody(true, true);
+            if (this.bricks.countActive() === 0) endGame(true, "Harika! Tüm tuğlaları temizledin.");
+        }
+
+        function hitPaddle(ball, paddle) {
+            ball.setVelocityX(10 * (ball.x - paddle.x));
+        }
+
+        function resetBall(s) {
+            s.ball.setVelocity(0);
+            s.ball.setPosition(s.paddle.x, 530);
+            s.ball.setData('onPaddle', true);
+        }
+
+        function updateLives(s) {
+            let txt = 'Canlar: ';
+            for(let i=0; i<lives; i++) txt += '🦋';
+            s.livesText.setText(txt);
+        }
+
+        function showQuestion() {
+            const q = questions[currentQuestionIdx];
+            document.getElementById('q-text').innerText = q.q;
+            document.getElementById('optA').innerText = "A) " + q.a;
+            document.getElementById('optB').innerText = "B) " + q.b;
+            document.getElementById('question-overlay').style.display = 'flex';
+        }
+
+        window.handleAnswer = function(choice) {
+            const correct = questions[currentQuestionIdx].correct;
+            document.getElementById('question-overlay').style.display = 'none';
+            if(choice === correct) {
+                document.getElementById('snd-correct').play();
+                if(lives < 5) lives = 5; else timeLeft += 15;
+                currentQuestionIdx++;
+                
+                // KAZANMA ŞARTI: Tüm sorular doğruysa bitir!
+                if(currentQuestionIdx === questions.length) {
+                    endGame(true, "Tebrikler! Metni dikkatli okumuşsun, tüm soruları doğru bildin ve bahçeyi korudun. 🦋🎉");
+                } else {
+                    scene.physics.resume();
+                }
+            } else {
+                restartGame("Yanlış cevap! Metni tekrar okumalısın.");
+            }
+        };
+
+        function endGame(win, msg) {
+            alert(msg);
+            location.reload();
+        }
+
+        function restartGame(msg) {
+            alert(msg + " Oyun yeniden başlıyor...");
+            timeLeft = 120; lives = 5; currentQuestionIdx = 0;
+            game.destroy(true);
+            startGame();
+        }
+    </script>
+</body>
+</html>
