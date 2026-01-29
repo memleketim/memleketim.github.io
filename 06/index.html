@@ -3,29 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa 01</title>
+    <title>Ankara'nın Kültürel Zenginlikleri</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0; padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
         }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+
+        .container {
+            max-width: 1200px; width: 95%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        a:hover {
-            background-color: #2980b9;
+
+        h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+
+        .instructions {
+            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
+            background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
+        .map-container {
+            position: relative; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: white; padding: 15px;
+            max-width: 800px; margin: 0 auto;
+        }
+
+        .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
+
+        .quiz-point {
+            position: absolute; width: 75px; height: 75px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px); border: 2px solid white;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5;
+        }
+
+        .quiz-point:hover { transform: scale(1.2); z-index: 10; background: rgba(255, 255, 255, 0.5); }
+
+        .quiz-point-icon {
+            width: 90px; height: 90px; object-fit: contain;
+            animation: bounce 1.2s infinite alternate;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+        .tooltip {
+            position: absolute; background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;
+            top: -40px; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+        }
+        .quiz-point:hover .tooltip { opacity: 1; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; max-width: 550px; width: 90%; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+        .modal-content h2 { color: #764ba2; margin-bottom: 15px; font-size: 1.8em; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .modal-content p { color: #444; line-height: 1.7; text-align: justify; font-size: 1.1em; margin-bottom: 25px; }
+        
+        .btn { padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4); }
+        .btn-secondary { background: #eee; color: #555; border: none; margin-left: 10px; }
+
+        /* Koordinatlar - Ankara Haritası Üzerinde Dağılım */
+        #p0 { top: 52%; left: 46%; } /* Anıtkabir */
+        #p1 { top: 43%; left: 53%; } /* Kalesi & Müzeler */
+        #p2 { top: 62%; left: 52%; } /* Meclisler */
+        #p3 { top: 48%; left: 63%; } /* Lezzetler */
+        #p4 { top: 63%; left: 62%; } /* Müzik & Halk Oyunları */
+        #p5 { top: 25%; left: 50%; } /* Doğa & Turizm (Kızılcahamam tarafı) */
+        #p6 { top: 65%; left: 30%; } /* Gordion (Daha sağa-içeri çekildi) */
     </style>
 </head>
 <body>
-    <h1>Bu sayfa henüz tasarım aşamasında: 01</h1>
-    <a href="http://memleketim.github.io/">Anasayfaya Dön</a>
+
+<div class="container">
+    <div style="width: 100%; position: relative;">
+        <h1>Ankara'nın Kültürel Zenginlikleri</h1>
+        <a href="https://memleketim.github.io" class="btn btn-primary" style="position: absolute; top: 0; right: 0;">Ana Sayfa</a>
+    </div>
+
+    <div class="instructions">Haritadaki ikonlara tıklayarak Ankara'nın tarihi ve kültürel hazinelerini keşfedebilirsiniz.</div>
+
+    <div class="map-container">
+        <img src="map.png" alt="Ankara Haritası" class="map-image">
+
+        <div class="quiz-point" id="p0" 
+             data-title="🇹🇷 Anıtkabir" 
+             data-description="Cumhuriyetimizin kurucusu Gazi Mustafa Kemal Atatürk'ün ebedi istirahatgâhı olan Anıtkabir, Ankara'nın en önemli simgesidir. Aslanlı Yol, Tören Meydanı ve Kurtuluş Savaşı Müzesi ile her yıl milyonlarca ziyaretçiyi ağırlayan bu anıt yapı, Türk milletinin bağımsızlık sembolüdür."
+             data-link="1.html">
+            <div class="tooltip">Anıtkabir</div>
+            <img src="0.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p1" 
+             data-title="🏰 Ankara Kalesi ve Müzeler" 
+             data-description="Şehrin en eski yapılarından biri olan Ankara Kalesi, tarihi evleri ve dar sokaklarıyla eski Ankara ruhunu yaşatır. Kalenin hemen aşağısında yer alan Anadolu Medeniyetleri Müzesi ve Etnografya Müzesi, binlerce yıllık tarihin izlerini taşıyan nadide eserlere ev sahipliği yapar."
+             data-link="2.html">
+            <div class="tooltip">Ankara Kalesi ve Müzeler</div>
+            <img src="1.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p2" 
+             data-title="🏛️ Meclis Binaları" 
+             data-description="Ankara, Türkiye Cumhuriyeti'nin kuruluşuna tanıklık etmiş meclis binalarıyla bir tarih müzesi gibidir. Kurtuluş Savaşı'nın yönetildiği 1. Meclis, Cumhuriyetin ilan edildiği 2. Meclis ve günümüzdeki modern 3. Meclis binası, milli egemenliğin kalbidir."
+             data-link="3.html">
+            <div class="tooltip">Meclis Binaları</div>
+            <img src="2.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p3" 
+             data-title="🥘 Simit ve Ankara Tavası" 
+             data-description="Ankara'nın mutfak kültüründe 'Ankara Simidi' çıtırlığıyla, 'Ankara Tavası' ise lezzetiyle öne çıkar. Kuzu eti ve arpa şehriye ile hazırlanan tava yemeği, şehrin en sevilen yöresel lezzetlerinden biridir."
+             data-link="4.html">
+            <div class="tooltip">Simit ve Tava</div>
+            <img src="3.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p4" 
+             data-title="🎻 Müzik ve Halk Oyunları" 
+             data-description="Ankara denilince akla heybetli Seğmenler ve kıvrak Ankara havaları gelir. Özellikle kaşık oyunları ve 'Misket' gibi havalar, düğünlerin ve şenliklerin vazgeçilmez bir parçasıdır."
+             data-link="5.html">
+            <div class="tooltip">Müzik ve Halk Oyunları</div>
+            <img src="4.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p5" 
+             data-title="🌳 Doğa ve Turizm" 
+             data-description="Ankara sadece binalardan ibaret değildir; Mogan ve Eymir gölleriyle doğa nefes alır. Kuzeydeki Kızılcahamam bölgesi ise şifalı kaplıcaları ve milli parklarıyla Ankara'nın turizm merkezidir."
+             data-link="6.html">
+            <div class="tooltip">Doğa ve Turizm</div>
+            <img src="5.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p6" 
+             data-title="👑 Gordion Antik Kenti" 
+             data-description="Polatlı ilçesinde yer alan Gordion, Frigya Krallığı'nın başkentidir. Efsanevi Kral Midas'ın mezarı (Tümülüs) ve Büyük İskender'in kestiği ünlü Gordion Düğümü efsanesi buradadır. UNESCO Dünya Mirası listesinde yer alan çok değerli bir antik kenttir."
+             data-link="7.html">
+            <div class="tooltip">Gordion</div>
+            <img src="6.png" class="quiz-point-icon">
+        </div>
+    </div>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div class="modal-buttons">
+            <a href="#" id="activityLinkBtn" class="btn btn-primary">Etkinliğe Git</a>
+            <button class="btn btn-secondary" id="closeModalBtn">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const quizPoints = document.querySelectorAll('.quiz-point');
+    const modal = document.getElementById('infoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const activityLinkBtn = document.getElementById('activityLinkBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    quizPoints.forEach(point => {
+        point.addEventListener('click', function() {
+            modalTitle.textContent = this.getAttribute('data-title');
+            modalText.textContent = this.getAttribute('data-description');
+            activityLinkBtn.href = this.getAttribute('data-link');
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+</script>
+
 </body>
 </html>
