@@ -1,0 +1,277 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anıtkabir Kaşifi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #0f172a;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+        }
+
+        #exploration-area {
+            position: relative;
+            cursor: none;
+            overflow: hidden;
+            display: none;
+        }
+
+        #flashlight-canvas {
+            width: 100%;
+            height: 450px;
+            border-radius: 16px;
+            background: #020617;
+        }
+
+        .timer-progress {
+            transition: width 0.1s linear;
+        }
+
+        /* Başarı ekranındaki resim stili */
+        .ata-img {
+            max-width: 250px;
+            border-radius: 15px;
+            border: 4px solid #fbbf24;
+            margin: 0 auto 20px;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+    <header class="text-center mb-6 w-full max-w-4xl">
+        <h1 class="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-400">
+            ANKARA: ANITKABİR
+        </h1>
+        <a href="https://drive.google.com/file/d/1vai7Tslz1c4ShLgv8ZB-1PZNMEij3DYL/view?usp=drive_link" target="_blank" class="text-slate-400 hover:text-blue-300 text-sm italic transition-colors">
+            📄 Batı-Deniz Alku'nun çalışmasının tamamına ulaşmak için tıklayın. 
+        </a>
+    </header>
+
+    <div class="w-full max-w-4xl flex flex-col gap-6">
+        
+        <div id="video-section" class="glass-panel p-6">
+            <div class="flex items-center gap-3 mb-4 border-b border-white/10 pb-2">
+                <i class="fas fa-info-circle text-blue-400"></i>
+                <h3 class="font-bold text-lg">Nasıl Oynanır?</h3>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed mb-6">
+                1. Önce videoyu dikkatle izle, bilgiler orada saklı! 📺<br>
+                2. İzledikten sonra <b>"Keşfe Başla"</b> butonuna bas.<br>
+                3. Karanlık alanda el fenerini gezdirerek gizli soru işaretlerini (?) bul.<br>
+                4. Her doğru cevapta zaman kazanırsın, ama yanlış cevapta baştan başlarsın! ⚠️
+            </p>
+            
+            <div class="rounded-xl overflow-hidden border-2 border-blue-500/30">
+                <video id="intro-video" class="w-full" controls>
+                    <source src="videolar/anitkabir.mp4" type="video/mp4">
+                </video>
+            </div>
+
+            <button id="start-btn" onclick="initExploration()" class="mt-6 w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-105">
+                <i class="fas fa-flashlight mr-2"></i> Bilgileri Öğrendim, Keşfe Başla!
+            </button>
+        </div>
+
+        <div id="exploration-area" class="glass-panel p-2">
+            <div class="flex justify-between items-center px-4 py-2 mb-2">
+                <div class="flex items-center gap-4">
+                    <span id="timer-text" class="font-mono text-xl text-yellow-400">00:30</span>
+                    <div class="w-48 h-3 bg-slate-800 rounded-full overflow-hidden border border-white/10">
+                        <div id="timer-bar" class="timer-progress h-full bg-emerald-500 w-full"></div>
+                    </div>
+                </div>
+                <div class="text-sm font-bold text-blue-300">Bulunan Sır: <span id="found-count">0</span>/5</div>
+            </div>
+            <canvas id="flashlight-canvas"></canvas>
+        </div>
+    </div>
+
+    <div id="q-modal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+        <div class="glass-panel p-8 max-w-md w-full text-center border-2 border-yellow-500/50">
+            <h2 id="q-text" class="text-xl font-bold mb-6">Soru buraya gelecek?</h2>
+            <div class="grid gap-3">
+                <button onclick="checkAnswer(0)" id="opt0" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl transition-all border border-white/10 font-medium"></button>
+                <button onclick="checkAnswer(1)" id="opt1" class="bg-slate-800 hover:bg-slate-700 p-4 rounded-xl transition-all border border-white/10 font-medium"></button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fail-modal" class="hidden fixed inset-0 bg-red-900/95 z-[100] flex items-center justify-center p-4">
+        <div class="text-center">
+            <i class="fas fa-times-circle text-8xl text-white mb-6"></i>
+            <h2 class="text-4xl font-black mb-4">GÖREV BAŞARISIZ!</h2>
+            <p class="text-lg mb-8">Zaman bitti veya yanlış cevap verdin.</p>
+            <button onclick="location.reload()" class="bg-white text-red-600 px-12 py-4 rounded-full font-bold text-xl">Baştan Dene</button>
+        </div>
+    </div>
+
+    <div id="win-modal" class="hidden fixed inset-0 bg-emerald-700/95 z-[100] flex items-center justify-center p-4">
+        <div class="text-center max-w-lg">
+            <img src="ata.jpg" alt="Mustafa Kemal Atatürk" class="ata-img">
+            <h2 class="text-4xl font-black mb-2 text-white">TEBRİKLER KAŞİF! 🎉</h2>
+            <p class="text-xl mb-8 text-emerald-100 font-medium">Anıtkabir'in tüm sırlarını başarıyla çözdün ve görevini tamamladın.</p>
+            <button onclick="location.href='index.html'" class="bg-white text-emerald-700 px-12 py-4 rounded-full font-bold text-xl hover:scale-110 transition-transform">Haritaya Dön</button>
+        </div>
+    </div>
+
+    <audio id="snd-tik" src="sesler/tik.mp3"></audio>
+    <audio id="snd-cin" src="sesler/cinlama.mp3"></audio>
+    <audio id="snd-dong" src="sesler/dong.mp3"></audio>
+
+    <script>
+        const questions = [
+            { q: "Anıtkabir'in bulunduğu tepenin eski adı nedir?", a: ["Rasattepe", "Kocatepe"], c: 0 },
+            { q: "Aslanlı yoldaki 24 aslan heykeli neyi temsil eder?", a: ["Türk Boylarını", "Tarihi Şehirleri"], c: 0 },
+            { q: "Barış Parkı'na toplam kaç ayrı ülkeden ağaç getirilmiştir?", a: ["24 Ülke", "12 Ülke"], c: 0 },
+            { q: "Atatürk'ün mezar odası hangi mimari plana göre yapılmıştır?", a: ["Sekizgen Planlı", "Dörtgen Planlı"], c: 0 },
+            { q: "Atatürk'ün naaşının 7 metre üzerinde ne bulunur?", a: ["Lahit Taşı", "Bayrak Direği"], c: 0 }
+        ];
+
+        const canvas = document.getElementById('flashlight-canvas');
+        const ctx = canvas.getContext('2d');
+        let timeLeft = 30;
+        let isExploring = false;
+        let currentQIdx = 0;
+        let mouseX = -500, mouseY = -500;
+        let targets = [];
+        let gameTimer;
+
+        // Fare hareketini her an takip et
+        window.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+        });
+
+        function initExploration() {
+            document.getElementById('video-section').style.display = 'none';
+            document.getElementById('exploration-area').style.display = 'block';
+            
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            targets = questions.map((_, i) => ({
+                x: 50 + Math.random() * (canvas.width - 100),
+                y: 50 + Math.random() * (canvas.height - 100),
+                found: false
+            }));
+
+            isExploring = true;
+            startTimer();
+            animate();
+        }
+
+        function startTimer() {
+            gameTimer = setInterval(() => {
+                if (isExploring) {
+                    timeLeft--;
+                    const bar = document.getElementById('timer-bar');
+                    document.getElementById('timer-text').innerText = `00:${timeLeft < 10 ? '0' + timeLeft : timeLeft}`;
+                    bar.style.width = (timeLeft / 30 * 100) + "%";
+                    if(timeLeft <= 10) bar.className = "timer-progress h-full bg-red-500 w-full";
+                    if (timeLeft <= 0) endGame(false);
+                }
+            }, 1000);
+        }
+
+        function animate() {
+            if (!isExploring && currentQIdx < 5) {
+                // Soru açıkken sadece ekranı temizleme veya sabit tutma
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // 1. Karanlık katman
+                ctx.fillStyle = '#020617';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 2. Fener Maskesi
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(mouseX, mouseY, 95, 0, Math.PI * 2);
+                ctx.clip();
+
+                // 3. Işık içi
+                ctx.fillStyle = '#1e293b';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                targets.forEach(t => {
+                    if(!t.found) {
+                        ctx.fillStyle = '#fbbf24';
+                        ctx.font = 'bold 30px Arial';
+                        ctx.fillText('?', t.x, t.y);
+                    }
+                });
+                ctx.restore();
+
+                // 4. Kenar halkası
+                ctx.beginPath();
+                ctx.arc(mouseX, mouseY, 95, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(251, 191, 36, 0.4)';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                if (isExploring) checkCollision();
+            }
+            requestAnimationFrame(animate);
+        }
+
+        function checkCollision() {
+            targets.forEach((t, idx) => {
+                if(!t.found) {
+                    const d = Math.hypot(mouseX - t.x, mouseY - t.y);
+                    if(d < 50) {
+                        isExploring = false;
+                        t.found = true;
+                        showQuestion();
+                    }
+                }
+            });
+        }
+
+        function showQuestion() {
+            document.getElementById('snd-tik').play();
+            const q = questions[currentQIdx];
+            document.getElementById('q-text').innerText = q.q;
+            document.getElementById('opt0').innerText = q.a[0];
+            document.getElementById('opt1').innerText = q.a[1];
+            document.getElementById('q-modal').classList.remove('hidden');
+        }
+
+        function checkAnswer(choice) {
+            if(choice === questions[currentQIdx].c) {
+                document.getElementById('snd-cin').play();
+                document.getElementById('q-modal').classList.add('hidden');
+                currentQIdx++;
+                document.getElementById('found-count').innerText = currentQIdx;
+                if(currentQIdx === 5) endGame(true);
+                else isExploring = true;
+            } else {
+                document.getElementById('snd-dong').play();
+                endGame(false);
+            }
+        }
+
+        function endGame(win) {
+            clearInterval(gameTimer);
+            isExploring = false;
+            if(win) document.getElementById('win-modal').classList.remove('hidden');
+            else document.getElementById('fail-modal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
