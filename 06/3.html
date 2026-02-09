@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meclis Binaları - Zaman Yolculuğu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c2d12 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: #fbbf24;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 60px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid #fbbf24;
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .timeline-content:hover:not(.locked):not(.done) { transform: scale(1.05); }
+
+        .left-box { margin-right: auto; margin-left: 0; }
+        .right-box { margin-left: auto; margin-right: 0; }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            background: #fbbf24;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            border: 4px solid #7c2d12;
+            z-index: 2;
+        }
+
+        /* DURUM STİLLERİ */
+        .locked { filter: grayscale(1) opacity(0.5); cursor: not-allowed; }
+        .done { border-color: #22c55e !important; cursor: not-allowed; background: rgba(34, 197, 94, 0.1); }
+        
+        .overlay-icon {
+            display: none;
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 18px;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+
+        .locked .overlay-icon.lock { display: flex; color: #fbbf24; }
+        .done .overlay-icon.check { display: flex; color: #22c55e; }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .quiz-option:hover { background: rgba(251, 191, 36, 0.2); }
+        .correct { background: rgba(34, 197, 94, 0.4) !important; border-color: #22c55e !important; }
+        .wrong { background: rgba(239, 68, 68, 0.4) !important; border-color: #ef4444 !important; }
+
+        .meclis-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 20px;
+            border: 4px solid #fbbf24;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+
+    <header class="text-center mb-6 w-full max-w-4xl">
+        <h1 class="text-4xl font-extrabold text-yellow-400 mb-2">MECLİS BİNALARI</h1>
+        <a href="https://drive.google.com/file/d/1R5Oy3xudmwHauUAnElf1LcBMtSdMbReQ/view?usp=drive_link" target="_blank" class="text-slate-300 italic text-sm underline mb-4 inline-block">
+            📄 Elif Şahin'in çalışmasının tamamına ulaşmak için tıklayın.
+        </a>
+        <img src="meclis.png" alt="Ankara Meclis Binaları" class="meclis-img">
+    </header>
+
+    <div class="w-full max-w-4xl">
+        <div id="intro-screen" class="glass-panel p-8 text-center">
+            <h2 class="text-3xl font-extrabold mb-6 text-yellow-400">Hoş Geldin Genç Tarihçi! 🏛️</h2>
+            
+            <div class="text-left bg-white/5 p-6 rounded-2xl border border-white/10 mb-8">
+                <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                    <i class="fas fa-scroll text-yellow-400"></i> Görev Rehberi:
+                </h3>
+                <ul class="space-y-4 text-slate-200">
+                    <li class="flex gap-3 items-start">
+                        <span class="bg-yellow-500 text-blue-900 font-bold rounded-full w-6 h-6 flex items-center justify-center shrink-0">1</span>
+                        <p>Meclis binalarını sırayla keşfedeceksin. Birini bitirmeden diğeri açılmaz! 🔒</p>
+                    </li>
+                    <li class="flex gap-3 items-start">
+                        <span class="bg-yellow-500 text-blue-900 font-bold rounded-full w-6 h-6 flex items-center justify-center shrink-0">2</span>
+                        <p>Her binanın <b>Bilgi Kartı</b>'nı dikkatle oku. Soruların cevapları o kartın içinde! 📖</p>
+                    </li>
+                    <li class="flex gap-3 items-start">
+                        <span class="bg-yellow-500 text-blue-900 font-bold rounded-full w-6 h-6 flex items-center justify-center shrink-0">3</span>
+                        <p>Bitirdiğin bir meclis binasına tekrar geri dönemezsin, o yüzden bilgileri iyi öğren! 🛑</p>
+                    </li>
+                    <li class="flex gap-3 items-start text-yellow-300 font-bold italic">
+                        <i class="fas fa-star mt-1"></i>
+                        <p>Hedef: En az 7 yıldız toplamak! Eğer 7 yıldız alamazsan zaman tüneli sıfırlanır ve soruların yeri değişir. ⚠️</p>
+                    </li>
+                </ul>
+            </div>
+
+            <button onclick="startGame()" class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 font-black py-4 px-12 rounded-full text-xl shadow-lg transition-transform hover:scale-105">
+                Zaman Yolculuğuna Başla! ▶
+            </button>
+        </div>
+
+        <div id="game-area" class="hidden">
+            <div class="flex justify-between mb-8 bg-black/30 p-4 rounded-xl">
+                <div class="text-yellow-400 font-bold">⭐ Yıldızlar: <span id="stars">0</span>/9</div>
+                <div class="text-green-400 font-bold">🏛️ Durum: <span id="progress">0</span>/3</div>
+            </div>
+
+            <div class="timeline-container">
+                <div class="timeline-line"></div>
+                
+                <div class="timeline-row">
+                    <div class="timeline-content left-box" id="box-1" onclick="handleBoxClick(1)">
+                        <div class="overlay-icon lock"><i class="fas fa-lock"></i></div>
+                        <div class="overlay-icon check"><i class="fas fa-check-circle"></i></div>
+                        <div class="text-3xl mb-2">🏛️</div>
+                        <h3 class="font-bold">1. MECLİS</h3>
+                        <p class="text-xs text-yellow-200">1920 - 1924</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                    <div class="w-[45%]"></div>
+                </div>
+
+                <div class="timeline-row">
+                    <div class="w-[45%]"></div>
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content right-box locked" id="box-2" onclick="handleBoxClick(2)">
+                        <div class="overlay-icon lock"><i class="fas fa-lock"></i></div>
+                        <div class="overlay-icon check"><i class="fas fa-check-circle"></i></div>
+                        <div class="text-3xl mb-2">🏛️</div>
+                        <h3 class="font-bold">2. MECLİS</h3>
+                        <p class="text-xs text-yellow-200">1924 - 1960</p>
+                    </div>
+                </div>
+
+                <div class="timeline-row">
+                    <div class="timeline-content left-box locked" id="box-3" onclick="handleBoxClick(3)">
+                        <div class="overlay-icon lock"><i class="fas fa-lock"></i></div>
+                        <div class="overlay-icon check"><i class="fas fa-check-circle"></i></div>
+                        <div class="text-3xl mb-2">🏛️</div>
+                        <h3 class="font-bold">3. MECLİS</h3>
+                        <p class="text-xs text-yellow-200">1961 - Bugün</p>
+                    </div>
+                    <div class="timeline-dot"></div>
+                    <div class="w-[45%]"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4">
+        <div class="glass-panel p-8 max-w-lg w-full text-center">
+            <div id="info-box">
+                <h2 id="info-title" class="text-2xl font-bold text-yellow-400 mb-4"></h2>
+                <div id="info-text" class="text-left text-sm space-y-3 mb-6 bg-white/5 p-4 rounded-lg"></div>
+                <button onclick="startQuiz()" class="bg-yellow-500 text-blue-900 font-bold py-3 px-8 rounded-xl">Hazırım!</button>
+            </div>
+            <div id="quiz-box" class="hidden">
+                <h3 class="text-xl font-bold mb-4" id="q-text"></h3>
+                <div id="options"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="win-modal" class="hidden fixed inset-0 bg-green-900/95 z-[100] flex items-center justify-center p-4">
+        <div class="text-center p-8 glass-panel max-w-md">
+            <div class="text-7xl mb-4">🏆</div>
+            <h2 class="text-3xl font-black mb-2">GÖREV TAMAMLANDI!</h2>
+            <p class="mb-8">Harika bir tarihçisin. Tüm meclisleri keşfettin!</p>
+            <button onclick="location.href='https://memleketim.github.io/06/index.html'" class="bg-white text-green-800 font-bold py-4 px-10 rounded-full text-xl">Haritaya Dön</button>
+        </div>
+    </div>
+
+    <div id="fail-modal" class="hidden fixed inset-0 bg-red-900/95 z-[100] flex items-center justify-center p-4">
+        <div class="text-center p-8 glass-panel max-w-md">
+            <div class="text-7xl mb-4">❌</div>
+            <h2 class="text-3xl font-black mb-2">YETERLİ YILDIZ YOK!</h2>
+            <p class="mb-8">Üzgünüm, 7 yıldız toplayamadın. Sorular karışıyor, tekrar dene!</p>
+            <button onclick="location.reload()" class="bg-white text-red-800 font-bold py-4 px-10 rounded-full text-xl">Baştan Başla</button>
+        </div>
+    </div>
+
+    <audio id="snd-tik" src="sesler/tik.mp3"></audio>
+    <audio id="snd-cin" src="sesler/cinlama.mp3"></audio>
+    <audio id="snd-dong" src="sesler/dong.mp3"></audio>
+
+    <script>
+        const originalData = {
+            1: {
+                title: "1. TBMM (Ulus)",
+                text: "🕒 <b>23 Nisan 1920</b>'de açıldı. <br>⚔️ <b>Kurtuluş Savaşı</b> buradan yönetildi. <br>🏠 Çok küçük ve elektriği olmayan mütevazı bir binaydı.",
+                qs: [
+                    { q: "1. Meclis ne zaman açıldı?", a: ["23 Nisan 1920", "29 Ekim 1923"], c: "23 Nisan 1920" },
+                    { q: "Hangi savaş buradan yönetildi?", a: ["Kurtuluş Savaşı", "1. Dünya Savaşı"], c: "Kurtuluş Savaşı" },
+                    { q: "Bu bina Ankara'nın hangi semtindedir?", a: ["Ulus", "Çankaya"], c: "Ulus" }
+                ]
+            },
+            2: {
+                title: "2. TBMM (Cumhuriyet Müzesi)",
+                text: "🕒 <b>29 Ekim 1923</b>'te Cumhuriyet burada ilan edildi. <br>🏛️ Bugün <b>Cumhuriyet Müzesi</b>'dir. <br>🇹🇷 Atatürk tüm büyük inkılapları bu binada gerçekleştirdi.",
+                qs: [
+                    { q: "Cumhuriyet hangi mecliste ilan edildi?", a: ["2. Meclis", "1. Meclis"], c: "2. Meclis" },
+                    { q: "2. Meclis bugün ne olarak kullanılıyor?", a: ["Müze", "Hastane"], c: "Müze" },
+                    { q: "Hangi şehirde bulunuyor?", a: ["Ankara", "İstanbul"], c: "Ankara" }
+                ]
+            },
+            3: {
+                title: "3. TBMM (Bakanlıklar)",
+                text: "🏢 <b>1961</b> yılından beri bu bina kullanılıyor. <br>👥 <b>600</b> milletvekili burada görev yapıyor. <br>📐 Mimarı <b>Clemens Holzmeister</b>'dır.",
+                qs: [
+                    { q: "Günümüz meclisinde kaç milletvekili var?", a: ["600", "200"], c: "600" },
+                    { q: "Bugün hâlâ bu meclis mi kullanılıyor?", a: ["Evet", "Hayır"], c: "Evet" },
+                    { q: "Bu binayı kim tasarladı?", a: ["Clemens Holzmeister", "Mimar Sinan"], c: "Clemens Holzmeister" }
+                ]
+            }
+        };
+
+        let currentStars = 0;
+        let completed = 0;
+        let currentM = 0;
+        let currentQ = 0;
+        let status = { 1: 'unlocked', 2: 'locked', 3: 'locked' };
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startGame() {
+            document.getElementById('intro-screen').classList.add('hidden');
+            document.getElementById('game-area').classList.remove('hidden');
+            document.getElementById('snd-tik').play();
+            
+            [1, 2, 3].forEach(key => {
+                shuffle(originalData[key].qs);
+                originalData[key].qs.forEach(item => shuffle(item.a));
+            });
+        }
+
+        function handleBoxClick(num) {
+            if(status[num] === 'locked') {
+                alert("⚠️ Bu meclis henüz kilitli!");
+                return;
+            }
+            if(status[num] === 'done') {
+                alert("✅ Bu meclisi zaten bitirdin, tekrar giremezsin!");
+                return;
+            }
+            
+            currentM = num;
+            currentQ = 0;
+            document.getElementById('modal').classList.remove('hidden');
+            document.getElementById('info-box').classList.remove('hidden');
+            document.getElementById('quiz-box').classList.add('hidden');
+            
+            document.getElementById('info-title').innerText = originalData[num].title;
+            document.getElementById('info-text').innerHTML = originalData[num].text;
+            document.getElementById('snd-tik').play();
+        }
+
+        function startQuiz() {
+            document.getElementById('info-box').classList.add('hidden');
+            document.getElementById('quiz-box').classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const qData = originalData[currentM].qs[currentQ];
+            document.getElementById('q-text').innerText = qData.q;
+            const optDiv = document.getElementById('options');
+            optDiv.innerHTML = "";
+            
+            qData.a.forEach((txt) => {
+                const btn = document.createElement('div');
+                btn.className = "quiz-option font-bold";
+                btn.innerText = txt;
+                btn.onclick = () => checkAnswer(txt, btn);
+                optDiv.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedTxt, btn) {
+            const correctTxt = originalData[currentM].qs[currentQ].c;
+            const allOpts = document.querySelectorAll('.quiz-option');
+            allOpts.forEach(o => o.style.pointerEvents = "none");
+
+            if(selectedTxt === correctTxt) {
+                btn.classList.add('correct');
+                document.getElementById('snd-cin').play();
+                currentStars++;
+                document.getElementById('stars').innerText = currentStars;
+            } else {
+                btn.classList.add('wrong');
+                allOpts.forEach(o => { if(o.innerText === correctTxt) o.classList.add('correct'); });
+                document.getElementById('snd-dong').play();
+            }
+
+            setTimeout(() => {
+                currentQ++;
+                if(currentQ < 3) showQuestion(); else finishSection();
+            }, 1200);
+        }
+
+        function finishSection() {
+            document.getElementById('modal').classList.add('hidden');
+            status[currentM] = 'done';
+            document.getElementById(`box-${currentM}`).classList.add('done');
+            
+            completed++;
+            document.getElementById('progress').innerText = completed;
+            
+            if(currentM < 3) {
+                status[currentM + 1] = 'unlocked';
+                document.getElementById(`box-${currentM+1}`).classList.remove('locked');
+                document.getElementById('snd-tik').play();
+            } else {
+                if(currentStars >= 7) {
+                    document.getElementById('win-modal').classList.remove('hidden');
+                } else {
+                    document.getElementById('fail-modal').classList.remove('hidden');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
