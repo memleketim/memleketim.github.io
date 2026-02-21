@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ankara Lezzetleri | Ülkem Yanımda</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+  :root {
+    --amber: #E8A030;
+    --amber-dark: #C47A20;
+    --amber-light: #F5C86A;
+    --red-clay: #8B3A2A;
+    --cream: #FDF6E8;
+    --warm-white: #FFFDF7;
+    --dark: #1A1208;
+    --glass-bg: rgba(255,253,247,0.12);
+    --glass-border: rgba(232,160,48,0.3);
+    --glass-shadow: rgba(0,0,0,0.25);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #0D0A04;
+    color: var(--cream);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ANIMATED BACKGROUND */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%, rgba(140,70,20,0.35) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 70%, rgba(232,160,48,0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 100% at 50% 50%, #1A1208 0%, #0D0A04 100%);
+  }
+  .bg-grain {
+    position: fixed; inset: 0; z-index: 1; opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 200px;
+    pointer-events: none;
+  }
+  /* Floating sesame seeds decoration */
+  .seed {
+    position: fixed; border-radius: 50%;
+    background: radial-gradient(circle, var(--amber-light), var(--amber-dark));
+    opacity: 0.15; pointer-events: none; z-index: 1;
+  }
+
+  /* LOGO */
+  .logo-fixed {
+    position: fixed; bottom: 20px; right: 24px; z-index: 999;
+    width: 64px; height: 64px;
+    filter: drop-shadow(0 4px 12px rgba(232,160,48,0.4));
+    transition: transform 0.3s;
+  }
+  .logo-fixed:hover { transform: scale(1.1) rotate(-5deg); }
+
+  /* MAIN WRAPPER */
+  .main {
+    position: relative; z-index: 10;
+    max-width: 960px; margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+
+  /* ===== HEADER / INTRO ===== */
+  .header {
+    text-align: center; padding: 50px 20px 30px;
+  }
+  .project-tag {
+    display: inline-block; padding: 6px 20px;
+    background: rgba(232,160,48,0.15);
+    border: 1px solid rgba(232,160,48,0.4);
+    border-radius: 100px; font-size: 13px; letter-spacing: 2px;
+    color: var(--amber-light); font-weight: 700; text-transform: uppercase;
+    margin-bottom: 20px;
+    backdrop-filter: blur(8px);
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 4rem);
+    font-weight: 900; line-height: 1.1;
+    background: linear-gradient(135deg, var(--amber-light), var(--amber), #E8622A);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  .header .subtitle {
+    font-size: 1rem; color: rgba(253,246,232,0.65);
+    max-width: 500px; margin: 0 auto;
+  }
+
+  /* COVER IMAGE */
+  .cover-wrap {
+    margin: 30px auto; max-width: 700px;
+    border-radius: 24px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,160,48,0.2);
+    position: relative;
+  }
+  .cover-wrap img {
+    width: 100%; display: block;
+    transition: transform 0.6s;
+  }
+  .cover-wrap:hover img { transform: scale(1.03); }
+  .cover-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13,10,4,0.7) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ===== GLASS CARD ===== */
+  .glass-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-radius: 24px;
+    box-shadow: 0 8px 40px var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.1);
+    padding: 32px;
+    margin-bottom: 28px;
+  }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; font-weight: 700;
+    color: var(--amber-light);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .card-title .icon { font-size: 1.8rem; }
+  .card-body { font-size: 0.95rem; line-height: 1.85; color: rgba(253,246,232,0.8); }
+  .card-body strong { color: var(--amber-light); font-weight: 800; }
+
+  /* ===== SECTION TABS ===== */
+  .content-section { margin: 40px 0; }
+  .section-label {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--amber); font-weight: 800; margin-bottom: 12px;
+    opacity: 0.7;
+  }
+
+  /* ===== GAME SECTION ===== */
+  .game-section { margin: 50px 0; }
+  .game-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; text-align: center;
+    color: var(--amber-light); margin-bottom: 8px;
+  }
+  .game-desc {
+    text-align: center; color: rgba(253,246,232,0.6);
+    font-size: 0.9rem; margin-bottom: 28px;
+  }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: rgba(255,255,255,0.08);
+    border-radius: 100px; height: 8px;
+    margin-bottom: 28px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; border-radius: 100px;
+    background: linear-gradient(90deg, var(--amber-dark), var(--amber-light));
+    transition: width 0.6s cubic-bezier(0.34,1.56,0.64,1);
+    width: 0%;
+  }
+  .progress-info {
+    display: flex; justify-content: space-between;
+    font-size: 0.8rem; color: rgba(253,246,232,0.5);
+    margin-bottom: 8px;
+  }
+
+  /* GAME CARD */
+  .game-card {
+    background: rgba(232,160,48,0.06);
+    border: 1px solid rgba(232,160,48,0.2);
+    border-radius: 20px;
+    padding: 28px 32px;
+    backdrop-filter: blur(20px);
+    position: relative; overflow: hidden;
+  }
+  .game-card::before {
+    content: '';
+    position: absolute; top: -50%; right: -30%;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,160,48,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .question-num {
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--amber); font-weight: 800; opacity: 0.6;
+    margin-bottom: 10px;
+  }
+  .question-text {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.1rem, 3vw, 1.45rem);
+    line-height: 1.5; color: var(--cream);
+    margin-bottom: 28px;
+  }
+  .question-text em {
+    font-style: italic; color: var(--amber-light);
+  }
+
+  /* ANSWER OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media(max-width: 520px) { .options-grid { grid-template-columns: 1fr; } }
+
+  .option-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 14px; padding: 16px 20px;
+    color: var(--cream); font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; text-align: left;
+    transition: all 0.25s;
+    display: flex; align-items: center; gap: 12px;
+    position: relative; overflow: hidden;
+  }
+  .option-btn::before {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(232,160,48,0.15), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .option-btn:hover:not(:disabled)::before { opacity: 1; }
+  .option-btn:hover:not(:disabled) {
+    border-color: rgba(232,160,48,0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(232,160,48,0.2);
+  }
+  .option-btn.correct {
+    border-color: #4CAF50; background: rgba(76,175,80,0.2);
+    box-shadow: 0 0 20px rgba(76,175,80,0.3);
+  }
+  .option-btn.wrong {
+    border-color: #F44336; background: rgba(244,67,54,0.2);
+    box-shadow: 0 0 20px rgba(244,67,54,0.25);
+  }
+  .option-btn:disabled { cursor: default; pointer-events: none; }
+  .option-letter {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: rgba(232,160,48,0.15);
+    border: 1px solid rgba(232,160,48,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; font-weight: 800; color: var(--amber-light);
+    flex-shrink: 0;
+  }
+
+  /* FEEDBACK */
+  .feedback-box {
+    margin-top: 20px; padding: 16px 20px;
+    border-radius: 14px; font-size: 0.9rem; line-height: 1.6;
+    display: none;
+  }
+  .feedback-box.show { display: block; }
+  .feedback-box.correct-fb {
+    background: rgba(76,175,80,0.15);
+    border: 1px solid rgba(76,175,80,0.35);
+    color: #A5D6A7;
+  }
+  .feedback-box.wrong-fb {
+    background: rgba(244,67,54,0.12);
+    border: 1px solid rgba(244,67,54,0.3);
+    color: #EF9A9A;
+  }
+  .feedback-box strong { font-weight: 800; }
+
+  /* NEXT BUTTON */
+  .btn-next {
+    display: none; margin-top: 20px;
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--amber), var(--amber-dark));
+    border: none; border-radius: 14px;
+    color: var(--dark); font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800; cursor: pointer;
+    transition: all 0.3s; letter-spacing: 0.5px;
+  }
+  .btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(232,160,48,0.4);
+  }
+  .btn-next.show { display: block; }
+
+  /* WORD BUILDER GAME */
+  .word-builder-wrap { margin-top: 20px; }
+  .word-slots {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    justify-content: center; margin: 16px 0;
+  }
+  .word-slot {
+    min-width: 44px; height: 48px; padding: 0 8px;
+    border-bottom: 3px solid var(--amber);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem; color: var(--amber-light); font-weight: 700;
+    background: rgba(232,160,48,0.08);
+    border-radius: 8px 8px 0 0;
+    transition: all 0.3s;
+  }
+  .syllable-pool {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    justify-content: center; margin-top: 16px;
+  }
+  .syllable-btn {
+    padding: 10px 18px;
+    background: rgba(232,160,48,0.1);
+    border: 1.5px solid rgba(232,160,48,0.3);
+    border-radius: 10px; color: var(--cream);
+    font-family: 'Nunito', sans-serif; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all 0.25s;
+  }
+  .syllable-btn:hover { background: rgba(232,160,48,0.25); transform: scale(1.05); }
+  .syllable-btn.used { opacity: 0.3; pointer-events: none; }
+
+  /* SCORE / END SCREEN */
+  .end-screen {
+    text-align: center; padding: 50px 20px;
+    display: none;
+  }
+  .end-screen.show { display: block; }
+  .score-ring {
+    width: 150px; height: 150px; border-radius: 50%;
+    border: 6px solid var(--amber);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    background: radial-gradient(circle, rgba(232,160,48,0.15), transparent);
+    box-shadow: 0 0 40px rgba(232,160,48,0.3);
+    font-family: 'Playfair Display', serif;
+  }
+  .score-num { font-size: 3rem; font-weight: 900; color: var(--amber-light); }
+  .score-total { font-size: 1rem; color: rgba(253,246,232,0.5); }
+  .end-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; color: var(--amber-light);
+    margin-bottom: 12px;
+  }
+  .end-msg { color: rgba(253,246,232,0.65); margin-bottom: 32px; }
+  .btn-restart {
+    padding: 16px 40px;
+    background: linear-gradient(135deg, var(--amber), var(--amber-dark));
+    border: none; border-radius: 100px;
+    color: var(--dark); font-family: 'Nunito', sans-serif;
+    font-size: 1rem; font-weight: 800; cursor: pointer;
+    transition: all 0.3s;
+  }
+  .btn-restart:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 16px 40px rgba(232,160,48,0.4);
+  }
+
+  /* MEDIA SECTION */
+  .media-section { margin: 40px 0; }
+  .fb-video-wrap {
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+    display: flex; justify-content: center;
+    background: #000;
+    border: 1px solid rgba(232,160,48,0.15);
+  }
+  .fb-video-wrap iframe {
+    display: block;
+    max-width: 100%;
+    border-radius: 16px;
+  }
+
+  /* STUDENT BUTTON */
+  .student-btn-wrap { text-align: center; margin: 40px 0; }
+  .student-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, rgba(232,160,48,0.15), rgba(232,160,48,0.05));
+    border: 1.5px solid rgba(232,160,48,0.4);
+    border-radius: 100px; color: var(--amber-light);
+    font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 800;
+    text-decoration: none; transition: all 0.35s;
+    backdrop-filter: blur(12px);
+  }
+  .student-btn:hover {
+    background: linear-gradient(135deg, rgba(232,160,48,0.28), rgba(232,160,48,0.1));
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(232,160,48,0.25);
+    color: var(--cream);
+  }
+  .student-btn svg { flex-shrink: 0; }
+
+  /* SCORE BADGE */
+  .score-badge {
+    position: fixed; top: 20px; right: 20px; z-index: 998;
+    background: rgba(13,10,4,0.85);
+    border: 1px solid rgba(232,160,48,0.35);
+    border-radius: 100px; padding: 8px 18px;
+    display: flex; align-items: center; gap: 8px;
+    backdrop-filter: blur(12px);
+    font-weight: 800; font-size: 0.85rem; color: var(--amber-light);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .score-badge .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--amber); 
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(232,160,48,0.4); }
+    50% { box-shadow: 0 0 0 5px rgba(232,160,48,0); }
+  }
+
+  /* REVEAL ANIM */
+  .reveal { opacity: 0; transform: translateY(30px); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232,160,48,0.25), transparent);
+    margin: 40px 0;
+  }
+  
+  /* KEYWORD HIGHLIGHT */
+  .keyword {
+    display: inline-block;
+    background: rgba(232,160,48,0.15);
+    border-radius: 4px; padding: 1px 6px;
+    color: var(--amber-light); font-weight: 800;
+  }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-layer"></div>
+<div class="bg-grain"></div>
+
+<!-- Floating seeds -->
+<div class="seed" id="s1" style="width:6px;height:6px;top:15%;left:8%;"></div>
+<div class="seed" id="s2" style="width:4px;height:4px;top:55%;left:92%;"></div>
+<div class="seed" id="s3" style="width:8px;height:4px;border-radius:40%;top:75%;left:5%;"></div>
+<div class="seed" id="s4" style="width:5px;height:3px;border-radius:40%;top:35%;left:95%;"></div>
+<div class="seed" id="s5" style="width:6px;height:3px;border-radius:40%;top:90%;left:60%;"></div>
+
+<!-- Score Badge -->
+<div class="score-badge" id="scoreBadge">
+  <div class="dot"></div>
+  <span id="badgeScore">0 / 10</span>
+</div>
+
+<!-- Logo -->
+<img src="orjinal.svg" alt="Ülkem Yanımda Logo" class="logo-fixed" 
+     onerror="this.style.display='none'">
+
+<div class="main">
+
+  <!-- HEADER -->
+  <div class="header reveal" id="hdr">
+    <h1>Ankara'nın<br>Mutfak Mirası</h1>
+    <p class="subtitle">Simit'in çıtır sesi ile Tava'nın bereketli kokusu — Bozkırın iki efsane lezzeti</p>
+  </div>
+
+  <!-- STUDENT WORK LINK — başlığın hemen altında, görselin üstünde -->
+  <div class="student-btn-wrap reveal" style="margin: 0 0 24px;">
+    <a href="https://drive.google.com/file/d/1qvMb02quia16vPQFEMzB91ZELUPlGCk9/view?usp=drive_link"
+       target="_blank" class="student-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14,2 14,8 20,8"/>
+      </svg>
+      Selin Assan'ın çalışmasının tamamına ulaşmak için tıklayınız
+    </a>
+  </div>
+
+  <!-- COVER IMAGE -->
+  <div class="cover-wrap reveal" id="cvr">
+    <img src="tavasimit.png" alt="Ankara Simidi ve Ankara Tavası"
+         onerror="this.style.background='linear-gradient(135deg,#3D2010,#1A1208)'; this.style.height='240px'; this.alt='Görsel yükleniyor...';">
+    <div class="cover-overlay"></div>
+  </div>
+
+  <!-- CONTENT: Simit -->
+  <div class="content-section">
+    <div class="section-label reveal">📖 Konu 1 — Ankara Simidi</div>
+    <div class="glass-card reveal">
+      <div class="card-title">
+        <span class="icon">🥨</span>
+        Ankara Simidi: Şehrin Gevrek Sesi
+      </div>
+      <div class="card-body">
+        <p>Ankara Simidi'ni diğer tüm simitlerden ayıran en temel özellik, <strong>daha ince, daha küçük ve çok daha çıtır</strong> olmasıdır. Bu simidin karakteristik koyu rengi ve kendine has aroması, hamurunun pişirilmeden önce <strong>pekmezli sıcak suya daldırılmasından</strong> (pekmezleme işlemi) gelir. Özellikle kaliteli üzüm pekmezi kullanılması, taş fırındaki odun ateşinde pişerken simidin dış yüzeyinin <strong>karamelize</strong> olmasını ve o meşhur çıtırtıyı kazanmasını sağlar.</p>
+        <br>
+        <p>Ankara'da bu kadar meşhur olmasının sebebi, şehrin bir <strong>"memur ve öğrenci kenti"</strong> olmasıyla doğrudan ilişkilidir. Sabah erken saatlerde işe veya okula yetişmeye çalışan binlerce insan için Ankara Simidi, en hızlı, en taze ve en ekonomik kahvaltı seçeneği haline gelmiştir. Kültürel değer açısından bakıldığında ise bu simit, Ankara'nın <strong>sokak dokusunun bir parçasıdır;</strong> vapurda simit yenen İstanbul'un aksine, Ankara'nın gri sabahlarında sıcak bir mola ve sosyal bir ortak noktadır.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIA SECTION — Konu 1'in hemen altında -->
+  <div class="media-section reveal">
+    <div class="section-label">🎬 Öğrenmeyi Derinleştir</div>
+    <div class="glass-card" style="padding: 24px;">
+      <div class="card-title" style="margin-bottom: 18px;">
+        <span class="icon">📽️</span> Görsel &amp; İşitsel Kaynak
+      </div>
+      <div class="fb-video-wrap">
+        <iframe src="https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ftrthaber%2Fvideos%2F1069768666850116%2F&show_text=false&width=560&t=0" width="560" height="314" style="border:none;overflow:hidden" scrolling="no" frameborder="0" allowfullscreen="true" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share" allowFullScreen="true"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- CONTENT: Tava — videonun altında -->
+  <div class="content-section">
+    <div class="section-label reveal">📖 Konu 2 — Ankara Tavası</div>
+    <div class="glass-card reveal">
+      <div class="card-title">
+        <span class="icon">🍲</span>
+        Ankara Tavası: Bozkırın Bereketli Sofrası
+      </div>
+      <div class="card-body">
+        <p>Ankara Tavası, görünüş itibarıyla bir etli pilavı andırsa da aslında onu özgün kılan en büyük detay, <strong>pirinç yerine arpa şehriye ile yapılmasıdır.</strong> Geleneksel tarifinde kemikli kuzu eti, kendi suyunda ağır ağır pişirilir ve bu et suyu şehriyelerle buluşturulur. Şehriyelerin pirinç gibi tane tane dökülmesi değil, etin suyunu tamamen çekerek <strong>lokum gibi yumuşaması</strong> esastır. Bu yemek, Ankara'nın hayvancılık kültürünün, özellikle de meşhur <strong>Ankara Keçisi ve kuzu etinin</strong> bir yansımasıdır.</p>
+        <br>
+        <p>Bu yemeğin Ankara'da meşhur olmasının kökeninde, geçmişteki <strong>bağ evi kültürü</strong> ve toplu ziyafet gelenekleri yatar. Eskiden Ankara Tavası, "tava" adı verilen büyük kaplarda fırınlara gönderilir ve özellikle <strong>düğün, bayram ya da misafir ağırlama</strong> gibi özel günlerde bir dayanışma ve kutlama yemeği olarak sunulurdu. Kültürel değeri, kalabalık sofraları birleştirmesinden ve Ankara'nın tarım ile hayvancılığa dayalı <strong>kadim mutfak mirasını</strong> günümüze taşımasından kaynaklanır.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ===== GAME SECTION ===== -->
+  <div class="game-section reveal" id="gameSection">
+    <div class="game-title">🎮 Lezzet Yolu Oyunu</div>
+    <p class="game-desc">Ankara'nın mutfak mirasını keşfet — 10 soruyla bilgini sına!</p>
+
+    <div class="progress-info">
+      <span id="progressLabel">Soru 1 / 10</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <div class="game-card" id="gameCard">
+      <!-- Rendered by JS -->
+    </div>
+
+    <div class="end-screen" id="endScreen">
+      <div class="score-ring">
+        <span class="score-num" id="finalScore">0</span>
+        <span class="score-total" id="finalTotal">/ 10</span>
+      </div>
+      <div class="end-title" id="endTitle">Aferin!</div>
+      <p class="end-msg" id="endMsg">Ankara lezzetlerini çok iyi öğrendin!</p>
+      <button class="btn-restart" onclick="restartGame()">🔄 Tekrar Oyna</button>
+    </div>
+  </div>
+
+
+
+</div><!-- /main -->
+
+<!-- AUDIO -->
+<audio id="sndCorrect" src="sesler/dogru.mp3" preload="auto"></audio>
+<audio id="sndWrong" src="sesler/yanlis.mp3" preload="auto"></audio>
+
+<script>
+// ============================
+//  GSAP ANIMATIONS — REVEAL
+// ============================
+gsap.registerPlugin(ScrollTrigger);
+
+document.querySelectorAll('.reveal').forEach((el, i) => {
+  gsap.fromTo(el,
+    { opacity: 0, y: 40 },
+    {
+      opacity: 1, y: 0, duration: 0.9,
+      ease: 'power3.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 88%',
+        toggleActions: 'play none none none'
+      }
+    }
+  );
+});
+
+// Floating seeds
+['s1','s2','s3','s4','s5'].forEach((id, i) => {
+  gsap.to(`#${id}`, {
+    y: `${-20 - i * 8}px`,
+    x: `${(i % 2 === 0 ? 1 : -1) * 15}px`,
+    duration: 3 + i * 0.7,
+    repeat: -1, yoyo: true,
+    ease: 'sine.inOut',
+    delay: i * 0.4
+  });
+});
+
+// ============================
+//  QUIZ DATA (PATH FINDER)
+//  Mecanic: Progressive difficulty
+//  Aşama 1 (1-3): Hatırlama (Recall)
+//  Aşama 2 (4-6): Anlama & İlişkilendirme
+//  Aşama 3 (7-9): Uygulama & Analiz
+//  Aşama 4 (10): Kelime Kurma
+// ============================
+const questions = [
+  // AŞAMA 1: HATIRLA
+  {
+    type: 'mcq',
+    stage: 'Aşama 1: Tanıyorum! 🔍',
+    q: 'Ankara Simidi diğer simitlerden nasıl ayrılır?',
+    opts: [
+      'Daha büyük ve yumuşaktır',
+      'Daha ince, küçük ve çıtırdır',
+      'Susamsızdır',
+      'Sadece şeker ile yapılır'
+    ],
+    correct: 1,
+    feedback: {
+      right: '✅ Harika! Ankara Simidi ince, küçük ve çıtır yapısıyla öne çıkar. Bu özellikler onu İstanbul simidinden ayırır.',
+      wrong: '❌ Tekrar düşün! Ankara Simidi "ince, küçük ve çıtır" olmasıyla tanınır — tam tersi değil!'
+    }
+  },
+  {
+    type: 'mcq',
+    stage: 'Aşama 1: Tanıyorum! 🔍',
+    q: 'Ankara Simidi\'ne koyu rengini veren işlem hangisidir?',
+    opts: [
+      'Soda ile hamurun yoğrulması',
+      'Uzun süre soğuk suda bekletilmesi',
+      'Pekmezli sıcak suya daldırılması',
+      'Tuz serpilmesi'
+    ],
+    correct: 2,
+    feedback: {
+      right: '✅ Evet! <strong>Pekmezleme</strong> işlemi; simidin koyu renk kazanmasını, dış yüzeyin karamelize olmasını ve o eşsiz çıtırtıyı sağlar.',
+      wrong: '❌ Doğru cevap <strong>pekmezleme</strong>! Hamur önce pekmezli sıcak suya daldırılır, sonra taş fırında pişirilir.'
+    }
+  },
+  {
+    type: 'mcq',
+    stage: 'Aşama 1: Tanıyorum! 🔍',
+    q: 'Ankara Tavası\'nı özel kılan malzeme nedir?',
+    opts: [
+      'Pirinç',
+      'Bulgur',
+      'Arpa şehriyesi',
+      'Mısır unu'
+    ],
+    correct: 2,
+    feedback: {
+      right: '✅ Süpersin! Ankara Tavası\'nı özgün kılan, pirinç yerine <strong>arpa şehriyesi</strong> kullanılmasıdır.',
+      wrong: '❌ Hayır! Ankara Tavası\'nda pirinç değil, <strong>arpa şehriyesi</strong> kullanılır. Bu onu benzersiz kılar!'
+    }
+  },
+
+  // AŞAMA 2: ANLAMA & İLİŞKİLENDİRME
+  {
+    type: 'mcq',
+    stage: 'Aşama 2: Anlıyorum! 💡',
+    q: 'Ankara Simidi neden bu şehirde bu kadar popüler oldu?',
+    opts: [
+      'Çok pahalı olduğu için özel bir lezzet sayılır',
+      'Ankara bir memur ve öğrenci kenti olduğu için hızlı kahvaltı seçeneği oldu',
+      'Yalnızca Ankara\'da buğday yetiştiği için',
+      'Osmanlı padişahının emriyle üretildi'
+    ],
+    correct: 1,
+    feedback: {
+      right: '✅ Çok iyi! Ankara\'nın <strong>memur ve öğrenci kenti</strong> kimliği, Simidi hızlı, ekonomik ve taze bir kahvaltı alternatifi haline getirdi.',
+      wrong: '❌ Doğru cevap: Ankara\'nın <strong>memur ve öğrenci kenti</strong> kimliği! Bu şehrin insanları için simit en pratik kahvaltıdır.'
+    }
+  },
+  {
+    type: 'mcq',
+    stage: 'Aşama 2: Anlıyorum! 💡',
+    q: 'Ankara Tavası\'nda etin pişirilme biçimi nasıldır?',
+    opts: [
+      'Kemikler ayrılarak hızlıca kızartılır',
+      'Kemikli kuzu eti kendi suyunda yavaşça pişirilir',
+      'Buharda pişirilip et suyu kullanılmaz',
+      'Önce haşlanır, sonra ızgaraya alınır'
+    ],
+    correct: 1,
+    feedback: {
+      right: '✅ Doğru! <strong>Kemikli kuzu eti kendi suyunda</strong> yavaşça pişirilir; bu et suyu daha sonra şehriyelerle buluşturulur.',
+      wrong: '❌ Yanlış! Kemikli kuzu eti <strong>kendi suyunda ağır ağır pişirilir</strong> ve şehriyeler bu değerli et suyuyla buluşturulur.'
+    }
+  },
+  {
+    type: 'mcq',
+    stage: 'Aşama 2: Anlıyorum! 💡',
+    q: 'Ankara Tavası geleneksel olarak ne tür etkinliklerde yapılırdı?',
+    opts: [
+      'Günlük öğle yemeklerinde',
+      'Yalnızca kışın soğuk günlerinde',
+      'Düğün, bayram ve misafir ağırlama gibi özel günlerde',
+      'Spor müsabakalarından önce'
+    ],
+    correct: 2,
+    feedback: {
+      right: '✅ Harika! Ankara Tavası <strong>düğün, bayram ve misafir ağırlama</strong> gibi özel günlerde dayanışma ve kutlama yemeği olarak pişirilirdi.',
+      wrong: '❌ Doğru cevap: <strong>Düğün, bayram ve misafir ağırlama!</strong> Bu yemek, büyük kaplarla fırınlara gönderilir ve özel günlere anlam katardı.'
+    }
+  },
+
+  // AŞAMA 3: UYGULAMA & ANALİZ
+  {
+    type: 'mcq',
+    stage: 'Aşama 3: Düşünüyorum! 🧠',
+    q: 'Bir balıkçı kasabasından gelen bir çocuk sana "Ankara Simidi İstanbul simidi gibi değil mi?" derse ne söylersin?',
+    opts: [
+      '"Evet, ikisi de aynı" derim',
+      '"Ankara Simidi daha büyük ve yumuşak" derim',
+      '"Ankara Simidi ince, çıtır ve pekmezle yapılır; çok farklı!" derim',
+      '"Hiç bilmiyorum" derim'
+    ],
+    correct: 2,
+    feedback: {
+      right: '✅ Mükemmel! Doğru bilgi: Ankara Simidi <strong>ince, çıtır, pekmezle hazırlanmış</strong> ve taş fırında pişirilmiş özgün bir ürün. İstanbul\'dan çok farklı!',
+      wrong: '❌ Doğru cevap buydu: "Ankara Simidi ince, çıtır ve pekmezle yapılır; çok farklı!" Bu bilgiyle arkadaşlarını da aydınlatabilirsin!'
+    }
+  },
+  {
+    type: 'mcq',
+    stage: 'Aşama 3: Düşünüyorum! 🧠',
+    q: 'Ankara Tavası\'nı hangi gelenekle ilişkilendirebilirsin?',
+    opts: [
+      'Sahil kentlerinde balık avı geleneğiyle',
+      'Ankara\'nın hayvancılık kültürü ve toplu sofra geleneğiyle',
+      'Osmanlı saray mutfağının ince tatlarıyla',
+      'Çay bahçelerinin hafif ikramlık kültürüyle'
+    ],
+    correct: 1,
+    feedback: {
+      right: '✅ Süper analiz! Ankara Tavası <strong>hayvancılık kültürü (Ankara Keçisi, kuzu eti)</strong> ve <strong>toplu sofra, bağ evi geleneğiyle</strong> iç içe geçmiş bir yemektir.',
+      wrong: '❌ Doğru cevap: <strong>Hayvancılık ve toplu sofra geleneği!</strong> Bu yemek, kalabalık ailelerin ortak lezzeti ve bozkırın bereketini simgeler.'
+    }
+  },
+  {
+    type: 'mcq',
+    stage: 'Aşama 3: Düşünüyorum! 🧠',
+    q: 'Hem Ankara Simidi hem de Ankara Tavası hakkında hangisi DOĞRU bir ifadedir?',
+    opts: [
+      'Her ikisi de yalnızca özel günlerde tüketilir',
+      'Her ikisi de Ankara\'nın kültürel kimliğini ve toplumsal yaşamını yansıtır',
+      'Her ikisi de sadece turistlere özgü yiyeceklerdir',
+      'Her ikisi de pirinç ile yapılır'
+    ],
+    correct: 1,
+    feedback: {
+      right: '✅ Bravo! Hem Simit hem de Tava, <strong>Ankara\'nın kültürel kimliğini</strong> temsil eder; biri sokak yaşamını, diğeri toplu kutlamaları simgeler.',
+      wrong: '❌ Doğru cevap: Her ikisi de <strong>Ankara\'nın kültürel kimliğini</strong> yansıtır. Simit → günlük hayat, Tava → toplumsal dayanışma.'
+    }
+  },
+
+  // AŞAMA 4: KELİME KURMA
+  {
+    type: 'word_builder',
+    stage: 'Aşama 4: Konuşuyorum! 🗣️',
+    q: 'Ankara Simidi\'nin rengini ve aromasını kazanmasını sağlayan işlemi hatırlıyor musun? Heceleri sırala ve kelimeyi bul!',
+    word: 'PEKMEZLEME',
+    syllables: ['PEK', 'ME', 'ZLE', 'MEK', 'LE'],  // shuffle
+    syllables_correct: ['PEK', 'MEZ', 'LE', 'ME'],
+    hint: 'Bu işlem, üzüm pekmezi içeren sıcak suya hamurun daldırılmasıdır.',
+    feedback: {
+      right: '✅ Harika! <strong>PEKMEZLEME</strong> — Bu özel işlem sayesinde Ankara Simidi karamelize olur ve o eşsiz çıtırtıyı kazanır!',
+      wrong: '❌ Kelime: <strong>PEKMEZLEME</strong>. Üzüm pekmezi, simidin renk ve aromasının sırrıdır!'
+    }
+  }
+];
+
+// ============================
+//  GAME ENGINE
+// ============================
+let current = 0, score = 0, answered = false;
+
+const gameCard = document.getElementById('gameCard');
+const endScreen = document.getElementById('endScreen');
+const progressBar = document.getElementById('progressBar');
+const progressLabel = document.getElementById('progressLabel');
+const progressPct = document.getElementById('progressPct');
+const badgeScore = document.getElementById('badgeScore');
+const sndCorrect = document.getElementById('sndCorrect');
+const sndWrong = document.getElementById('sndWrong');
+
+function playSound(correct) {
+  const snd = correct ? sndCorrect : sndWrong;
+  snd.currentTime = 0;
+  snd.play().catch(() => {});
+}
+
+function updateProgress() {
+  const pct = Math.round((current / questions.length) * 100);
+  progressBar.style.width = pct + '%';
+  progressLabel.textContent = `Soru ${Math.min(current + 1, questions.length)} / ${questions.length}`;
+  progressPct.textContent = pct + '%';
+  badgeScore.textContent = `${score} / ${questions.length}`;
+}
+
+function renderQuestion() {
+  if (current >= questions.length) { showEnd(); return; }
+  answered = false;
+  const q = questions[current];
+  updateProgress();
+
+  if (q.type === 'mcq') {
+    renderMCQ(q);
+  } else {
+    renderWordBuilder(q);
+  }
+
+  gsap.fromTo(gameCard,
+    { opacity: 0, x: 30 },
+    { opacity: 1, x: 0, duration: 0.5, ease: 'power3.out' }
+  );
+}
+
+function renderMCQ(q) {
+  const letters = ['A', 'B', 'C', 'D'];
+  const html = `
+    <div class="question-num">${q.stage}</div>
+    <div class="question-text">${q.q}</div>
+    <div class="options-grid">
+      ${q.opts.map((opt, i) => `
+        <button class="option-btn" onclick="answerMCQ(${i}, ${q.correct}, this)" data-idx="${i}">
+          <span class="option-letter">${letters[i]}</span>
+          ${opt}
+        </button>
+      `).join('')}
+    </div>
+    <div class="feedback-box" id="fb"></div>
+    <button class="btn-next" id="btnNext" onclick="nextQuestion()">Sonraki Soru →</button>
+  `;
+  gameCard.innerHTML = html;
+}
+
+function answerMCQ(idx, correct, btn) {
+  if (answered) return;
+  answered = true;
+  const isCorrect = idx === correct;
+  const fb = document.getElementById('fb');
+  const allBtns = document.querySelectorAll('.option-btn');
+  const q = questions[current];
+
+  allBtns.forEach(b => { b.disabled = true; });
+  btn.classList.add(isCorrect ? 'correct' : 'wrong');
+  allBtns[correct].classList.add('correct');
+
+  fb.innerHTML = isCorrect ? q.feedback.right : q.feedback.wrong;
+  fb.className = `feedback-box show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+
+  if (isCorrect) { score++; badgeScore.textContent = `${score} / ${questions.length}`; }
+  playSound(isCorrect);
+
+  gsap.fromTo(fb, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
+
+  if (isCorrect) {
+    gsap.to(btn, { scale: 1.04, duration: 0.2, yoyo: true, repeat: 1 });
+  } else {
+    gsap.to(btn, { x: -8, duration: 0.08, repeat: 4, yoyo: true });
+  }
+
+  document.getElementById('btnNext').classList.add('show');
+}
+
+// WORD BUILDER
+let wbAnswer = [], wbWord = '';
+
+function renderWordBuilder(q) {
+  wbAnswer = [];
+  wbWord = q.syllables_correct.join('');
+  const shuffled = [...q.syllables_correct].sort(() => Math.random() - 0.5);
+
+  const html = `
+    <div class="question-num">${q.stage}</div>
+    <div class="question-text">${q.q}<br><small style="font-size:0.8rem;color:rgba(253,246,232,0.5);font-style:italic;">${q.hint}</small></div>
+    <div class="word-builder-wrap">
+      <div class="word-slots" id="wbSlots">
+        ${q.syllables_correct.map((_, i) => `<div class="word-slot" id="slot${i}">_</div>`).join('')}
+      </div>
+      <div class="syllable-pool" id="syllablePool">
+        ${shuffled.map((syl, i) => `
+          <button class="syllable-btn" id="syls${i}" onclick="pickSyllable('${syl}', this, ${i})">
+            ${syl}
+          </button>
+        `).join('')}
+      </div>
+      <div class="feedback-box" id="fb"></div>
+      <button class="btn-next" id="btnNext" style="display:none;" onclick="nextQuestion()">Sonraki Soru →</button>
+    </div>
+  `;
+  gameCard.innerHTML = html;
+}
+
+function pickSyllable(syl, btn, bIdx) {
+  if (answered) return;
+  wbAnswer.push(syl);
+  btn.classList.add('used');
+
+  const pos = wbAnswer.length - 1;
+  const slot = document.getElementById(`slot${pos}`);
+  if (slot) {
+    slot.textContent = syl;
+    slot.style.color = 'var(--amber-light)';
+    slot.style.borderColor = 'var(--amber)';
+    gsap.from(slot, { scale: 1.3, duration: 0.3, ease: 'back.out' });
+  }
+
+  if (wbAnswer.length === questions[current].syllables_correct.length) {
+    checkWordBuilder();
+  }
+}
+
+function checkWordBuilder() {
+  answered = true;
+  const q = questions[current];
+  const userWord = wbAnswer.join('');
+  const isCorrect = userWord === wbWord;
+  const fb = document.getElementById('fb');
+
+  fb.innerHTML = isCorrect ? q.feedback.right : q.feedback.wrong;
+  fb.className = `feedback-box show ${isCorrect ? 'correct-fb' : 'wrong-fb'}`;
+
+  if (isCorrect) { score++; badgeScore.textContent = `${score} / ${questions.length}`; }
+  playSound(isCorrect);
+
+  gsap.fromTo(fb, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4 });
+
+  const nxt = document.getElementById('btnNext');
+  nxt.style.display = 'block';
+  nxt.classList.add('show');
+}
+
+function nextQuestion() {
+  current++;
+  gsap.to(gameCard, { opacity: 0, x: -30, duration: 0.35, ease: 'power2.in', onComplete: renderQuestion });
+}
+
+function showEnd() {
+  gameCard.style.display = 'none';
+  endScreen.classList.add('show');
+
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('finalTotal').textContent = `/ ${questions.length}`;
+
+  const pct = score / questions.length;
+  let title, msg;
+  if (pct >= 0.9) { title = '🏆 Ankara Uzmanısın!'; msg = 'Ankara\'nın mutfak mirasını mükemmel öğrendin. Simit\'in çıtırtısı ve Tava\'nın kokusu seninle!'; }
+  else if (pct >= 0.6) { title = '⭐ Harika Bir Başlangıç!'; msg = 'Çok şey öğrendin! İçerikleri tekrar okuyup oyunu bir daha oyna, uzman olacaksın!'; }
+  else { title = '💪 Devam Et!'; msg = 'Ankara\'nın lezzetleri seni bekliyor. İçerikleri dikkatlice okuyup tekrar dene!'; }
+
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endMsg').textContent = msg;
+
+  updateProgress();
+  progressBar.style.width = '100%';
+  progressPct.textContent = '100%';
+
+  gsap.from('.score-ring', { scale: 0, duration: 0.8, ease: 'elastic.out(1.2,0.5)' });
+  gsap.from('.end-title', { opacity: 0, y: 20, duration: 0.6, delay: 0.4 });
+  gsap.from('.end-msg', { opacity: 0, y: 20, duration: 0.6, delay: 0.6 });
+  gsap.from('.btn-restart', { opacity: 0, scale: 0.8, duration: 0.6, delay: 0.8, ease: 'back.out' });
+}
+
+function restartGame() {
+  current = 0; score = 0;
+  endScreen.classList.remove('show');
+  gameCard.style.display = '';
+  updateProgress();
+  renderQuestion();
+
+  gsap.fromTo(gameCard,
+    { opacity: 0, scale: 0.95 },
+    { opacity: 1, scale: 1, duration: 0.5, ease: 'power3.out' }
+  );
+}
+
+// START
+renderQuestion();
+</script>
+</body>
+</html>
