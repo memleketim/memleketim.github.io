@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gordion: Efsaneler Atlası | Bilgi ve Deneyim</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ancient: {
+                            gold: '#D4AF37',
+                            dark: '#0f172a',
+                            light: '#f8fafc'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Outfit:wght@300;400;600;800&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        .bg-faded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70vh;
+            background: url('gordion.png') center top / cover no-repeat;
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+            mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+        }
+        
+        .light .bg-faded { opacity: 0.08; }
+
+        .ancient-font { font-family: 'Cinzel', serif; }
+
+        .glass-morphism {
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background-color 0.5s, border-color 0.5s;
+        }
+        .dark .glass-morphism {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .light .glass-morphism {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .step-indicator {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: rgba(150, 150, 150, 0.4);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .step-indicator.active {
+            background: #D4AF37;
+            box-shadow: 0 0 15px #D4AF37;
+            transform: scale(1.5);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 1.5rem;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .knot-svg { transition: all 1s ease; }
+        .knot-cut { transform: scaleX(0); opacity: 0; }
+
+        .gold-glow {
+            animation: gold-pulse 2s infinite;
+        }
+        @keyframes gold-pulse {
+            0% { filter: drop-shadow(0 0 5px #D4AF37); }
+            50% { filter: drop-shadow(0 0 25px #D4AF37); }
+            100% { filter: drop-shadow(0 0 5px #D4AF37); }
+        }
+
+        .stage { transition: all 0.6s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col items-center">
+
+    <div class="bg-faded"></div>
+
+    <audio id="snd-success" src="sesler/basari.mp3"></audio>
+    <audio id="snd-error" src="sesler/hata.mp3"></audio>
+
+    <nav class="w-full max-w-6xl flex flex-wrap justify-between items-center p-6 z-50 gap-4">
+        <div class="flex items-center gap-4">
+            <img src="orjinal.svg" alt="Proje Logosu" class="h-12 w-auto drop-shadow-md">
+            
+            <div class="bg-white/50 dark:bg-white/10 p-2 rounded-xl border border-slate-200 dark:border-white/20">
+                <img src="unesco.png" class="h-8 dark:invert" alt="UNESCO">
+            </div>
+            
+            <div>
+                <h2 class="ancient-font text-xl font-bold text-amber-600 dark:text-amber-500">GORDION</h2>
+                <p class="text-[10px] uppercase tracking-[3px] opacity-70">Antik Kent & Efsaneler</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <button onclick="toggleTheme()" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-slate-800 dark:text-amber-400 dark:hover:bg-slate-700 px-4 py-2 rounded-full font-bold shadow-sm transition-all flex items-center gap-2 text-sm">
+                <i class="fas fa-moon" id="theme-icon"></i> Tema Değiştir
+            </button>
+            <div class="flex gap-2">
+                <div class="step-indicator active" data-step="0"></div>
+                <div class="step-indicator" data-step="1"></div>
+                <div class="step-indicator" data-step="2"></div>
+                <div class="step-indicator" data-step="3"></div>
+                <div class="step-indicator" data-step="4"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 w-full max-w-4xl px-4 flex flex-col justify-center py-6">
+        
+        <section id="stage0" class="stage block">
+            <div class="text-center mb-8">
+                <h1 class="ancient-font text-4xl md:text-6xl font-black mb-4">Keşfe Hazır Mısın?</h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400">Önce öğrenelim, sonra efsaneyi canlandıralım!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                <div class="glass-morphism p-8 rounded-[2rem] border-l-8 border-amber-500">
+                    <h3 class="ancient-font text-2xl text-amber-600 dark:text-amber-500 mb-4">Gordion Nedir?</h3>
+                    <div class="space-y-4 text-slate-700 dark:text-slate-200 text-sm md:text-base leading-relaxed">
+                        <p>Ankara'nın Polatlı ilçesinde bulunan <strong>Gordion</strong>, antik dönemde büyük <strong>Frigya Krallığı</strong>'nın başkentiydi. 2023 yılında <strong>UNESCO Dünya Miras Listesi</strong>'ne girerek tüm dünyanın tanıdığı bir hazine oldu.</p>
+                        <p>Burası; dokunduğu her şeyi altına çeviren <strong>Kral Midas</strong>'ın, kılıçla çözülen o meşhur <strong>Gordion Düğümü</strong>'nün ve devasa toprak tepeler olan <strong>Tümülüslerin</strong> yurdudur. Şimdi videoyu izle ve bu gizemli dünyaya bir adım at!</p>
+                    </div>
+                </div>
+                <div class="glass-morphism p-4 rounded-[2rem]">
+                    <div class="video-container shadow-inner">
+                        <iframe src="https://www.youtube.com/embed/r4eURjqnHqw?si=9JNrln0273FOWZ_-" title="Gordion Düğümü" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button onclick="nextStep(0)" class="bg-amber-500 hover:bg-amber-600 text-white px-12 py-5 rounded-3xl font-black text-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                    Hadi, Efsaneyi Başlat! <i class="fas fa-play ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <section id="stage1" class="stage hidden opacity-0 translate-y-10">
+            <div class="text-center mb-8">
+                <h1 class="ancient-font text-5xl md:text-7xl font-black mb-4">Gordion'a Varış</h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400 italic">"Kente giren ilk kişi kral olacak!"</p>
+            </div>
+
+            <div class="glass-morphism rounded-[3rem] p-10 text-center relative overflow-hidden group">
+                <div class="mb-8">
+                    <i class="fas fa-landmark text-6xl text-amber-500 mb-4 transition-transform group-hover:scale-110"></i>
+                    <p class="text-xl leading-relaxed text-slate-800 dark:text-white">
+                        Frigya'nın kapısındasın. Serüvene başlamak için kraliyet selamını ver!
+                    </p>
+                </div>
+
+                <div class="bg-slate-200/50 dark:bg-black/30 p-6 rounded-2xl border-2 border-dashed border-amber-500/50 mb-8">
+                    <p class="text-xs uppercase tracking-widest text-amber-600 dark:text-amber-500 font-bold mb-2">Söylemen Gereken (Benzer Sözler Kabul Edilir):</p>
+                    <p class="text-2xl font-black italic text-slate-800 dark:text-white">"Merhaba Gordion, ben geldim!"</p>
+                </div>
+
+                <button onclick="startListening(1)" id="mic1" class="bg-amber-500 hover:bg-amber-600 w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl shadow-[0_0_30px_rgba(245,158,11,0.4)] transition-all active:scale-90 mx-auto relative overflow-hidden">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <p class="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400" id="status1">Mikrofona tıkla ve konuş!</p>
+            </div>
+        </section>
+
+        <section id="stage2" class="stage hidden opacity-0 translate-y-10">
+            <div class="text-center mb-8">
+                <h1 class="ancient-font text-5xl font-black text-blue-600 dark:text-blue-400">Gordion Düğümü</h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400">"Kılıcınla kaderini çiz!"</p>
+            </div>
+
+            <div class="glass-morphism rounded-[3rem] p-10 text-center relative">
+                <div id="knotContainer" class="mb-8 h-48 flex items-center justify-center">
+                    <svg class="knot-svg w-32 h-32 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2C10 2 8 4 8 6C8 8 10 10 12 10C14 10 16 8 16 6C16 4 14 2 12 2Z" />
+                        <path d="M12 10C10 10 8 12 8 14C8 16 10 18 12 18C14 18 16 16 16 14C16 12 14 10 12 10Z" />
+                        <path d="M4 12C4 10 6 8 8 8M20 12C20 10 18 8 16 8M4 12C4 14 6 16 8 16M20 12C20 14 18 16 16 16" />
+                    </svg>
+                </div>
+
+                <p class="mb-8 text-lg text-slate-800 dark:text-white">
+                    Düğümü kılıcıyla kesip "Asya'nın Hakimi" olan Büyük İskender'in gücünü göster!
+                </p>
+
+                <div class="bg-slate-200/50 dark:bg-black/30 p-6 rounded-2xl border-2 border-dashed border-blue-500/50 mb-8">
+                    <p class="text-xs uppercase tracking-widest text-blue-600 dark:text-blue-500 font-bold mb-2">Söylemen Gereken:</p>
+                    <p class="text-2xl font-black italic text-slate-800 dark:text-white">"Düğümü kılıcımla keseceğim!"</p>
+                </div>
+
+                <button onclick="startListening(2)" id="mic2" class="bg-blue-600 hover:bg-blue-700 w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl shadow-[0_0_30px_rgba(37,99,235,0.4)] transition-all active:scale-90 mx-auto">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <p class="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400" id="status2">Sözünü kılıç gibi savur!</p>
+            </div>
+        </section>
+
+        <section id="stage3" class="stage hidden opacity-0 translate-y-10">
+            <div class="text-center mb-8">
+                <h1 class="ancient-font text-5xl font-black text-emerald-600 dark:text-emerald-400">Kralın Sırrı</h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400">"Sadece kamışlar duyacak!"</p>
+            </div>
+
+            <div class="glass-morphism rounded-[3rem] p-10 text-center relative overflow-hidden">
+                <div class="mb-8 flex justify-center gap-4">
+                    <span class="text-7xl animate-bounce" style="animation-delay: 0.1s">🌾</span>
+                    <span class="text-7xl animate-bounce" style="animation-delay: 0.3s">🌾</span>
+                    <span class="text-7xl animate-bounce" style="animation-delay: 0.5s">🌾</span>
+                </div>
+
+                <div class="bg-emerald-100/50 dark:bg-emerald-900/30 p-6 rounded-2xl border-2 border-dashed border-emerald-500/50 mb-8">
+                    <p class="text-xs uppercase tracking-widest text-emerald-600 dark:text-emerald-500 font-bold mb-2">Fısılda:</p>
+                    <p class="text-2xl font-black italic text-slate-800 dark:text-white">"Midas'ın kulakları eşek kulakları!"</p>
+                </div>
+
+                <button onclick="startListening(3)" id="mic3" class="bg-emerald-600 hover:bg-emerald-700 w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl shadow-[0_0_30px_rgba(5,150,105,0.4)] transition-all active:scale-90 mx-auto">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <p class="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400" id="status3">Sırrı rüzgara fısılda...</p>
+            </div>
+        </section>
+
+        <section id="stage4" class="stage hidden opacity-0 translate-y-10">
+            <div class="text-center mb-8">
+                <h1 class="ancient-font text-5xl font-black text-amber-600 dark:text-amber-500">Altın Dokunuş</h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400">"UNESCO Mirası Altına Dönüşüyor!"</p>
+            </div>
+
+            <div class="glass-morphism rounded-[3rem] p-10 text-center relative overflow-hidden">
+                <div class="grid grid-cols-3 gap-4 mb-10" id="goldGrid">
+                    <div class="bg-slate-200 dark:bg-slate-700 p-6 rounded-2xl text-4xl transform transition-all duration-1000 border border-slate-300 dark:border-transparent">🏺</div>
+                    <div class="bg-slate-200 dark:bg-slate-700 p-6 rounded-2xl text-4xl transform transition-all duration-1000 border border-slate-300 dark:border-transparent">🏛️</div>
+                    <div class="bg-slate-200 dark:bg-slate-700 p-6 rounded-2xl text-4xl transform transition-all duration-1000 border border-slate-300 dark:border-transparent">🍇</div>
+                </div>
+
+                <div class="bg-amber-100/50 dark:bg-amber-900/30 p-6 rounded-2xl border-2 border-dashed border-amber-500/50 mb-8">
+                    <p class="text-2xl font-black italic text-slate-800 dark:text-white">"Altın dokunuş başlasın!"</p>
+                </div>
+
+                <button onclick="startListening(4)" id="mic4" class="bg-amber-500 hover:bg-amber-600 w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl gold-glow transition-all active:scale-90 mx-auto">
+                    <i class="fas fa-magic"></i>
+                </button>
+                <p class="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400" id="status4">Sihirli cümleyi söyle!</p>
+
+                <div id="finalActions" class="hidden mt-12 space-y-4">
+                    <h3 class="text-3xl font-bold text-amber-600 dark:text-amber-500">Gordion Fatihi! 🏆</h3>
+                    <p class="text-slate-700 dark:text-slate-300">Harika bir arkeolog ve efsane canlandırıcısı olduğunu kanıtladın!</p>
+                    <button onclick="location.href='https://memleketim.github.io/06/index.html'" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-4 rounded-2xl font-bold shadow-xl hover:scale-105 transition-all">
+                        Ankara Yolculuğuna Devam Et
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="msgBox" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass-morphism bg-white dark:bg-slate-800 px-8 py-4 rounded-2xl text-lg font-bold shadow-2xl transition-all opacity-0 translate-y-10 z-[100] pointer-events-none border border-slate-200 dark:border-slate-700">
+        <i class="fas fa-check-circle text-emerald-500 mr-2"></i> <span class="text-slate-800 dark:text-white"></span>
+    </div>
+
+    <script>
+        // Tema Değiştirme Sistemi
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        // Ses Tanıma Sistemi
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = SpeechRecognition ? new SpeechRecognition() : null;
+
+        if (recognition) {
+            recognition.lang = 'tr-TR';
+            recognition.interimResults = false;
+        }
+
+        function playSound(type) {
+            const el = document.getElementById(type === 'success' ? 'snd-success' : 'snd-error');
+            if(el) {
+                el.currentTime = 0;
+                el.play().catch(e => console.log("Ses oynatılamadı, tarayıcı engellemiş olabilir."));
+            }
+        }
+
+        function showMessage(text, isError = false) {
+            const box = document.getElementById('msgBox');
+            box.querySelector('span').innerText = text;
+            box.querySelector('i').className = isError ? 'fas fa-times-circle text-red-500 mr-2' : 'fas fa-check-circle text-emerald-500 mr-2';
+            box.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => {
+                box.classList.add('opacity-0', 'translate-y-10');
+            }, 3000);
+        }
+
+        function nextStep(current) {
+            const currentStage = document.getElementById(`stage${current}`);
+            const nextStage = document.getElementById(`stage${current + 1}`);
+            
+            document.querySelectorAll('.step-indicator').forEach(dot => {
+                if(parseInt(dot.dataset.step) <= current + 1) dot.classList.add('active');
+            });
+
+            currentStage.classList.add('opacity-0', '-translate-y-10');
+            setTimeout(() => {
+                currentStage.classList.add('hidden');
+                if(nextStage) {
+                    nextStage.classList.remove('hidden');
+                    setTimeout(() => {
+                        nextStage.classList.remove('opacity-0', 'translate-y-10');
+                    }, 50);
+                }
+            }, 600);
+
+            if(current > 0) {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#D4AF37', '#1E3A8A']
+                });
+            }
+        }
+
+        function startListening(step) {
+            if (!recognition) {
+                showMessage("Ses tanıma aktif değil. Otomatik geçiliyor...", true);
+                playSound('success');
+                setTimeout(() => nextStep(step), 1500);
+                return;
+            }
+
+            const btn = document.getElementById(`mic${step}`);
+            const status = document.getElementById(`status${step}`);
+
+            btn.classList.add('bg-red-500');
+            status.innerText = "Seni dinliyorum...";
+
+            recognition.start();
+
+            recognition.onresult = (event) => {
+                const result = event.results[0][0].transcript.toLowerCase();
+                console.log("Algılanan Metin:", result); // Konsoldan kontrol için
+                let success = false;
+                
+                // ESNEK KELİME KONTROLLERİ
+                if(step === 1) {
+                    if(result.includes("merhaba") || result.includes("meraba") || result.includes("geldim") || result.includes("gordion") || result.includes("selam")) success = true;
+                }
+                if(step === 2) {
+                    if(result.includes("düğüm") || result.includes("düğümü") || result.includes("keseceğim") || result.includes("kılıç") || result.includes("kılınç") || result.includes("kes")) {
+                        document.querySelector('.knot-svg').classList.add('knot-cut');
+                        success = true;
+                    }
+                }
+                if(step === 3) {
+                    if(result.includes("kulak") || result.includes("kulakları") || result.includes("eşek") || result.includes("eşeğin") || result.includes("midas")) success = true;
+                }
+                if(step === 4) {
+                    if(result.includes("altın") || result.includes("altına") || result.includes("dokunuş") || result.includes("başla") || result.includes("başlasın")) {
+                        document.querySelectorAll('#goldGrid div').forEach(el => {
+                            el.style.backgroundColor = '#D4AF37';
+                            el.style.borderColor = '#D4AF37';
+                            el.style.boxShadow = '0 0 20px #FFD700';
+                            el.style.transform = 'scale(1.1) rotate(10deg)';
+                            el.classList.remove('bg-slate-200', 'dark:bg-slate-700');
+                        });
+                        document.getElementById('finalActions').classList.remove('hidden');
+                        success = true;
+                    }
+                }
+
+                if (success) {
+                    status.innerText = "Başarıyla canlandırdın!";
+                    playSound('success');
+                    showMessage("Harika Telaffuz!");
+                    setTimeout(() => {
+                        if(step < 4) nextStep(step);
+                    }, 2000);
+                } else {
+                    status.innerText = "Bir daha deneyelim mi?";
+                    playSound('error');
+                    showMessage("Daha gür ve net söyle!", true);
+                }
+            };
+
+            recognition.onerror = () => {
+                btn.classList.remove('bg-red-500');
+                status.innerText = "Tekrar mikrofona tıkla.";
+            };
+
+            recognition.onend = () => {
+                btn.classList.remove('bg-red-500');
+            };
+        }
+    </script>
+</body>
+</html>
