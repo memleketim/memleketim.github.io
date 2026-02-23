@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ankara - Doğa ve Turizm | Memleketim Haritası</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:wght@700;900&display=swap');
+
+        :root {
+            --bg-light: #f8fafc;
+            --bg-dark: #0f172a; /* Koyu lacivert zemin */
+            --text-light: #1e293b;
+            --text-dark: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            transition: background-color 0.5s, color 0.5s;
+            min-height: 100vh;
+        }
+
+        .dark { background-color: var(--bg-dark); color: var(--text-dark); }
+        .light { background-color: var(--bg-light); color: var(--text-light); }
+
+        .glass-panel {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bounce-hover:hover {
+            transform: translateY(-5px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-anim { animation: float 3s ease-in-out infinite; }
+
+        .card-choice {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-choice:active { transform: scale(0.95); }
+    </style>
+</head>
+<body class="light">
+
+    <nav class="sticky top-0 z-50 glass-panel px-6 py-3 flex justify-between items-center border-b border-emerald-500/20">
+        <div class="flex gap-3">
+            <button onclick="toggleTheme()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg transition-all flex items-center gap-2 active:scale-95">
+                <i class="fas fa-moon"></i> <span class="hidden md:inline">Tema Değiştir</span>
+            </button>
+            <button id="musicToggle" onclick="toggleMusic()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-full text-sm font-bold shadow-lg transition-all flex items-center gap-2 active:scale-95">
+                <i id="musicIcon" class="fas fa-volume-up"></i> <span class="hidden md:inline">Müzik</span>
+            </button>
+        </div>
+        <img src="orjinal.svg" alt="Logo" class="h-12 w-auto">
+    </nav>
+
+    <main class="max-w-5xl mx-auto px-4 py-10">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-5xl md:text-7xl font-black mb-4 tracking-tight" style="font-family: 'Playfair Display', serif;">
+                Ankara - <span class="text-emerald-500">Doğa ve Turizm</span>
+            </h1>
+        </header>
+
+        <div class="flex justify-center mb-10">
+            <a href="https://drive.google.com/file/d/1-ZiyOelZH-bXoWUKJVpBzYBMkgNj9fJd/view" target="_blank" 
+               class="group relative inline-flex items-center justify-center px-10 py-4 font-extrabold text-white transition-all duration-300 bg-gradient-to-r from-blue-600 to-blue-800 rounded-2xl shadow-2xl hover:shadow-blue-500/40 hover:-translate-y-1">
+                <span>Nisanur Atak'ın çalışmasının tamamına ulaşmak için tıklayın.</span>
+                <i class="fas fa-external-link-alt ml-3 text-xs animate-pulse"></i>
+            </a>
+        </div>
+
+        <div class="relative mb-12 rounded-[2rem] overflow-hidden shadow-2xl border-8 border-white dark:border-slate-800 group">
+            <img src="doga.png" alt="Ankara Doğa" class="w-full h-[450px] object-cover transition-transform duration-1000 group-hover:scale-110">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-10">
+                <div class="max-w-2xl">
+                    <span class="bg-emerald-500 text-white px-4 py-1 rounded-full text-xs font-bold uppercase mb-4 inline-block">Keşif Başlıyor</span>
+                    <p class="text-white text-2xl md:text-3xl font-bold leading-tight drop-shadow-2xl italic">"Bozkırın ortasında saklı mavi ve yeşil nefesleri keşfetmeye hazır mısın?"</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="glass-panel rounded-[2.5rem] p-10 mb-16 relative overflow-hidden border-2 border-emerald-500/10">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
+                <h2 class="text-4xl font-black flex items-center gap-4">
+                    <i class="fas fa-map-marked-alt text-emerald-500"></i> Doğa Rehberi
+                </h2>
+                <button onclick="playNarrator()" class="group flex items-center gap-4 bg-emerald-500 text-white px-8 py-4 rounded-2xl font-black shadow-xl hover:bg-emerald-600 transition-all active:scale-95">
+                    <i class="fas fa-headphones-alt text-2xl"></i> Bilgileri Dinle 🎧
+                </button>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-10 text-base leading-relaxed custom-scrollbar max-h-[600px] overflow-y-auto pr-6">
+                <div class="space-y-8">
+                    <div class="bg-blue-500/10 p-6 rounded-3xl border-l-8 border-blue-500">
+                        <h3 class="text-xl font-black text-blue-600 dark:text-blue-400 mb-4 flex items-center gap-2">🌊 Göller ve Parklar</h3>
+                        <p class="mb-4"><strong>Eymir Gölü 🚴‍♂️:</strong> Motorlu araç yasak! Bisikletine atla, doğanın sessizliğini dinle ve taze çay molası ver.</p>
+                        <p class="mb-4"><strong>Mogan Gölü 🌅:</strong> Gölbaşı'nın incisi. Gün batımında deniz fenerine karşı harika fotoğraflar çekebilirsin.</p>
+                        <p><strong>Soğuksu Milli Parkı 🌲:</strong> Ankara'nın Karadeniz'i! Kara Akbabaları gökyüzünde süzülürken izle.</p>
+                    </div>
+                    <div class="bg-amber-500/10 p-6 rounded-3xl border-l-8 border-amber-500">
+                        <h3 class="text-xl font-black text-amber-600 dark:text-amber-400 mb-4 flex items-center gap-2">📸 Manzara Durakları</h3>
+                        <p class="mb-4"><strong>Çubuk Karagöl 📸:</strong> Bir krater gölüdür. Sonbaharda renklerin suya yansıması tam bir görsel şölendir.</p>
+                        <p><strong>Göksu Parkı 🎡:</strong> Eski Susuz Göleti’nin modern hali. Renkli ışıklar ve "ada" konseptiyle çok eğlenceli!</p>
+                    </div>
+                </div>
+                <div class="space-y-8">
+                    <div class="bg-emerald-500/10 p-6 rounded-3xl border-l-8 border-emerald-500">
+                        <h3 class="text-xl font-black text-emerald-600 dark:text-emerald-400 mb-4 flex items-center gap-2">🌳 Şehirdeki Yeşillikler</h3>
+                        <p class="mb-4"><strong>Atatürk Orman Çiftliği 🍦:</strong> Meşhur dondurmasını veya kokoreçini tatmadan dönmek yok!</p>
+                        <p><strong>Dikmen Vadisi 🏙️:</strong> Gökdelenlerin arasında asma köprüler ve şelaleler. Gece ışıklandırması büyüleyici!</p>
+                    </div>
+                    <div class="bg-red-500/10 p-6 rounded-3xl border-l-8 border-red-500">
+                        <h3 class="text-xl font-black text-red-600 dark:text-red-400 mb-4 flex items-center gap-2">♨️ Şifa Kaynağı</h3>
+                        <p><strong>Kızılcahamam Kaplıcaları 🧖‍♀️:</strong> Roma döneminden kalma sularla dinlen ve enerji barını fulle!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="gameArea" class="glass-panel rounded-[3rem] p-12 mb-20 border-4 border-white dark:border-slate-800 shadow-2xl">
+            <div class="text-center mb-10">
+                <div class="inline-block bg-emerald-500 text-white px-8 py-2 rounded-full font-black text-sm uppercase tracking-[0.3em] mb-6 shadow-lg">
+                    🎯 OYUN ZAMANI
+                </div>
+                <h2 class="text-4xl font-black mb-4">İpucu Avcısı 🧩</h2>
+                <div class="bg-white/10 p-4 rounded-2xl inline-block border border-white/20">
+                    <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400">Kısa Oyun Kuralları:</p>
+                    <p class="text-xs opacity-80 mt-1">Gelen ipucunu oku ve doğru yeri seç. Doğru seçimler 100 puan, yanlışlar -50 puan! ✨</p>
+                </div>
+            </div>
+
+            <div class="flex justify-center gap-6 mb-12">
+                <div class="bg-white dark:bg-slate-800 px-8 py-5 rounded-3xl shadow-xl border-b-4 border-emerald-500 flex flex-col items-center min-w-[150px] transform hover:scale-105 transition-transform">
+                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Puan</span>
+                    <span id="scoreDisplay" class="text-4xl font-black text-emerald-500">0</span>
+                </div>
+                <div class="bg-white dark:bg-slate-800 px-8 py-5 rounded-3xl shadow-xl border-b-4 border-blue-500 flex flex-col items-center min-w-[150px] transform hover:scale-105 transition-transform">
+                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest">Görev</span>
+                    <span id="taskCounter" class="text-4xl font-black text-blue-500">1/8</span>
+                </div>
+            </div>
+
+            <div id="hintContainer" class="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 p-10 rounded-[2.5rem] border-4 border-dashed border-emerald-300 dark:border-emerald-700 text-center mb-12 min-h-[150px] flex items-center justify-center shadow-inner">
+                <p id="currentHint" class="text-2xl md:text-3xl font-black text-slate-700 dark:text-emerald-400 leading-tight">"İpucu Yükleniyor..."</p>
+            </div>
+
+            <div id="cardsGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
+
+            <div id="finishScreen" class="hidden text-center py-10">
+                <div class="float-anim text-9xl mb-8">🏆</div>
+                <h2 class="text-5xl font-black mb-4">Mükemmel İş Kaşif! 🎉</h2>
+                <p id="finalScoreMsg" class="text-2xl mb-12 opacity-80 font-bold">Ankara'nın doğasını avucunun içi gibi öğrendin.</p>
+                <div class="flex flex-col md:flex-row justify-center gap-6">
+                    <button onclick="initGame()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-5 rounded-3xl font-black shadow-2xl transition-all hover:scale-110 active:scale-95 text-xl flex items-center gap-3">
+                        <i class="fas fa-redo"></i> Tekrar Oyna
+                    </button>
+                    <button onclick="location.href='https://memleketim.github.io/06/index.html'" class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 rounded-3xl font-black shadow-2xl transition-all hover:scale-110 active:scale-95 text-xl flex items-center gap-3">
+                        <i class="fas fa-map"></i> Haritaya Dön 🗺️
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        const sounds = {
+            success: new Audio('sesler/basari.mp3'),
+            error: new Audio('sesler/hata.mp3'),
+            click: new Audio('sesler/tiklama.mp3'),
+            bg: new Audio('sesler/arkaplan1.mp3'),
+            narrator: new Audio('sesler/anlatim1.mp3')
+        };
+        sounds.bg.loop = true;
+
+        let musicActive = false;
+        let score = 0;
+        let currentTask = 0;
+        let gameActive = true;
+
+        const rawData = [
+            { id: 'eymir', name: 'Eymir Gölü', emoji: '🚴‍♂️', hint: 'Göl çevresinde motorlu araç yasak, sessizliğin tadını çıkar!' },
+            { id: 'mogan', name: 'Mogan Gölü', emoji: '🌅', hint: 'Deniz fenerine karşı gün batımı fotoğrafları çekilen yer.' },
+            { id: 'soguksu', name: 'Soğuksu', emoji: '🌲', hint: 'Kara Akbabaları gökyüzünde görebileceğin Karadeniz havası.' },
+            { id: 'karagol', name: 'Çubuk Karagöl', emoji: '📸', hint: 'Her mevsim renk değiştiren büyüleyici bir krater gölü.' },
+            { id: 'goksu', name: 'Göksu Parkı', emoji: '🎡', hint: 'İçinde "ada" konsepti olan renkli ışıklı modern park.' },
+            { id: 'aoc', name: 'Orman Çiftliği', emoji: '🍦', hint: 'Meşhur dondurmasını tatmadan dönmemen gereken miras.' },
+            { id: 'dikmen', name: 'Dikmen Vadisi', emoji: '🏙️', hint: 'Gökdelenler arasında asma köprüler ve şelaleler bölgesi.' },
+            { id: 'kizilcahamam', name: 'Kızılcahamam', emoji: '🧖‍♀️', hint: 'Roma devrinden beri şifa dağıtan termal su merkezi.' }
+        ];
+
+        let shuffledTasks = [];
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            document.body.classList.toggle('light');
+            sounds.click.play();
+        }
+
+        function toggleMusic() {
+            if (!musicActive) {
+                sounds.bg.play();
+                document.getElementById('musicIcon').className = 'fas fa-volume-up';
+            } else {
+                sounds.bg.pause();
+                document.getElementById('musicIcon').className = 'fas fa-volume-mute';
+            }
+            musicActive = !musicActive;
+            sounds.click.play();
+        }
+
+        function playNarrator() {
+            sounds.narrator.currentTime = 0;
+            sounds.narrator.play();
+            sounds.click.play();
+        }
+
+        function initGame() {
+            score = 0;
+            currentTask = 0;
+            gameActive = true;
+            shuffledTasks = [...rawData].sort(() => Math.random() - 0.5);
+            
+            document.getElementById('finishScreen').classList.add('hidden');
+            document.getElementById('hintContainer').classList.remove('hidden');
+            document.getElementById('cardsGrid').classList.remove('hidden');
+            document.getElementById('scoreDisplay').innerText = '0';
+            
+            renderCards();
+            updateTask();
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = '';
+            
+            // Seçenekleri her zaman farklı sırada göster (Shuffle)
+            const cardOrder = [...rawData].sort(() => Math.random() - 0.5);
+            
+            cardOrder.forEach(item => {
+                const card = document.createElement('button');
+                card.className = "card-choice bg-white dark:bg-slate-800 p-6 rounded-[2rem] flex flex-col items-center gap-4 shadow-xl border-4 border-transparent hover:border-emerald-400 hover:shadow-emerald-500/20";
+                card.onclick = () => checkAnswer(item.id, card);
+                card.innerHTML = `
+                    <div class="text-5xl transform group-hover:scale-125 transition-transform">${item.emoji}</div>
+                    <span class="text-sm font-black uppercase text-slate-600 dark:text-emerald-100">${item.name}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function updateTask() {
+            if (currentTask >= shuffledTasks.length) {
+                endGame();
+                return;
+            }
+            const hintText = document.getElementById('currentHint');
+            gsap.fromTo(hintText, {opacity: 0, y: 10}, {opacity: 1, y: 0, duration: 0.5});
+            hintText.innerText = `"${shuffledTasks[currentTask].hint}"`;
+            document.getElementById('taskCounter').innerText = `${currentTask + 1}/${shuffledTasks.length}`;
+        }
+
+        function checkAnswer(selectedId, cardElement) {
+            if (!gameActive) return;
+            
+            const correctId = shuffledTasks[currentTask].id;
+
+            if (selectedId === correctId) {
+                sounds.success.currentTime = 0;
+                sounds.success.play();
+                score += 100;
+                
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: { y: 0.7 },
+                    colors: ['#10b981', '#3b82f6', '#fbbf24']
+                });
+                
+                cardElement.classList.add('bg-emerald-500', 'text-white');
+                setTimeout(() => {
+                    currentTask++;
+                    updateTask();
+                    renderCards(); // Her doğru cevapta kartları tekrar karıştır (Zorluk seviyesi)
+                }, 600);
+            } else {
+                sounds.error.currentTime = 0;
+                sounds.error.play();
+                score = Math.max(0, score - 50);
+                cardElement.classList.add('bg-red-500', 'text-white');
+                gsap.to(cardElement, { x: [-10, 10, -10, 10, 0], duration: 0.4 });
+                setTimeout(() => {
+                    cardElement.classList.remove('bg-red-500', 'text-white');
+                }, 500);
+            }
+            document.getElementById('scoreDisplay').innerText = score;
+        }
+
+        function endGame() {
+            gameActive = false;
+            document.getElementById('hintContainer').classList.add('hidden');
+            document.getElementById('cardsGrid').classList.add('hidden');
+            document.getElementById('finishScreen').classList.remove('hidden');
+            document.getElementById('finalScoreMsg').innerText = `Tebrikler Kaşif! ${score} puan topladın.`;
+            
+            confetti({
+                particleCount: 200,
+                spread: 100,
+                origin: { y: 0.6 }
+            });
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
