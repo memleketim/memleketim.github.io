@@ -3,123 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa 01</title>
+    <title>Adana'nın Kültürel Zenginlikleri</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0; padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Logo kapsayıcı */
-        .logo-wrapper {
-            display: inline-block;
-            position: relative;
+        .container {
+            max-width: 1200px; width: 95%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Logo */
-        .logo {
-            max-width: 220px;
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+
+        .instructions {
+            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
+            background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* Hover efekti */
-        .logo-wrapper:hover .logo {
-            transform: scale(1.05);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        .map-container {
+            position: relative; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: white; padding: 15px;
+            max-width: 600px; margin: 0 auto;
         }
 
-        /* Tooltip */
+        .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
+
+        .quiz-point {
+            position: absolute; width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px); border: 2px solid white;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5;
+        }
+
+        .quiz-point:hover { transform: scale(1.2); z-index: 10; background: rgba(255, 255, 255, 0.5); }
+
+        .quiz-point-icon {
+            width: 85px; height: 85px; object-fit: contain;
+            animation: bounce 1.2s infinite alternate;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
         .tooltip {
+            position: absolute; background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;
+            top: -40px; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+        }
+        .quiz-point:hover .tooltip { opacity: 1; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; max-width: 550px; width: 90%; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+        .modal-content h2 { color: #e67e22; margin-bottom: 15px; font-size: 1.8em; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .modal-content p { color: #444; line-height: 1.7; text-align: justify; font-size: 1.1em; margin-bottom: 25px; }
+        
+        .btn { padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+        
+        /* Sağ Üst Ana Sayfa Butonu Stili */
+        .btn-ana-sayfa {
             position: absolute;
-            bottom: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #333;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        /* Tooltip ok */
-        .tooltip::after {
-            content: "";
-            position: absolute;
-            top: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 6px;
-            border-style: solid;
-            border-color: transparent transparent #333 transparent;
-        }
-
-        /* Hover’da tooltip görünür */
-        .logo-wrapper:hover .tooltip {
-            opacity: 1;
-        }
-
-        /* Buton */
-        a.button {
-            display: inline-block;
-            margin-top: 40px;
-            padding: 10px 20px;
-            background-color: #3498db;
+            top: 0;
+            right: 0;
+            padding: 8px 20px;
+            background: #5c67f2;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+        .btn-ana-sayfa:hover { background: #4a54e1; transform: scale(1.05); }
 
-        a.button:hover {
-            background-color: #2980b9;
-        }
+        .btn-primary { background: linear-gradient(45deg, #e67e22, #d35400); color: white; border: none; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4); }
+        .btn-secondary { background: #eee; color: #555; border: none; margin-left: 10px; }
+
+        /* Koordinatlar - Adana Haritası Üzerinde Dağılım */
+        #p1 { top: 65%; left: 35%; } /* Taşköprü */
+        #p2 { top: 60%; left: 45%; } /* Cami */
+        #p3 { top: 78%; left: 55%; } /* Pamuk */
+        #p4 { top: 40%; left: 30%; } /* Varda */
+        #p5 { top: 50%; left: 55%; } /* Nehirler */
+        #p6 { top: 72%; left: 45%; } /* Lezzetler */
+        #p7 { top: 58%; left: 32%; } /* Festivaller */
     </style>
 </head>
 <body>
 
-    <!-- Logo + Tooltip -->
-    <a href="https://ulkemyanimda.eba.gov.tr/moodle/mod/assign/view.php?id=4931" target="_blank"  class="logo-wrapper">
-        <img src="http://memleketim.github.io/icons/katkiekle.jpg" alt="Katkı Ekle" class="logo">
-        <span class="tooltip">Katkı Ekle</span>
-	
-    </a>
+<div class="container">
+    <div style="width: 100%; position: relative;">
+        <h1>Adana'nın Kültürel Zenginlikleri</h1>
+        <a href="https://memleketim.github.io" class="btn-ana-sayfa">Ana Sayfa</a>
+    </div>
 
-    <!-- Anasayfaya dönüş -->
-    <br>
-		
-		
-		<div style="
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 1vh;
-">
-  <div style="
-    border: 2px dashed #4fb3a2;
-    border-radius: 12px;
-    padding: 18px 22px;
-    background-color: #f4fbfa;
-    max-width: 520px;
-    font-family: Arial, sans-serif;
-    color: #2c3e3a;
-    text-align: center;
-  ">
-    <strong style="font-size: 1.1em;">Bu illerin hikâyesi henüz yazılmadı.</strong>
-    <p style="margin: 10px 0 0 0; line-height: 1.6;">
-      Haritamız, sizler anlattıkça tamamlanıyor.
-<br>      
-      Sen de kendi ilinin sesini ekleyebilirsin.
-    </p>
-  </div>
+    <div class="instructions">Haritadaki ikonlara tıklayarak Adana'nın tarihi ve kültürel hazinelerini keşfedebilirsiniz. 🍊</div>
+
+    <div class="map-container">
+        <img src="map.png" alt="Adana Haritası" class="map-image">
+
+        <div class="quiz-point" id="p1" 
+             data-title="🌉 Tarihi Taşköprü" 
+             data-description="Adana'nın en ikonik simgesi olan Taşköprü, Roma İmparatoru Hadrianus tarafından yaptırılmıştır. Dünyanın hala kullanılan en eski köprülerinden biridir. Seyhan Nehri üzerinde yükselen bu tarihi yapı, şehri birbirine bağlayan kadim bir bağ gibidir. Geçmişten günümüze Adana'nın tarihine tanıklık etmeye devam etmektedir."
+             data-link="1.html">
+            <div class="tooltip">Taşköprü</div>
+            <img src="1.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p2" 
+             data-title="🕌 Sabancı Merkez Camii" 
+             data-description="Orta Doğu'nun en büyük camilerinden biri olan Sabancı Merkez Camii, Seyhan Nehri'nin kıyısında tüm görkemiyle yükselir. 6 minaresi ve devasa kubbesiyle şehrin silüetini süsler. Hem modern hem de klasik Osmanlı mimarisinin izlerini taşır. Caminin iç süslemeleri ve geniş avlusu huzur veren bir atmosfere sahiptir."
+             data-link="2.html">
+            <div class="tooltip">Sabancı Camii</div>
+            <img src="2.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p3" 
+             data-title="☁️ Pamuk: Beyaz Altın" 
+             data-description="Çukurova'nın bereketli topraklarında yetişen pamuk, bölge için 'Beyaz Altın' olarak bilinir. Adana ekonomisinin ve kültürünün temel taşlarından biridir. Eskiden elle toplanan pamuk tarlaları, şimdi modern tarımla şehrin bereketini tüm dünyaya yayar. Dokuma sanayisinin kalbi de bu yumuşacık beyaz liflerle atmaktadır."
+             data-link="3.html">
+            <div class="tooltip">Beyaz Altın</div>
+            <img src="3.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p4" 
+             data-title="🚂 Varda Viyadüğü" 
+             data-description="Alman Köprüsü olarak da bilinen Varda Viyadüğü, Karaisalı ilçesinde uçurumun kenarında bir mühendislik harikasıdır. 1912 yılında Almanlar tarafından inşa edilen bu devasa yapı, tarihi Bağdat demir yolunun en önemli parçasıdır. James Bond filmine de ev sahipliği yapan köprü, muazzam manzarasıyla ziyaretçilerini büyüler."
+             data-link="4.html">
+            <div class="tooltip">Varda Viyadüğü</div>
+            <img src="4.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p5" 
+             data-title="🌊 Seyhan ve Ceyhan Nehirleri" 
+             data-description="Adana'yı bereketli kılan iki büyük can damarı Seyhan ve Ceyhan nehirleridir. Şehri besleyen bu sular, hem tarım için hayat verir hem de kıyısındaki parklarla nefes aldırır. Nehirlerin serinliği, sıcak Adana yazlarında bir ferahlama kaynağıdır. Üzerlerindeki barajlar ise bölgenin enerji ihtiyacını karşılayan devasa göller oluşturur."
+             data-link="5.html">
+            <div class="tooltip">Nehirler</div>
+            <img src="5.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p6" 
+             data-title="🥘 Adana Lezzetleri" 
+             data-description="Adana mutfağı, baharatın ve etin en lezzetli buluşma noktasıdır. Meşhur Adana Kebabı, acılı şalgam suyu ve serinleten bici bici tatlısı sofraların vazgeçilmezidir. Ciğer kebabı ve mumbar dolması gibi yöresel tatlar, bu şehri bir gastronomi cenneti yapar. Adana'da yemek yemek, başlı başına kültürel bir yolculuktur."
+             data-link="6.html">
+            <div class="tooltip">Mutfak Kültürü</div>
+            <img src="6.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p7" 
+             data-title="🍊 Sanat ve Çiçek Karnavalı" 
+             data-description="Portakal Çiçeği Karnavalı ve Altın Koza Film Festivali, Adana'nın sanat ve neşe dolu yüzüdür. Şehir sokaklarının portakal çiçeği koktuğu nisan aylarında başlayan karnaval, insanları bir araya getirir. Altın Koza ise Türk sinemasının kalbinin attığı en prestijli film festivallerinden biridir. Adana, sanatla ve çiçeklerle yaşayan bir şehirdir."
+             data-link="7.html">
+            <div class="tooltip">Festivaller</div>
+            <img src="7.png" class="quiz-point-icon">
+        </div>
+    </div>
 </div>
 
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div class="modal-buttons">
+            <a href="#" id="activityLinkBtn" class="btn btn-primary">Etkinliğe Git</a>
+            <button class="btn btn-secondary" id="closeModalBtn">Kapat</button>
+        </div>
+    </div>
+</div>
 
-    <a class="button" href="http://memleketim.github.io/">Anasayfaya Dön</a>
+<script>
+    const quizPoints = document.querySelectorAll('.quiz-point');
+    const modal = document.getElementById('infoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const activityLinkBtn = document.getElementById('activityLinkBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    quizPoints.forEach(point => {
+        point.addEventListener('click', function() {
+            modalTitle.textContent = this.getAttribute('data-title');
+            modalText.textContent = this.getAttribute('data-description');
+            activityLinkBtn.href = this.getAttribute('data-link');
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+</script>
 
 </body>
 </html>
