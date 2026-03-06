@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sabancı Merkez Camii: Mimari Şifreler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:wght@700;900&display=swap');
+        body { font-family: 'Outfit', sans-serif; background: #f8fafc; color: #1e293b; margin: 0; }
+        .ancient-title { font-family: 'Playfair Display', serif; }
+        .grid-container { display: grid; grid-template-columns: repeat(12, 1fr); gap: 4px; user-select: none; max-width: 500px; margin: 0 auto; background: #cbd5e1; padding: 8px; border-radius: 16px; }
+        .letter-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; background: white; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: clamp(10px, 2.5vw, 18px); transition: all 0.2s; }
+        .letter-cell.selected { background: #fbbf24; color: #78350f; }
+        .letter-cell.found { background: #22c55e !important; color: white !important; transform: scale(0.95); }
+        .letter-cell.hint-glow { background: #6366f1; color: white; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .word-tag { padding: 6px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; background: white; border: 2px solid #e2e8f0; }
+        .word-tag.found { background: #dcfce7; color: #16a34a; border-color: #16a34a; text-decoration: line-through; }
+        .word-btn { cursor: pointer; background: white; border: 2px solid #e2e8f0; padding: 10px 18px; border-radius: 12px; font-weight: 700; transition: 0.2s; }
+        .word-btn:hover { border-color: #3b82f6; transform: translateY(-2px); }
+        .word-btn.is-hidden { visibility: hidden; pointer-events: none; }
+        .sentence-box { min-height: 80px; background: #f1f5f9; border: 3px dashed #cbd5e1; display: flex; flex-wrap: wrap; gap: 8px; padding: 15px; border-radius: 24px; justify-content: center; align-items: center; }
+        .placed-word { background: #3b82f6; color: white; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; animation: popIn 0.3s ease-out; }
+        .placed-word:hover { background: #ef4444; }
+        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <nav class="max-w-6xl mx-auto flex justify-between items-center mb-8 bg-white shadow-md p-4 rounded-3xl sticky top-4 z-50">
+        <div class="flex items-center gap-4">
+            <img src="orjinal.svg" alt="Logo" class="h-10 w-auto">
+            <div class="bg-blue-900 text-white px-4 py-1 rounded-full text-sm font-black">PUAN: <span id="scoreVal">0</span></div>
+        </div>
+        <div class="flex gap-4">
+            <div id="hintDisplay" class="bg-indigo-100 text-indigo-700 px-4 py-1 rounded-full text-sm font-black">İPUCU: 5</div>
+            <a href="https://memleketim.github.io/01/index.html" class="bg-indigo-600 text-white px-6 py-1 rounded-full font-bold text-sm hover:bg-indigo-700 transition">Anasayfa</a>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto space-y-10">
+        <div class="text-center">
+            <a href="https://drive.google.com/file/d/1r29VpjeNBGNQKcjtt6oJpLTcAbpFxyFk/view?usp=drive_link" target="_blank" class="bg-blue-50 text-blue-700 px-6 py-3 rounded-2xl font-bold italic hover:bg-blue-100 transition border border-blue-200">
+                📄 Yüsra Demirel'in çalışmasına ulaşmak için tıklayın
+            </a>
+        </div>
+
+        <section class="grid md:grid-cols-2 gap-6">
+            <div class="bg-gradient-to-br from-blue-900 to-blue-700 text-white p-6 rounded-[2.5rem] shadow-xl">
+                <h2 class="text-xl font-black mb-4 italic text-amber-400">🕌 Sabancı Camii Şifreleri</h2>
+                <ul class="text-xs space-y-2 font-medium">
+                    <li>📍 <b>99 Metre:</b> Allah'ın 99 ismini simgeler.</li>
+                    <li>📍 <b>16 Şerefe:</b> 16 büyük Türk devletini temsil eder.</li>
+                    <li>📍 <b>23 Basamak:</b> Kur'an-ı Kerim'in indiriliş süresine atıf yapar.</li>
+                    <li>📍 <b>6 Kubbe & 40 Pencere:</b> İmanın 6 şartı ve günlük 40 rekat namaza işarettir.</li>
+                </ul>
+            </div>
+            <div class="rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white aspect-video">
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/0hdVFMbksmA?si=78Sn-QS4ioK8Nd7_" frameborder="0" allowfullscreen></iframe>
+            </div>
+        </section>
+
+        <section id="stage1" class="space-y-8 py-10 bg-white p-8 rounded-[3rem] shadow-xl border border-slate-100">
+            <div class="text-center">
+                <h2 class="text-4xl font-black text-slate-800 uppercase">Kelime Avı 🕵️‍♂️</h2>
+                <p class="text-slate-500 font-medium mt-2">Kelimeleri bul, puanları topla! (5 Yatay - 3 Dikey)</p>
+            </div>
+            <div class="grid-container" id="puzzleGrid"></div>
+            <div class="flex flex-col items-center gap-6">
+                <div class="flex flex-wrap justify-center gap-3" id="wordListArea"></div>
+                <button onclick="useHint()" id="hintBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-10 py-3 rounded-2xl font-black shadow-lg transition-transform active:scale-95">💡 BAŞ HARF İPUCU</button>
+            </div>
+        </section>
+
+        <section id="stage2" class="hidden space-y-10 py-16 bg-slate-900 text-white p-8 rounded-[3rem] shadow-2xl">
+            <div class="text-center">
+                <h2 class="text-4xl font-black text-amber-400 ancient-title">Şifreleri Düzenle 🧩</h2>
+                <p class="text-slate-400 mt-2 italic">Kelimelere tıklayarak cümleyi kur. Çıkarmak için kutudaki kelimeye tıkla!</p>
+            </div>
+            <div id="sentencePlayArea" class="space-y-12 max-w-2xl mx-auto"></div>
+        </section>
+    </main>
+
+    <audio id="snd-tik" src="sesler/tik.mp3"></audio>
+    <audio id="snd-dogru" src="sesler/dogru.mp3"></audio>
+    <audio id="snd-hata" src="sesler/hata.mp3"></audio>
+
+    <script>
+        let score = 0, hintsLeft = 5;
+        const mosqueWords = [
+            {w: "İHTİŞAM", found: false, hintUsed: false, pos: [], dir: 'H'},
+            {w: "ŞEREFE", found: false, hintUsed: false, pos: [], dir: 'H'},
+            {w: "DEVASA", found: false, hintUsed: false, pos: [], dir: 'H'},
+            {w: "SİMGE", found: false, hintUsed: false, pos: [], dir: 'H'},
+            {w: "HUZUR", found: false, hintUsed: false, pos: [], dir: 'H'},
+            {w: "GÖRKEM", found: false, hintUsed: false, pos: [], dir: 'V'},
+            {w: "İŞLEME", found: false, hintUsed: false, pos: [], dir: 'V'},
+            {w: "ATIF", found: false, hintUsed: false, pos: [], dir: 'V'}
+        ];
+
+        const gridSize = 12;
+        let gridData = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+        let isMouseDown = false, selectedCells = [];
+
+        function updateScore(pts) { score += pts; document.getElementById('scoreVal').innerText = score; }
+
+        function placeWords() {
+            mosqueWords.forEach(obj => {
+                let placed = false;
+                while (!placed) {
+                    const r = Math.floor(Math.random() * (obj.dir === 'H' ? gridSize : gridSize - obj.w.length));
+                    const c = Math.floor(Math.random() * (obj.dir === 'V' ? gridSize : gridSize - obj.w.length));
+                    let canPlace = true;
+                    for (let i = 0; i < obj.w.length; i++) {
+                        const char = obj.dir === 'H' ? gridData[r][c + i] : gridData[r + i][c];
+                        if (char !== '' && char !== obj.w[i]) { canPlace = false; break; }
+                    }
+                    if (canPlace) {
+                        obj.pos = [];
+                        for (let i = 0; i < obj.w.length; i++) {
+                            const rr = obj.dir === 'H' ? r : r + i, cc = obj.dir === 'H' ? c + i : c;
+                            gridData[rr][cc] = obj.w[i];
+                            obj.pos.push(rr * gridSize + cc);
+                        }
+                        placed = true;
+                    }
+                }
+            });
+            const letters = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ";
+            for(let r=0; r<gridSize; r++) for(let c=0; c<gridSize; c++) if(!gridData[r][c]) gridData[r][c] = letters[Math.floor(Math.random()*letters.length)];
+        }
+
+        function drawGrid() {
+            const gridEl = document.getElementById('puzzleGrid'); gridEl.innerHTML = '';
+            gridData.flat().forEach((l, i) => {
+                const cell = document.createElement('div'); cell.className = 'letter-cell'; cell.innerText = l; cell.dataset.idx = i;
+                cell.onmousedown = () => { isMouseDown = true; selectCell(cell); };
+                cell.onmouseenter = () => { if(isMouseDown) selectCell(cell); };
+                gridEl.appendChild(cell);
+            });
+            const listEl = document.getElementById('wordListArea');
+            mosqueWords.forEach(obj => listEl.innerHTML += `<span class="word-tag" id="tag-${obj.w}">${obj.w}</span>`);
+        }
+
+        function selectCell(cell) { if(!selectedCells.includes(cell)) { selectedCells.push(cell); cell.classList.add('selected'); document.getElementById('snd-tik').play(); } }
+
+        window.onmouseup = () => {
+            if(!isMouseDown) return;
+            isMouseDown = false;
+            const str = selectedCells.map(c => c.innerText).join('');
+            const wordObj = mosqueWords.find(o => o.w === str && !o.found);
+            if(wordObj) {
+                wordObj.found = true; document.getElementById('snd-dogru').play();
+                document.getElementById(`tag-${wordObj.w}`).classList.add('found');
+                selectedCells.forEach(c => c.classList.add('found'));
+                if(!wordObj.hintUsed) updateScore(wordObj.w.length * 10);
+                confetti({ particleCount: 40, origin: { y: 0.8 } });
+                if(mosqueWords.every(o => o.found)) setTimeout(openStage2, 1000);
+            } else {
+                document.getElementById('snd-hata').play(); updateScore(-2);
+                selectedCells.forEach(c => c.classList.remove('selected'));
+            }
+            selectedCells = [];
+        };
+
+        function useHint() {
+            if(hintsLeft <= 0) return;
+            const target = mosqueWords.find(o => !o.found);
+            if(target) {
+                hintsLeft--; target.hintUsed = true;
+                document.getElementById('hintDisplay').innerText = `İPUCU: ${hintsLeft}`;
+                const cell = document.querySelector(`[data-idx='${target.pos[0]}']`);
+                cell.classList.add('hint-glow'); setTimeout(() => cell.classList.remove('hint-glow'), 3000);
+            }
+        }
+
+        const sentences = [
+            { c: ["Sabancı", "Merkez", "Camii", "Seyhan", "Nehri", "kıyısındadır"], id: 0 },
+            { c: ["99", "metrelik", "minareler", "Allah'ın", "isimlerini", "simgeler"], id: 1 },
+            { c: ["23", "basamaklı", "minber", "indiriliş", "süresine", "atıf", "yapar"], id: 2 }
+        ];
+        let currentSnt = 0, userSnt = [];
+
+        function openStage2() { confetti({ particleCount: 200, spread: 70 }); document.getElementById('stage2').classList.remove('hidden'); renderSnt(); document.getElementById('stage2').scrollIntoView({ behavior: 'smooth' }); }
+
+        function renderSnt() {
+            const area = document.getElementById('sentencePlayArea');
+            const data = sentences[currentSnt];
+            const shuffled = [...data.c].map((w, i) => ({w, i})).sort(() => Math.random() - 0.5);
+            userSnt = [];
+            area.innerHTML = `
+                <div class="bg-white/10 p-8 rounded-[3rem] border border-white/10">
+                    <p class="text-xs font-black text-amber-500 mb-6 text-center uppercase tracking-widest">Soru ${currentSnt + 1}</p>
+                    <div class="sentence-box mb-8" id="dropBox"></div>
+                    <div class="flex flex-wrap gap-3 justify-center" id="pool">
+                        ${shuffled.map(obj => `<button class="word-btn text-slate-900" id="btn-${obj.i}" onclick="pickWord('${obj.w.replace(/'/g, "\\'")}', ${obj.i})">${obj.w}</button>`).join('')}
+                    </div>
+                </div>`;
+        }
+
+        function pickWord(word, id) {
+            document.getElementById('snd-tik').play();
+            document.getElementById(`btn-${id}`).classList.add('is-hidden');
+            userSnt.push({word, id});
+            updateUI();
+            if(userSnt.length === sentences[currentSnt].c.length) checkSnt();
+        }
+
+        function undoWord(id) {
+            document.getElementById('snd-tik').play();
+            userSnt = userSnt.filter(item => item.id !== id);
+            document.getElementById(`btn-${id}`).classList.remove('is-hidden');
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('dropBox').innerHTML = userSnt.map(obj => `<span class="placed-word" onclick="undoWord(${obj.id})">${obj.word}</span>`).join('');
+        }
+
+        function checkSnt() {
+            if(userSnt.map(o => o.word).join(' ') === sentences[currentSnt].c.join(' ')) {
+                document.getElementById('snd-dogru').play(); updateScore(100); confetti({ particleCount: 80 });
+                currentSnt++; if(currentSnt < sentences.length) setTimeout(renderSnt, 1500); else finish();
+            } else {
+                document.getElementById('snd-hata').play(); alert("Sıralama yanlış, kutudaki kelimelere dokunarak düzeltebilirsin!");
+            }
+        }
+
+        function finish() { confetti({ particleCount: 300, spread: 100 }); setTimeout(() => { alert(`Tebrikler! ${score} puan topladın.`); window.location.href = "https://memleketim.github.io/01/index.html"; }, 2000); }
+
+        window.onload = () => { placeWords(); drawGrid(); };
+    </script>
+</body>
+</html>
