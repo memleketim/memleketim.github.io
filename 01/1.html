@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adana - Taşköprü Oyunu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap');
+        body { font-family: 'Nunito', sans-serif; transition: background-color 0.3s, color 0.3s; }
+        .dark-mode { background-color: #0f172a; color: #f8fafc; }
+        
+        /* Boşluk (Slot) Stilleri */
+        .blank-slot { 
+            display: inline-block; min-width: 120px; height: 38px; border-bottom: 3px dashed #94a3b8; 
+            margin: 0 5px; vertical-align: middle; text-align: center; font-weight: bold; color: #0ea5e9;
+            cursor: pointer; transition: all 0.3s ease; border-radius: 6px; padding: 0 8px; line-height: 34px;
+        }
+        .dark-mode .blank-slot { border-bottom-color: #475569; color: #38bdf8; }
+        
+        .blank-slot:hover:not(.filled) { background-color: #e0f2fe; }
+        .dark-mode .blank-slot:hover:not(.filled) { background-color: #0c4a6e; }
+
+        /* Seçili Boşluk */
+        .blank-selected {
+            background-color: #fef08a !important; /* Sarı parlama */
+            border-bottom: 3px solid #eab308;
+            color: #854d0e;
+            box-shadow: 0 0 10px rgba(234, 179, 8, 0.5);
+        }
+        
+        /* Doldurulmuş Boşluk */
+        .blank-slot.filled { 
+            border-bottom: 3px solid #22c55e; color: #16a34a; background-color: #dcfce7; cursor: default;
+        }
+        .dark-mode .blank-slot.filled { background-color: #14532d; color: #4ade80; }
+        
+        /* Tıklanabilir Kelimeler */
+        .word-btn { 
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s; user-select: none;
+        }
+        .word-btn:active { transform: scale(0.95); }
+        
+        /* Animasyonlar */
+        .bounce-anim { animation: bounce 0.5s; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .shake-anim { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Köprü Tasarımı */
+        .bridge-container {
+            position: relative;
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(to bottom, #e0f2fe 0%, #bae6fd 100%);
+            border-bottom: 12px solid #78716c; /* Taş rengi taban */
+            border-radius: 120px 120px 0 0;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding: 0 5%;
+        }
+        .dark-mode .bridge-container { background: linear-gradient(to bottom, #0c4a6e 0%, #082f49 100%); border-bottom-color: #44403c; }
+        
+        .bridge-arch {
+            width: 12%;
+            height: 40px;
+            border: 6px solid #a8a29e;
+            border-bottom: none;
+            border-radius: 50px 50px 0 0;
+            background-color: transparent;
+        }
+        .dark-mode .bridge-arch { border-color: #57534e; }
+
+        .bridge-point {
+            width: 16px;
+            height: 16px;
+            background-color: #ef4444;
+            border-radius: 50%;
+            border: 3px solid white;
+            z-index: 10;
+            position: relative;
+            bottom: -8px;
+        }
+
+        #emreEmoji {
+            position: absolute;
+            bottom: 15px; /* Köprünün üstünde durması için */
+            left: 2%; /* Başlangıç noktası */
+            font-size: 3rem;
+            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Sıçrama efekti */
+            z-index: 20;
+            filter: drop-shadow(0px 4px 2px rgba(0,0,0,0.3));
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col items-center pb-10">
+
+    <script>
+        const soundDogru = new Audio('sesler/dogru.mp3');
+        const soundHata = new Audio('sesler/hata.mp3');
+        const soundTik = new Audio('sesler/tik.mp3');
+        const soundArkaplan = new Audio('sesler/arkaplan.mp3');
+        soundArkaplan.loop = true;
+        soundArkaplan.volume = 0.3;
+    </script>
+
+    <div class="w-full max-w-5xl flex justify-between items-center p-4 bg-white shadow-md rounded-b-2xl dark-mode:bg-slate-800 transition-colors z-10" id="topBar">
+        <div class="flex gap-3">
+            <button id="themeToggle" class="p-2 rounded-full bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 transition" onclick="toggleTheme()">
+                🌗 Tema Değiştir
+            </button>
+            <button id="musicToggle" class="p-2 rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition" onclick="toggleMusic()">
+                🔊 Müzik Aç/Kapat
+            </button>
+        </div>
+        <img src="orjinal.svg" alt="Logo" class="h-12 w-auto drop-shadow-md">
+    </div>
+
+    <h1 class="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-red-500 mt-8 mb-4 text-center drop-shadow-sm">
+        🌉 Adana - Taşköprü ✨
+    </h1>
+
+    <a href="https://drive.google.com/file/d/1WPFKHXBgYVkfJ0P-FrzOPUG9_dyC3RvT/view?usp=drive_link" target="_blank" class="mb-8 px-6 py-3 bg-gradient-to-r from-orange-400 to-red-500 text-white font-bold rounded-full shadow-lg hover:scale-105 hover:shadow-xl transition-transform duration-300 animate-pulse text-center">
+        📄 Emre Erkmen'in çalışmasının tamamına ulaşmak için tıklayın. 🎯
+    </a>
+
+    <div class="w-full max-w-4xl bg-white rounded-3xl shadow-xl overflow-hidden mb-8 border-4 border-blue-100 flex flex-col md:flex-row" id="mediaContainer">
+        <div class="w-full md:w-1/2">
+            <img src="taskopru.png" alt="Taşköprü Kapak" class="w-full h-full object-cover">
+        </div>
+        <div class="w-full md:w-1/2 aspect-video bg-black flex justify-center items-center relative">
+            <iframe width="100%" height="100%" src="https://www.youtube.com/embed/ydAgnjtGfjc?si=9dxavyEJ6omq2ulG" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <div class="w-full max-w-4xl text-center mb-8" id="startSection">
+        <button id="startBtn" onclick="startGame()" class="px-8 py-4 bg-green-500 hover:bg-green-600 text-white text-2xl font-black rounded-full shadow-xl hover:scale-110 transition-all transform bounce-anim">
+            🚀 Videoyu İzledim, Oyuna Başla! 🎮
+        </button>
+    </div>
+
+    <div id="gameSection" class="w-full max-w-4xl bg-white p-8 rounded-3xl shadow-2xl border-4 border-indigo-100 hidden relative transition-colors">
+        
+        <div class="flex justify-between items-center mb-6">
+            <div class="text-2xl font-bold text-red-500 bg-red-100 px-4 py-2 rounded-xl border-2 border-red-200">⏳ Süre: <span id="timer">120</span> sn</div>
+            <div class="text-2xl font-bold text-indigo-500 bg-indigo-100 px-4 py-2 rounded-xl border-2 border-indigo-200">🧩 Doğru: <span id="score">0</span> / 7</div>
+        </div>
+
+        <div class="w-full relative">
+            <div class="bridge-container">
+                <div class="bridge-arch"></div>
+                <div class="bridge-arch"></div>
+                <div class="bridge-arch"></div>
+                <div class="bridge-arch"></div>
+                <div class="bridge-arch"></div>
+                <div class="bridge-arch"></div>
+                
+                <div class="absolute bottom-0 left-[14%] bridge-point"></div>
+                <div class="absolute bottom-0 left-[27%] bridge-point"></div>
+                <div class="absolute bottom-0 left-[40%] bridge-point"></div>
+                <div class="absolute bottom-0 left-[53%] bridge-point"></div>
+                <div class="absolute bottom-0 left-[66%] bridge-point"></div>
+                <div class="absolute bottom-0 left-[79%] bridge-point"></div>
+                <div class="absolute bottom-0 left-[92%] bridge-point" style="background-color: #22c55e;"></div> <div id="emreEmoji">👦🏻</div>
+            </div>
+        </div>
+
+        <div class="bg-indigo-50 p-4 rounded-xl mb-6 border-l-4 border-indigo-400">
+            <h3 class="font-bold text-indigo-800 text-lg mb-1">📝 Nasıl Oynanır?</h3>
+            <p class="text-indigo-700">1. Önce metindeki <b>bir boşluğa dokunarak</b> seç (sarı yanacak).<br>2. Yukarıdaki kelimelerden doğru olanı <b>tıkla</b>.<br> Dikkat et, 3 kelime şaşırtmaca! Doğru bildikçe Emre köprüde ilerleyecek! 🏃‍♂️💨</p>
+        </div>
+
+        <div id="wordBank" class="flex flex-wrap gap-3 justify-center mb-10 min-h-[60px] p-4 bg-gray-100 rounded-2xl border-2 border-dashed border-gray-300 dark:bg-slate-700 dark:border-slate-500">
+            </div>
+
+        <div class="text-xl leading-loose text-gray-800 bg-blue-50 p-6 rounded-2xl shadow-inner border border-blue-100" id="gameTextContainer">
+            Adana’nın simgesi olan <span class="blank-slot" data-answer="Taşköprü"></span>, 
+            <span class="blank-slot" data-answer="Roma İmparatorluğu"></span> döneminden günümüze ulaşan dünyanın en eski köprülerinden biridir. 🌉 
+            <span class="blank-slot" data-answer="Seyhan Nehri"></span> üzerinde yükselen bu 
+            <span class="blank-slot" data-answer="tarihi yapı"></span>, yüzyıllardır şehri birbirine bağlayan muazzam bir 
+            <span class="blank-slot" data-answer="mimari harikadır"></span>. ✨ Ziyaretçilerini tarihte bir 
+            <span class="blank-slot" data-answer="yolculuğa"></span> çıkaran köprü, hem yayalara açık olması hem de büyüleyici manzarasıyla 
+            <span class="blank-slot" data-answer="görülmeye"></span> değerdir. 📸
+        </div>
+
+    </div>
+
+    <script>
+        // Veriler
+        const words = [
+            "Taşköprü", "Roma İmparatorluğu", "Seyhan Nehri", "tarihi yapı", "mimari harikadır", "yolculuğa", "görülmeye", // Doğrular
+            "Osmanlı İmparatorluğu", "Ceyhan Nehri", "alışverişe" // Yanlışlar
+        ];
+        
+        let score = 0;
+        let timeLeft = 120;
+        let timerInterval;
+        let musicPlaying = false;
+        let gameActive = false;
+        let selectedSlot = null; // Seçili boşluğu tutar
+
+        // Köprü İlerleme Noktaları (Yüzdelik olarak Emre'nin konumu: 0'dan 7'ye)
+        const bridgePositions = ["2%", "12%", "25%", "38%", "51%", "64%", "77%", "90%"];
+
+        // Tema Yönetimi
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            soundTik.play().catch(e=>console.log(e));
+            document.getElementById('topBar').classList.toggle('bg-white');
+            document.getElementById('topBar').classList.toggle('bg-slate-800');
+            document.getElementById('mediaContainer').classList.toggle('bg-white');
+            document.getElementById('mediaContainer').classList.toggle('bg-slate-800');
+            document.getElementById('gameSection').classList.toggle('bg-white');
+            document.getElementById('gameSection').classList.toggle('bg-slate-800');
+            document.getElementById('gameTextContainer').classList.toggle('text-gray-800');
+            document.getElementById('gameTextContainer').classList.toggle('text-gray-100');
+            document.getElementById('gameTextContainer').classList.toggle('bg-blue-50');
+            document.getElementById('gameTextContainer').classList.toggle('bg-slate-800');
+            document.getElementById('gameTextContainer').classList.toggle('border-blue-100');
+            document.getElementById('gameTextContainer').classList.toggle('border-slate-600');
+        }
+
+        // Müzik Yönetimi
+        function toggleMusic() {
+            if(musicPlaying) {
+                soundArkaplan.pause();
+                document.getElementById('musicToggle').innerHTML = "🔇 Müzik Aç/Kapat";
+            } else {
+                soundArkaplan.play().catch(e=>console.log("Ses politikası", e));
+                document.getElementById('musicToggle').innerHTML = "🔊 Müzik Aç/Kapat";
+            }
+            musicPlaying = !musicPlaying;
+            soundTik.play().catch(e=>console.log(e));
+        }
+
+        // Oyunu Başlat
+        function startGame() {
+            soundTik.play();
+            if(!musicPlaying) toggleMusic(); // Müzik otomatik başlasın
+            
+            document.getElementById('startSection').style.display = 'none';
+            document.getElementById('gameSection').classList.remove('hidden');
+            document.getElementById('gameSection').classList.add('bounce-anim');
+            
+            setupGame();
+            gameActive = true;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if(timeLeft <= 0) {
+                    endGame(false);
+                }
+            }, 1000);
+        }
+
+        // Oyunu Kur
+        function setupGame() {
+            const wordBank = document.getElementById('wordBank');
+            wordBank.innerHTML = '';
+            
+            // Diziyi Karıştır (Shuffle)
+            const shuffledWords = [...words].sort(() => Math.random() - 0.5);
+            
+            shuffledWords.forEach(word => {
+                const btn = document.createElement('button');
+                btn.className = 'word-btn bg-white border-2 border-blue-400 text-blue-700 px-4 py-2 rounded-xl shadow-sm hover:bg-blue-50 font-bold dark:bg-slate-600 dark:text-blue-200 dark:border-blue-500 text-lg';
+                btn.innerText = word;
+                btn.dataset.val = word;
+                
+                // Kelimeye Tıklama Olayı
+                btn.addEventListener('click', () => {
+                    if(!gameActive) return;
+
+                    // Eğer bir boşluk seçilmemişse uyarı ver
+                    if(!selectedSlot) {
+                        btn.classList.add('shake-anim', 'bg-red-100');
+                        soundHata.play().catch(e=>console.log(e));
+                        setTimeout(() => btn.classList.remove('shake-anim', 'bg-red-100'), 400);
+                        return;
+                    }
+
+                    const guessedWord = btn.dataset.val;
+                    const correctAnswer = selectedSlot.dataset.answer;
+
+                    if(guessedWord === correctAnswer) {
+                        // DOĞRU CEVAP
+                        selectedSlot.innerText = guessedWord;
+                        selectedSlot.classList.remove('blank-selected', 'animate-pulse');
+                        selectedSlot.classList.add('filled');
+                        
+                        soundDogru.play().catch(e=>console.log(e));
+                        btn.remove(); // Kelimeyi bankadan sil
+                        selectedSlot = null; // Seçimi sıfırla
+
+                        score++;
+                        document.getElementById('score').innerText = score;
+
+                        // Emre'yi köprüde ilerlet
+                        document.getElementById('emreEmoji').style.left = bridgePositions[score];
+
+                        if(score === 7) {
+                            endGame(true);
+                        }
+                    } else {
+                        // YANLIŞ CEVAP
+                        soundHata.play().catch(e=>console.log(e));
+                        btn.classList.add('shake-anim', 'bg-red-200', 'border-red-500', 'text-red-800');
+                        selectedSlot.classList.add('shake-anim');
+                        setTimeout(() => {
+                            btn.classList.remove('shake-anim', 'bg-red-200', 'border-red-500', 'text-red-800');
+                            if(selectedSlot) selectedSlot.classList.remove('shake-anim');
+                        }, 400);
+                    }
+                });
+                
+                wordBank.appendChild(btn);
+            });
+
+            // Boşluklara (Slot) Tıklama Olayları
+            document.querySelectorAll('.blank-slot').forEach(slot => {
+                slot.addEventListener('click', () => {
+                    if(!gameActive || slot.classList.contains('filled')) return;
+                    
+                    soundTik.play().catch(e=>console.log(e));
+                    
+                    // Eski seçimi kaldır
+                    if(selectedSlot) {
+                        selectedSlot.classList.remove('blank-selected', 'animate-pulse');
+                    }
+                    
+                    // Yeni seçimi uygula
+                    selectedSlot = slot;
+                    selectedSlot.classList.add('blank-selected', 'animate-pulse');
+                });
+            });
+        }
+
+        // Oyun Bitişi
+        function endGame(isWin) {
+            clearInterval(timerInterval);
+            gameActive = false;
+            
+            // Eğer varsa seçili boşluğun stilini temizle
+            if(selectedSlot) selectedSlot.classList.remove('blank-selected', 'animate-pulse');
+            
+            if(isWin) {
+                // Emre hedefe ulaştıktan sonra animasyon
+                document.getElementById('emreEmoji').classList.add('bounce-anim');
+                
+                // Confetti Patlat
+                confetti({
+                    particleCount: 200,
+                    spread: 90,
+                    origin: { y: 0.6 },
+                    colors: ['#26ccff', '#a25afd', '#ff5e7e', '#88ff5a', '#fcff42', '#ffa62d', '#ff36ff']
+                });
+                
+                setTimeout(() => {
+                    alert('Tebrikler! Emre Taşköprü\'yü başarıyla geçti! 🎉 Yönlendiriliyorsunuz...');
+                    window.location.href = "https://memleketim.github.io/01/index.html";
+                }, 3500);
+            } else {
+                alert('Süre doldu! 😢 Lütfen sayfayı yenileyip tekrar deneyin.');
+            }
+        }
+    </script>
+</body>
+</html>
