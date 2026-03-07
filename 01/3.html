@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pamuk: Beyaz Altın – Adana Macerası</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TEMEL VE GLOBAL STILLER
+═══════════════════════════════════════════ */
+:root {
+  --toprak: #7C4A2D;
+  --toprak-koyu: #4A2C17;
+  --gunes: #F5A623;
+  --gunes-acik: #FFD166;
+  --yesil: #3E8A4F;
+  --yesil-acik: #6DBF82;
+  --pamuk: #FAFAF5;
+  --turuncu: #E8632A;
+  --turuncu-koyu: #BF4D1E;
+  --krem: #FDF6E3;
+  --kahve: #8B5E3C;
+  --lacivert: #1A3A5C;
+  --gok: #5BA4CF;
+  --sky-dark: #2E6DA4;
+  --zemin: #D4A05A;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Baloo 2', 'Segoe UI', Tahoma, sans-serif;
+  cursor: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* DOKU ARKA PLANI */
+body {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(245,166,35,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(62,138,79,0.10) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 80%, rgba(91,164,207,0.10) 0%, transparent 40%),
+    linear-gradient(135deg, #FEF9EE 0%, #FFF3D6 30%, #F0F9FF 70%, #EDFFF3 100%);
+}
+
+/* ÖZEL İMLEÇ */
+#cursor {
+  position: fixed; z-index: 99999;
+  width: 44px; height: 44px;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  font-size: 28px; line-height: 44px; text-align: center;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+  transition: transform 0.08s;
+}
+#cursor.active { transform: translate(-50%,-50%) scale(1.3) rotate(-10deg); }
+
+/* EKRANLAR */
+.ekran {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  overflow: hidden;
+}
+.ekran.gizli { opacity: 0; pointer-events: none; transform: scale(0.97); }
+
+/* ═══════════════════════════════════════════
+   ANA SAYFA
+═══════════════════════════════════════════ */
+#anasayfa {
+  background:
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23E8632A' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(160deg, #FFF8E7 0%, #FDEBC8 40%, #FFF0D4 70%, #FDE8B8 100%);
+  overflow: hidden;
+}
+
+#anasayfa::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 600px 400px at 10% 80%, rgba(232,99,42,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 500px 300px at 90% 10%, rgba(245,166,35,0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 300px 300px at 50% 50%, rgba(253,241,196,0.6) 0%, transparent 80%);
+}
+
+.ana-icerik { position: relative; z-index: 2; text-align: center; max-width: 640px; padding: 20px; }
+
+/* LOGO SOL ÜST */
+.sol-ust-logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+}
+.logo-img { height: 60px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15)); }
+
+.ana-baslik {
+  font-family: 'Baloo 2', sans-serif;
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  color: var(--toprak-koyu);
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.ana-baslik .vurgu {
+  background: linear-gradient(135deg, var(--turuncu), var(--gunes));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* PAMUK RESİM ALANI */
+.pamuk-resim-alani {
+  margin: 15px auto;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pamuk-png {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 20px rgba(0,0,0,0.12));
+  animation: salla 4s ease-in-out infinite;
+}
+@keyframes salla {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+
+.ana-alt-baslik {
+  font-family: 'Crimson Pro', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1rem, 3vw, 1.35rem);
+  color: var(--kahve);
+  margin-bottom: 20px;
+  opacity: 0.85;
+}
+
+.kapak-kart {
+  background: rgba(255,255,255,0.75);
+  border: 2px solid rgba(232,99,42,0.15);
+  border-radius: 24px;
+  padding: 20px 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+  backdrop-filter: blur(8px);
+}
+.kapak-kart p {
+  font-size: 1rem; color: #5C3B1E; line-height: 1.65;
+}
+.kapak-kart strong { color: var(--turuncu); }
+
+.kaynak-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.8);
+  border: 2px solid rgba(232,99,42,0.2);
+  border-radius: 14px;
+  padding: 10px 20px;
+  color: var(--turuncu-koyu);
+  font-size: 0.88rem; font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+.kaynak-link:hover { background: rgba(232,99,42,0.08); transform: translateY(-2px); }
+
+.baslat-btn {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, var(--turuncu), #D45A25);
+  color: white;
+  border: none;
+  padding: 18px 64px;
+  border-radius: 60px;
+  cursor: pointer;
+  box-shadow: 0 8px 0 var(--turuncu-koyu), 0 16px 32px rgba(232,99,42,0.25);
+  transition: transform 0.1s, box-shadow 0.1s;
+  animation: btnNabiz 1.8s ease-in-out infinite;
+  letter-spacing: 0.01em;
+}
+.baslat-btn:hover { transform: translateY(4px); box-shadow: 0 4px 0 var(--turuncu-koyu), 0 8px 20px rgba(232,99,42,0.2); }
+@keyframes btnNabiz { 0%,100% { transform: scale(1); } 50% { transform: scale(1.025); } }
+
+/* Yüzen dekor pamuklar */
+.deko-pamuk {
+  position: absolute;
+  font-size: 2.5rem; opacity: 0.12;
+  animation: yukseliPamuk linear infinite;
+  pointer-events: none;
+}
+@keyframes yukseliPamuk {
+  from { transform: translateY(110vh) rotate(0deg); }
+  to   { transform: translateY(-20vh) rotate(360deg); }
+}
+
+/* AŞAMA GÖSTERGESİ */
+#asama-bar {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 6px; z-index: 1000;
+  background: rgba(0,0,0,0.08);
+}
+#asama-dolgu {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gunes), var(--turuncu), #9D4EDD);
+  transition: width 0.6s ease;
+}
+
+/* ═══════════════════════════════════════════
+   HİKAYE POPUP
+═══════════════════════════════════════════ */
+#popup-arka {
+  position: fixed; inset: 0;
+  background: rgba(15,15,20,0.55);
+  backdrop-filter: blur(6px);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  transition: opacity 0.3s;
+}
+#popup-arka.gizli { opacity: 0; pointer-events: none; }
+
+.popup-kutu {
+  background: linear-gradient(145deg, #FFFEF5, #FFF8E7);
+  border-radius: 28px;
+  padding: 32px 36px;
+  max-width: 480px; width: 100%;
+  border: 3px solid var(--gunes-acik);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+  position: relative; overflow: hidden;
+  animation: popupGel 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes popupGel { from { transform: scale(0.88) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.popup-kutu::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(245,166,35,0.18), transparent 60%);
+  pointer-events: none;
+}
+.popup-emoji { font-size: 4.5rem; display: block; text-align: center; margin-bottom: 12px; animation: emojiZipla 0.5s ease; }
+@keyframes emojiZipla { from { transform: scale(0) rotate(-20deg); } to { transform: scale(1) rotate(0); } }
+.popup-baslik {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 1.7rem; color: var(--toprak-koyu);
+  text-align: center; margin-bottom: 12px;
+  position: relative; z-index: 1;
+}
+.popup-metin {
+  font-size: 0.98rem; color: #5C3B1E; line-height: 1.65;
+  text-align: center; margin-bottom: 16px; position: relative; z-index: 1;
+}
+.popup-bilgi {
+  background: rgba(245,166,35,0.15);
+  border-left: 4px solid var(--gunes);
+  border-radius: 10px; padding: 12px 14px;
+  font-family: 'Crimson Pro', serif; font-style: italic;
+  font-size: 0.92rem; color: #6B4000;
+  margin-bottom: 20px; position: relative; z-index: 1;
+}
+.popup-btn {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 1.25rem;
+  width: 100%; padding: 15px;
+  background: linear-gradient(135deg, var(--turuncu), #D45A25);
+  color: white; border: none; border-radius: 16px; cursor: pointer;
+  box-shadow: 0 6px 0 var(--turuncu-koyu);
+  transition: transform 0.1s, box-shadow 0.1s;
+  position: relative; z-index: 1;
+}
+.popup-btn:hover { transform: translateY(3px); box-shadow: 0 3px 0 var(--turuncu-koyu); }
+
+/* HUD */
+#hud {
+  position: fixed; top: 6px; left: 0; right: 0;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 20px; z-index: 200; pointer-events: none;
+}
+.hud-kart {
+  background: rgba(255,255,255,0.88);
+  border: 2px solid rgba(232,99,42,0.18);
+  border-radius: 14px; padding: 8px 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  backdrop-filter: blur(8px);
+}
+.hud-kart .etiket { font-size: 0.65rem; color: #999; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+.hud-kart .deger { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.4rem; color: var(--turuncu); }
+
+.sure-bar-wrap { flex: 1; margin: 0 14px; }
+.sure-etiket { font-size: 0.7rem; color: rgba(255,255,255,0.9); font-weight: 700; text-align: center; margin-bottom: 4px; text-shadow: 0 1px 3px rgba(0,0,0,0.4); }
+.sure-bar-dis { height: 14px; background: rgba(255,255,255,0.7); border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+#sure-dolgu { height: 100%; border-radius: 10px; background: linear-gradient(90deg, var(--turuncu), var(--gunes)); transition: width 0.5s linear, background 0.5s; }
+
+/* UÇAN PAMUK & PUAN POP */
+.ucuyor { position: fixed; pointer-events: none; z-index: 800; font-size: 26px; will-change: transform, opacity; }
+.puan-pop {
+  position: fixed; pointer-events: none; z-index: 800;
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 2rem; color: var(--gunes);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  animation: puanYuksel 1.2s ease forwards;
+}
+@keyframes puanYuksel {
+  0%    { transform: translateY(0) scale(0.5); opacity: 1; }
+  60%   { transform: translateY(-60px) scale(1.2); opacity: 1; }
+  100% { transform: translateY(-100px) scale(0.8); opacity: 0; }
+}
+
+/* KONFETI */
+.konfeti { position: fixed; pointer-events: none; z-index: 900; border-radius: 3px; }
+
+/* RÜZGAR */
+.ruzgar-p {
+  position: fixed; pointer-events: none; z-index: 5;
+  color: rgba(91,164,207,0.55); font-size: 18px;
+  animation: ruzgarGit linear forwards;
+}
+@keyframes ruzgarGit {
+  from { transform: translateX(0) translateY(0) rotate(0deg); opacity: 0.8; }
+  to   { transform: translateX(250px) translateY(-30px) rotate(180deg); opacity: 0; }
+}
+
+/* KOMBO */
+#kombo-goster {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%,-50%) scale(0);
+  font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 2.8rem; color: var(--turuncu);
+  text-shadow: 0 0 30px rgba(232,99,42,0.7);
+  z-index: 850; pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#kombo-goster.goster { transform: translate(-50%,-50%) scale(1); }
+
+/* SEVIYE ROZET */
+#seviye-rozet {
+  position: fixed; top: 80px; left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: linear-gradient(135deg, #AB47BC, #7B1FA2);
+  color: white; font-family: 'Baloo 2', sans-serif; font-weight: 800;
+  font-size: 1.3rem; padding: 10px 28px; border-radius: 40px; z-index: 700;
+  box-shadow: 0 6px 24px rgba(171,71,188,0.45);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+#seviye-rozet.goster { transform: translateX(-50%) scale(1); }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 1: EKİM (İKLİM AYARLAMA)
+═══════════════════════════════════════════ */
+#asama1 {
+  background:
+    linear-gradient(180deg, #87CEEB 0%, #B8E2F2 38%, #5D9B4A 38%, #4A7A3A 55%, #7C4A2D 55%, #5C3A21 100%);
+  overflow: hidden;
+}
+.a1-icerik {
+  position: relative; z-index: 10;
+  background: rgba(255,255,255,0.88);
+  border-radius: 28px; padding: 28px 32px;
+  max-width: 520px; width: 90%; margin: 0 16px;
+  border: 2px solid rgba(245,166,35,0.3);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+}
+.a1-baslik {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.6rem;
+  color: var(--toprak-koyu); text-align: center; margin-bottom: 8px;
+}
+.ayar-satir { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin: 14px 0; }
+.ayar-grup { flex: 1; text-align: center; }
+.ayar-etiket { font-size: 0.72rem; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+
+.mevsim-sec {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.mevsim-ok {
+  font-size: 1.5rem; cursor: pointer; padding: 8px;
+  border-radius: 50%; background: rgba(245,166,35,0.1);
+  border: 2px solid rgba(245,166,35,0.2);
+  transition: all 0.15s; line-height: 1;
+}
+.mevsim-ok:hover { background: rgba(245,166,35,0.25); transform: scale(1.1); }
+.mevsim-kutu {
+  min-width: 130px; padding: 10px 14px;
+  background: white; border-radius: 14px;
+  border: 2px solid rgba(245,166,35,0.25);
+  font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 1rem;
+  color: var(--turuncu); box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.sicaklik-satir { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.sicaklik-btn {
+  width: 40px; height: 40px;
+  background: white; border: 2px solid rgba(245,166,35,0.2);
+  border-radius: 50%; font-size: 1.4rem; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.sicaklik-btn:hover { background: rgba(245,166,35,0.1); transform: scale(1.1); }
+.sicaklik-deger {
+  min-width: 90px; padding: 10px;
+  background: white; border-radius: 14px;
+  border: 2px solid rgba(232,99,42,0.2);
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.1rem;
+  color: #E53E3E; box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+.durum-kutu {
+  border-radius: 14px; padding: 12px 16px;
+  font-family: 'Crimson Pro', serif; font-style: italic;
+  font-size: 0.95rem; margin: 14px 0;
+  transition: all 0.4s; text-align: center;
+}
+.durum-yanlis { background: rgba(239,68,68,0.08); border: 2px solid rgba(239,68,68,0.2); color: #9B1C1C; }
+.durum-dogru { background: rgba(62,138,79,0.10); border: 2px solid rgba(62,138,79,0.3); color: #14532D; }
+
+.ekimi-basla-btn {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.2rem;
+  width: 100%; padding: 15px; border-radius: 16px; border: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.ekimi-basla-btn.aktif {
+  background: linear-gradient(135deg, var(--yesil), #2D6E3E);
+  color: white; box-shadow: 0 6px 0 #1A4D2A;
+}
+.ekimi-basla-btn.aktif:hover { transform: translateY(3px); box-shadow: 0 3px 0 #1A4D2A; }
+.ekimi-basla-btn.pasif { background: #E2E8F0; color: #94A3B8; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 2: BÜYÜME ANİMASYONU
+═══════════════════════════════════════════ */
+#asama2 {
+  background: linear-gradient(180deg, #3B7EC8 0%, #87CEEB 35%, #5D9B4A 35%, #3A6E2F 55%, #7C4A2D 55%, #5C3A21 100%);
+  overflow: hidden;
+}
+.buyume-sahne {
+  position: relative; width: min(90vw, 480px); height: 320px;
+  border-radius: 24px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.b-gunes {
+  position: absolute; top: 20px; right: 40px;
+  width: 72px; height: 72px;
+  background: radial-gradient(circle, #FFE566 40%, #FFD700 70%, rgba(255,215,0,0) 100%);
+  border-radius: 50%;
+  box-shadow: 0 0 60px rgba(255,215,0,0.6);
+  animation: guneparlat 3s ease-in-out infinite;
+}
+@keyframes guneparlat { 0%,100% { box-shadow: 0 0 60px rgba(255,215,0,0.5); } 50% { box-shadow: 0 0 120px rgba(255,215,0,0.9); } }
+
+.b-tohum { position: absolute; font-size: 2.8rem; left: 50%; top: 50%; transform: translate(-50%,-50%); opacity: 0; transition: all 0.8s ease; }
+.b-tohum.goster { opacity: 1; top: 58%; }
+
+.b-bitki {
+  position: absolute; bottom: 30%; left: 50%; transform: translateX(-50%) scaleY(0);
+  transform-origin: bottom center; display: flex; flex-direction: column; align-items: center;
+  transition: transform 3.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.b-bitki.buyut { transform: translateX(-50%) scaleY(1); }
+.b-sap { width: 10px; height: 130px; background: linear-gradient(to right, #4CAF50, #2E7D32); border-radius: 5px; }
+.b-koza {
+  font-size: 4rem; position: absolute; top: -35px;
+  opacity: 0; transform: scale(0);
+  transition: opacity 1s ease 2.5s, transform 1s ease 2.5s;
+  filter: drop-shadow(0 5px 12px rgba(0,0,0,0.15));
+}
+.b-bitki.buyut .b-koza { opacity: 1; transform: scale(1); }
+
+.b-su {
+  position: absolute; font-size: 1.4rem; opacity: 0;
+  transition: top 1s ease, opacity 0.5s;
+}
+
+.buyume-bilgi {
+  background: rgba(255,255,255,0.88);
+  border-radius: 20px; padding: 18px 24px;
+  max-width: min(90vw, 480px); width: 100%;
+  border: 2px solid rgba(62,138,79,0.2);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  margin-top: 16px; text-align: center;
+}
+.buyume-bilgi h3 { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.2rem; color: var(--yesil); margin-bottom: 6px; }
+.buyume-bilgi p { font-family: 'Crimson Pro', serif; font-size: 0.95rem; color: #4A6741; line-height: 1.55; }
+
+.hasat-git-btn {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.35rem;
+  padding: 16px 56px; border-radius: 60px; border: none; cursor: pointer;
+  background: linear-gradient(135deg, #3E8A4F, #2D6E3E);
+  color: white; box-shadow: 0 8px 0 #1A4D2A, 0 16px 32px rgba(62,138,79,0.3);
+  margin-top: 16px; opacity: 0; pointer-events: none;
+  transition: opacity 0.5s, transform 0.1s, box-shadow 0.1s;
+}
+.hasat-git-btn.goster { opacity: 1; pointer-events: all; }
+.hasat-git-btn:hover { transform: translateY(4px); box-shadow: 0 4px 0 #1A4D2A; }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 3: HASAT
+═══════════════════════════════════════════ */
+#asama3 {
+  background: transparent;
+  flex-direction: column; padding: 0;
+}
+#asama3-zemin {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, #3B7EC8 0%, #87CEEB 38%, #5D9B4A 38%, #4A7A3A 50%, #7C4A2D 50%, #5C3A21 100%);
+}
+#asama3-alan {
+  position: absolute; inset: 0;
+  overflow: hidden;
+}
+
+/* Bulutlar */
+.bulut {
+  position: absolute; background: white; border-radius: 50px; opacity: 0.85;
+  animation: bulutGit linear infinite;
+}
+@keyframes bulutGit { from { transform: translateX(-200px); } to { transform: translateX(110vw); } }
+
+/* Pamuk Bitkisi */
+.pamuk-bitki {
+  position: absolute; bottom: 0;
+  display: flex; flex-direction: column; align-items: center;
+  transform-origin: bottom center;
+}
+.p-sap { width: 8px; background: linear-gradient(180deg, #558B2F, #33691E); border-radius: 4px; position: relative; }
+.p-yaprak {
+  position: absolute; height: 15px;
+  background: linear-gradient(135deg, #66BB6A, #43A047);
+  border-radius: 50% 0;
+  transform-origin: center left;
+  animation: yaprakSallan 2.2s ease-in-out infinite;
+}
+.p-yaprak.sag { transform-origin: center right; border-radius: 0 50%; }
+@keyframes yaprakSallan { 0%,100% { transform: rotate(-5deg); } 50% { transform: rotate(6deg); } }
+
+.p-koza { width: 58px; height: 50px; position: relative; cursor: pointer; transition: transform 0.2s; z-index: 20; }
+.p-koza:hover { transform: scale(1.18); }
+.p-puf {
+  position: absolute; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FFFFFF, #F0EEE6);
+  box-shadow: inset -3px -3px 6px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.12);
+}
+.p-koza.toplandi { opacity: 0.3; transform: scale(0.75); pointer-events: none; }
+.p-kapsul {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 14px; height: 18px;
+  background: linear-gradient(180deg, #8BC34A, #558B2F);
+  border-radius: 4px 4px 2px 2px;
+}
+
+/* Sepet */
+#sepet-wrap {
+  position: fixed; bottom: 18px; left: 50%;
+  transform: translateX(-50%); z-index: 60;
+  display: flex; flex-direction: column; align-items: center; pointer-events: none;
+}
+#sepet-kol { width: 66px; height: 28px; border: 6px solid #8B5E3C; border-bottom: none; border-radius: 33px 33px 0 0; margin-bottom: -3px; }
+#sepet {
+  width: 96px; height: 68px;
+  background: linear-gradient(180deg, #C8963C, #9A6B28);
+  border-radius: 0 0 48px 48px;
+  border-top: 6px solid #B8863C;
+  position: relative; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+#sepet::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255,255,255,0.12) 6px, rgba(255,255,255,0.12) 8px);
+}
+#sepet-pamuk {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.9), rgba(240,240,230,0.95));
+  border-radius: 0 0 48px 48px; transition: height 0.3s ease; height: 0;
+}
+
+/* ═══════════════════════════════════════════
+   AŞAMA 4: ÇIKRIK (İPLİK)
+═══════════════════════════════════════════ */
+#asama4 {
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(139,94,60,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(245,166,35,0.12) 0%, transparent 50%),
+    linear-gradient(160deg, #FEF3D4 0%, #FDE8B8 50%, #FEF9EE 100%);
+}
+.cark-kapsul {
+  background: rgba(255,255,255,0.82);
+  border-radius: 32px; padding: 32px 36px;
+  width: min(92vw, 480px);
+  border: 2px solid rgba(139,94,60,0.18);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.12);
+  text-align: center;
+}
+.cark-baslik { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.5rem; color: var(--toprak-koyu); margin-bottom: 6px; }
+.cark-alt { font-family: 'Crimson Pro', serif; font-style: italic; font-size: 0.95rem; color: #7A5030; margin-bottom: 20px; }
+
+#cark-wrap { position: relative; width: 240px; height: 240px; margin: 0 auto 20px; touch-action: none; }
+#cark-dis {
+  width: 100%; height: 100%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #D7CCC8, #8B6954);
+  border: 14px solid var(--kahve);
+  box-shadow: 0 12px 36px rgba(0,0,0,0.35), inset 0 4px 12px rgba(0,0,0,0.2);
+  position: relative; overflow: hidden;
+}
+.cark-ispiti {
+  position: absolute; top: 50%; left: 0;
+  width: 100%; height: 10px;
+  background: linear-gradient(90deg, var(--toprak-koyu) 0%, var(--kahve) 50%, var(--toprak-koyu) 100%);
+  transform-origin: center; margin-top: -5px; border-radius: 5px;
+}
+#cark-merkez {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; z-index: 10; pointer-events: none;
+}
+#cark-kol {
+  position: absolute; top: 16px; right: 16px;
+  width: 36px; height: 36px;
+  background: radial-gradient(circle at 30% 30%, #EF4444, #B91C1C);
+  border-radius: 50%; z-index: 20;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4), inset 0 2px 4px rgba(255,255,255,0.3);
+  border: 3px solid #991B1B; cursor: grab;
+}
+#cark-kol:active { cursor: grabbing; }
+
+.iplik-bar-dis {
+  width: 100%; height: 22px;
+  background: #E2E8F0; border-radius: 11px; overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 10px;
+}
+#iplik-dolgu {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #60A5FA, #8B5CF6);
+  border-radius: 11px; transition: width 0.08s;
+}
+.iplik-yuzde { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.1rem; color: #5B3A8A; }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 5: DİKİŞ MAKİNESİ
+═══════════════════════════════════════════ */
+#asama5 {
+  background:
+    radial-gradient(ellipse at 70% 30%, rgba(236,72,153,0.08) 0%, transparent 50%),
+    linear-gradient(160deg, #FFF0F8 0%, #FDE8F5 50%, #F8F0FF 100%);
+}
+.dikis-kapsul {
+  background: rgba(255,255,255,0.85);
+  border-radius: 32px; padding: 28px 32px;
+  width: min(92vw, 500px);
+  border: 2px solid rgba(236,72,153,0.2);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.1);
+  text-align: center;
+}
+.dikis-baslik { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.45rem; color: #831843; margin-bottom: 6px; }
+.dikis-alt { font-family: 'Crimson Pro', serif; font-style: italic; font-size: 0.95rem; color: #9D174D; margin-bottom: 20px; }
+
+.makine-sahne {
+  position: relative; width: 260px; height: 140px;
+  margin: 0 auto 20px; background: linear-gradient(135deg, #F1F5F9, #E2E8F0);
+  border-radius: 20px; border: 3px solid #CBD5E1;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1), inset 0 2px 6px rgba(0,0,0,0.05);
+  overflow: hidden;
+}
+.makine-govde {
+  position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+  width: 160px; height: 70px;
+  background: linear-gradient(135deg, #64748B, #475569);
+  border-radius: 12px; box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+.makine-kol {
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+  width: 8px; height: 60px;
+  background: linear-gradient(180deg, #94A3B8, #64748B);
+  border-radius: 4px;
+}
+.makine-igne {
+  position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 28px;
+  background: linear-gradient(180deg, #94A3B8, #C0C0C0);
+  border-radius: 2px;
+}
+.makine-igne.dikiyor { animation: igneHareket 0.12s infinite; }
+@keyframes igneHareket { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(18px); } }
+
+.kumas-serit {
+  position: absolute; bottom: 26px; left: 80px; right: 20px; height: 14px;
+  background: repeating-linear-gradient(45deg, #F87171, #F87171 8px, #FCA5A5 8px, #FCA5A5 16px);
+  border-radius: 6px;
+  clip-path: inset(0 100% 0 0); transition: clip-path 0.08s;
+}
+
+.dikis-btn {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.3rem;
+  background: linear-gradient(135deg, #334155, #1E293B);
+  color: white; padding: 16px 48px;
+  border-radius: 16px; border: none;
+  border-bottom: 6px solid #0F172A; cursor: pointer;
+  transition: all 0.08s; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  touch-action: none;
+}
+.dikis-btn:active { transform: translateY(6px); border-bottom-width: 0; }
+
+.dikis-bar-dis {
+  width: 100%; height: 18px;
+  background: #E2E8F0; border-radius: 9px; overflow: hidden;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 8px; margin-top: 16px;
+}
+#dikis-dolgu {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #EC4899, #A855F7);
+  border-radius: 9px; transition: width 0.08s;
+}
+
+/* SONUÇ */
+#sonuc-kutu {
+  background: rgba(255,255,255,0.9);
+  border-radius: 28px; padding: 32px;
+  max-width: 500px; width: 90%;
+  border: 3px solid var(--gunes-acik);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.15);
+  text-align: center;
+}
+.sonuc-baslik { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 2rem; color: var(--toprak-koyu); margin-bottom: 8px; }
+.sonuc-puan { font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 5rem; color: var(--turuncu); line-height: 1; margin: 8px 0; }
+.tisortler { font-size: 2.5rem; margin: 12px 0; line-height: 1.4; }
+.sonuc-bilgi { font-family: 'Crimson Pro', serif; font-size: 1.05rem; color: #5C3B1E; line-height: 1.6; margin-bottom: 20px; }
+.sonuc-bilgi-kutu {
+  background: rgba(245,166,35,0.1); border-left: 4px solid var(--gunes);
+  border-radius: 10px; padding: 14px; margin-bottom: 20px;
+  font-family: 'Crimson Pro', serif; font-style: italic; font-size: 0.95rem; color: #6B4000;
+}
+.yeniden-btn {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.2rem;
+  background: linear-gradient(135deg, #26C6DA, #00ACC1);
+  color: white; padding: 16px 48px; border-radius: 60px; border: none;
+  box-shadow: 0 8px 0 #0097A7; cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.yeniden-btn:hover { transform: translateY(4px); box-shadow: 0 4px 0 #0097A7; }
+
+/* SHAKE */
+@keyframes titre { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-8px) rotate(-2deg); } 40% { transform: translateX(8px) rotate(2deg); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+.titres { animation: titre 0.4s ease; }
+
+/* Geçiş animasyonu */
+@keyframes sahneGel { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+.sahne-animasyon { animation: sahneGel 0.5s ease; }
+</style>
+</head>
+<body>
+
+<div id="cursor">🤲</div>
+<div id="asama-bar"><div id="asama-dolgu" style="width:0%"></div></div>
+
+<div class="ekran" id="anasayfa">
+  <div id="deko-pamuklar"></div>
+  
+  <div class="sol-ust-logo">
+    <img src="orjinal.svg" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+  </div>
+
+  <div class="ana-icerik">
+    <div class="ana-baslik">Pamuk: <span class="vurgu">Beyaz Altın</span></div>
+    
+    <div class="pamuk-resim-alani">
+      <img src="pamuk.png" alt="Pamuk" class="pamuk-png" onerror="this.style.display='none'">
+    </div>
+
+    <div class="ana-alt-baslik">Adana'nın Çukurova Tarlalarından Tişörte Uzanan Yolculuk</div>
+    <div class="kapak-kart">
+      <p>
+        Merhaba küçük çiftçi! Ben <strong>Pamukcuk</strong> — Adana'nın bereketli Çukurova tarlalarında büyüyen bir pamuk tohumuyum. 🌱<br><br>
+        Benimle birlikte <strong>tohum ekiminden</strong> başlayıp, <strong>çıkrıkta iplik</strong> büküp, <strong>dikiş makinesiyle</strong> tişört dikene kadar tüm yolculuğu yaşayacaksın!
+      </p>
+    </div>
+    <a href="https://drive.google.com/file/d/1rnedEFXsQD4r0DNQRJ_lJx99NKjUZP1Z/view?usp=drive_link"
+       target="_blank" class="kaynak-link">
+      📄 Can Yıldırım'ın çalışmasına ulaşmak için tıklayın
+    </a><br>
+    <button class="baslat-btn" onclick="oyunuBaslat()">🌾 Maceraya Başla!</button>
+  </div>
+</div>
+
+<div id="hud" style="display:none">
+  <div class="hud-kart">
+    <div class="etiket">Balya</div>
+    <div class="deger" id="balyaGoster">0</div>
+  </div>
+  <div class="sure-bar-wrap" id="sure-wrap" style="display:none">
+    <div class="sure-etiket">⏳ Süre</div>
+    <div class="sure-bar-dis"><div id="sure-dolgu" style="width:100%"></div></div>
+  </div>
+  <div class="hud-kart">
+    <div class="etiket">Aşama</div>
+    <div class="deger" id="asamaGoster">1/5</div>
+  </div>
+</div>
+
+<div id="popup-arka" class="gizli">
+  <div class="popup-kutu">
+    <span class="popup-emoji" id="popupEmoji">🌱</span>
+    <div class="popup-baslik" id="popupBaslik">Başlık</div>
+    <div class="popup-metin" id="popupMetin">Metin</div>
+    <div class="popup-bilgi" id="popupBilgi">Bilgi</div>
+    <button class="popup-btn" id="popupBtn" onclick="popupKapat()">Devam! ➡️</button>
+  </div>
+</div>
+
+<div id="kombo-goster"></div>
+<div id="seviye-rozet"></div>
+
+<div class="ekran gizli" id="asama1">
+  <div class="a1-icerik">
+    <div class="a1-baslik">🌡️ İklim ve Ekim Koşulları</div>
+    <p style="font-family:'Crimson Pro',serif;font-style:italic;font-size:0.93rem;color:#7A5030;text-align:center;margin-bottom:16px;">Pamuk tohumu için doğru mevsimi ve toprak sıcaklığını ayarla!</p>
+    <div class="ayar-satir">
+      <div class="ayar-grup">
+        <div class="ayar-etiket">🍂 Mevsim</div>
+        <div class="mevsim-sec">
+          <button class="mevsim-ok" onclick="mevsimDegistir(-1)">◀</button>
+          <div class="mevsim-kutu" id="mevsimKutu">Kış ❄️</div>
+          <button class="mevsim-ok" onclick="mevsimDegistir(1)">▶</button>
+        </div>
+      </div>
+      <div class="ayar-grup">
+        <div class="ayar-etiket">🌡️ Toprak °C</div>
+        <div class="sicaklik-satir">
+          <button class="sicaklik-btn" onclick="sicaklikDegistir(-5)">➖</button>
+          <div class="sicaklik-deger" id="sicaklikDeger">10°C</div>
+          <button class="sicaklik-btn" onclick="sicaklikDegistir(5)">➕</button>
+        </div>
+      </div>
+    </div>
+    <div class="durum-kutu durum-yanlis" id="ekimDurum">
+      ❌ Pamuk için koşullar henüz uygun değil. İlkbahar'ı seç ve sıcaklığı 25–30°C yap!
+    </div>
+    <button class="ekimi-basla-btn pasif" id="ekimBtn" disabled onclick="ekimiBaslat()">
+      Şartlar Uygun Değil ❌
+    </button>
+  </div>
+</div>
+
+<div class="ekran gizli" id="asama2">
+  <div class="buyume-sahne" id="buyumeSahne">
+    <div class="b-gunes"></div>
+    <div class="b-tohum" id="bTohum">🫘</div>
+    <div class="b-bitki" id="bBitki">
+      <div class="b-koza">☁️</div>
+      <div class="b-sap"></div>
+    </div>
+  </div>
+  <div class="buyume-bilgi" id="buyumeBilgi">
+    <h3 id="buyumeBaslik">Tohum Hazırlanıyor...</h3>
+    <p id="buyumeMetin">Çukurova'nın verimli toprağına tohum düşüyor...</p>
+  </div>
+  <button class="hasat-git-btn" id="hasatGitBtn" onclick="asama3Git()">
+    🧺 Hasat Zamanı! Tarlaya Git!
+  </button>
+</div>
+
+<div class="ekran gizli" id="asama3">
+  <div id="asama3-zemin"></div>
+  <div id="asama3-alan"></div>
+  <div id="sepet-wrap">
+    <div id="sepet-kol"></div>
+    <div id="sepet"><div id="sepet-pamuk"></div></div>
+  </div>
+</div>
+
+<div class="ekran gizli" id="asama4">
+  <div class="cark-kapsul">
+    <div class="cark-baslik">🧵 İplik Çıkrığı</div>
+    <div class="cark-alt">Kırmızı kolu tut, fareyi dairesel çevir — 3 tam tur!</div>
+    <div class="popup-bilgi" style="margin-bottom:16px;font-family:'Crimson Pro',serif;font-style:italic;font-size:0.88rem;color:#6B4000;">
+      💡 Toplanan pamuklar çırçır fabrikalarında çekirdeğinden ayrılır ve geleneksel çıkrıkta ince ipliklere dönüştürülür.
+    </div>
+    <div id="cark-wrap">
+      <div id="cark-dis">
+        <div class="cark-ispiti" style="transform:rotate(0deg)"></div>
+        <div class="cark-ispiti" style="transform:rotate(45deg)"></div>
+        <div class="cark-ispiti" style="transform:rotate(90deg)"></div>
+        <div class="cark-ispiti" style="transform:rotate(135deg)"></div>
+        <div id="cark-merkez">🧵</div>
+        <div id="cark-kol"></div>
+      </div>
+    </div>
+    <div class="iplik-bar-dis"><div id="iplik-dolgu"></div></div>
+    <div class="iplik-yuzde" id="iplikYuzde">İplik Sarılıyor: 0%</div>
+  </div>
+</div>
+
+<div class="ekran gizli" id="asama5">
+  <div class="dikis-kapsul" id="dikisKapsul">
+    <div class="dikis-baslik">🪡 Tekstil Atölyesi</div>
+    <div class="dikis-alt">"DİKİŞ YAP" butonuna basılı tut, kumaşı dik!</div>
+    <div class="makine-sahne" id="makineSahne">
+      <div class="makine-kol">
+        <div class="makine-igne" id="makineIgne"></div>
+      </div>
+      <div class="makine-govde"></div>
+      <div class="kumas-serit" id="kumasSerit"></div>
+    </div>
+    <div class="dikis-bar-dis"><div id="dikis-dolgu"></div></div>
+    <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1rem;color:#9D174D;margin-bottom:14px;" id="dikisYuzde">Dikiş İlerlemesi: 0%</div>
+    <button class="dikis-btn" id="dikisBtn" ontouchstart="dikisiBaslat(event)" ontouchend="dikisiDurdur(event)">
+      👇 BASILI TUT 👇
+    </button>
+  </div>
+
+  <div id="sonuc-kutu" style="display:none">
+    <div class="sonuc-baslik">🎉 Harika bir iş çıkardın!</div>
+    <div style="font-family:'Crimson Pro',serif;font-style:italic;color:#7A5030;font-size:1rem;margin-bottom:8px;">Topladığın balya pamuktan:</div>
+    <div class="sonuc-puan" id="sonucBalya">0</div>
+    <div style="font-family:'Baloo 2',sans-serif;font-weight:700;color:#888;font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">BALYA PAMUK</div>
+    <div class="tisortler" id="tisortler"></div>
+    <div style="font-family:'Baloo 2',sans-serif;font-weight:800;font-size:1.8rem;color:var(--turuncu);margin-bottom:8px;"><span id="tisortSayisi">0</span> Adet Tişört Üretildi!</div>
+    <div class="sonuc-bilgi-kutu" id="sonucBilgi">Pamuk bilgisi yükleniyor...</div>
+    <button class="yeniden-btn" onclick="oyunuYenidenBaslat()">🔄 Yeni Hasat!</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  WEB AUDIO API – DOSYASIZ SES SENTEZİ
+// ═══════════════════════════════════════════════════
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function sesCarpal(freq, type='sine', dur=0.15, gain=0.3, delay=0) {
+  try {
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.connect(g); g.connect(ctx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    g.gain.setValueAtTime(0, ctx.currentTime + delay);
+    g.gain.linearRampToValueAtTime(gain, ctx.currentTime + delay + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + dur);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + dur + 0.01);
+  } catch(e){}
+}
+
+function sesTik() { sesCarpal(800, 'sine', 0.08, 0.2); }
+function sesDogru() {
+  sesCarpal(440, 'sine', 0.15, 0.3);
+  sesCarpal(660, 'sine', 0.15, 0.3, 0.1);
+  sesCarpal(880, 'sine', 0.2, 0.3, 0.2);
+}
+function sesCapalama() {
+  for(let i=0; i<3; i++) sesCarpal(180 + i*30, 'sawtooth', 0.12, 0.15, i*0.12);
+}
+function sesSulama() {
+  for(let i=0; i<8; i++) {
+    sesCarpal(400 + Math.random()*400, 'sine', 0.1, 0.1, i*0.06);
+  }
+}
+function sesBuyume() {
+  for(let i=0; i<6; i++) sesCarpal(200 + i*80, 'sine', 0.3, 0.2, i*0.2);
+}
+function sesSepet() {
+  sesCarpal(600, 'sine', 0.08, 0.25);
+  sesCarpal(800, 'sine', 0.1, 0.2, 0.05);
+}
+
+let carkSesAktif = false;
+let carkOscillator = null;
+function sesCarkBaslat() {
+  if(carkSesAktif) return;
+  try {
+    const ctx = getAudioCtx();
+    carkOscillator = ctx.createOscillator();
+    const g = ctx.createGain();
+    carkOscillator.connect(g); g.connect(ctx.destination);
+    carkOscillator.type = 'sawtooth';
+    carkOscillator.frequency.setValueAtTime(60, ctx.currentTime);
+    g.gain.setValueAtTime(0.08, ctx.currentTime);
+    carkOscillator.start();
+    carkSesAktif = true;
+  } catch(e){}
+}
+function sesCarkDurdur() {
+  if(!carkSesAktif || !carkOscillator) return;
+  try { carkOscillator.stop(); } catch(e){}
+  carkSesAktif = false; carkOscillator = null;
+}
+
+let dikisOscillator = null;
+let dikisAktif = false;
+function sesDikisBaslat() {
+  if(dikisAktif) return;
+  try {
+    const ctx = getAudioCtx();
+    dikisOscillator = ctx.createOscillator();
+    const g = ctx.createGain();
+    dikisOscillator.connect(g); g.connect(ctx.destination);
+    dikisOscillator.type = 'square';
+    dikisOscillator.frequency.setValueAtTime(120, ctx.currentTime);
+    g.gain.setValueAtTime(0.06, ctx.currentTime);
+    dikisOscillator.start();
+    dikisAktif = true;
+  } catch(e){}
+}
+function sesDikisDurdur() {
+  if(!dikisAktif || !dikisOscillator) return;
+  try { dikisOscillator.stop(); } catch(e){}
+  dikisAktif = false; dikisOscillator = null;
+}
+function sesKutlama() {
+  const notalar = [523,659,784,1047,1319];
+  notalar.forEach((f,i) => sesCarpal(f, 'sine', 0.3, 0.35, i*0.12));
+}
+
+// ═══════════════════════════════════════════════════
+//  ÖZEL İMLEÇ
+// ═══════════════════════════════════════════════════
+const cursorEl = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  cursorEl.style.left = e.clientX + 'px';
+  cursorEl.style.top  = e.clientY + 'px';
+});
+document.addEventListener('mousedown', () => { cursorEl.classList.add('active'); cursorEl.textContent = '✊'; });
+document.addEventListener('mouseup',   () => { cursorEl.classList.remove('active'); cursorEl.textContent = '🤲'; });
+
+// ═══════════════════════════════════════════════════
+//  GLOBAL OYUN DURUMU
+// ═══════════════════════════════════════════════════
+let balya = 0;
+let mevsimIdx = 0;
+let toprakSicak = 10;
+let popupKb = null;
+let haricKombo = 0, sonHasatZaman = 0;
+
+const mevsimler = ['Kış ❄️','İlkbahar 🌸','Yaz ☀️','Sonbahar 🍂'];
+const popupVerileri = {
+  a1: {
+    emoji:'🌱', baslik:'1. Aşama: Tohum Ekimi',
+    metin:'Pamukcuk toprakta uyuyor! Ona doğru iklimi hazırlamalısın. İlkbaharda, toprak 25–30°C olduğunda ekime başlanabilir.',
+    bilgi:'💡 Adana\'da pamuk ekimi Nisan başında yapılır. Çukurova\'nın killi-tınlı toprakları dünyada en kaliteli pamuk için idealdir!',
+    btn:'Koşulları Ayarla 🌡️'
+  },
+  a2: {
+    emoji:'🌿', baslik:'2. Aşama: Büyüme Mevsimi',
+    metin:'Tohum toprağa düştü! Şimdi güneş, yağmur ve zamana ihtiyaç var. Çukurova\'nın yaz sıcağı altında Pamukcuk büyüyecek...',
+    bilgi:'💡 Pamuk bitkisi yaklaşık 5–6 ay içinde olgunlaşır. Adana\'nın 40°C\'yi aşan yazları pamuk için mükemmeldir!',
+    btn:'Büyümeyi İzle 🌱'
+  },
+  a3: {
+    emoji:'🧺', baslik:'3. Aşama: Hasat Zamanı!',
+    metin:'Eylül geldi ve kozalar bembeyaz açıldı! Rüzgar esiyor, pamuklar sallıyor. Hızlı tıkla ve sepete topla!',
+    bilgi:'💡 Adana\'da hasat Eylül–Kasım aylarında yapılır. Eskiden tüm aile tarlaya çıkardı — bugün hasat makineleri kullanılır!',
+    btn:'Tarlaya Git! 🌬️'
+  },
+  a4: {
+    emoji:'🧵', baslik:'4. Aşama: İplik Çıkrığı',
+    metin:'Sepet doldu! Şimdi bu yumuşacık pamuğu ince ipliklere dönüştürme vakti. Kolu tut ve çevir!',
+    bilgi:'💡 Ham pamuk önce çırçır makinesinde çekirdeğinden ayrılır. Sonra eğrilip iplik haline gelir — 1 kg pamuktan yaklaşık 1.5 km iplik çıkar!',
+    btn:'Çıkrığı Çevir 🔄'
+  },
+  a5: {
+    emoji:'🪡', baslik:'5. Aşama: Dikiş Atölyesi',
+    metin:'İplik hazır, kumaş dokundu! Şimdi dikiş makinesinde tişörtler biçilecek. Butona bas ve dik!',
+    bilgi:'💡 1 adet tişört için yaklaşık 200 gram (0.2 kg) pamuk gerekir. Topladığın her 3 balya 1 tişört yapar!',
+    btn:'Dikişe Başla! 🪡'
+  }
+};
+
+const sonucBilgiler = [
+  'Adana\'da pamuk tarımının tarihi MÖ 2000 yılına dayanır! Çukurova ovası dünyanın en verimli pamuk tarlalarına ev sahipliği yapar.',
+  'Pamuktan sadece kumaş yapılmaz! Pamuk tohumu yağı, sabun, boya, banknot kağıdı ve hatta ilaç yapımında kullanılır.',
+  'Türkiye dünyada en çok pamuk üreten 5. ülkedir. Adana ve çevresi bu üretimin büyük bölümünü karşılar.',
+  '1 pamuk bitkisi yaklaşık 100–150 gram beyaz pamuk verir. Bir tişört için 4–5 bitki gerekir!',
+  'Adana\'da her yıl Ekim ayında Pamuk Festivali düzenlenir. Çiftçiler en güzel koza yarışmasında buluşur!'
+];
+
+// ═══════════════════════════════════════════════════
+//  YARDIMCI FONKSİYONLAR
+// ═══════════════════════════════════════════════════
+function ekranGoster(id) {
+  document.querySelectorAll('.ekran').forEach(e => e.classList.add('gizli'));
+  const el = document.getElementById(id);
+  el.classList.remove('gizli');
+  el.classList.add('sahne-animasyon');
+  setTimeout(() => el.classList.remove('sahne-animasyon'), 600);
+}
+
+function hudGuncelle() {
+  document.getElementById('balyaGoster').textContent = balya;
+}
+
+function asamaBarGuncelle(n, toplam=5) {
+  document.getElementById('asama-dolgu').style.width = ((n/toplam)*100) + '%';
+  document.getElementById('asamaGoster').textContent = `${n}/${toplam}`;
+}
+
+function popupAc(veriKey, cb) {
+  const v = popupVerileri[veriKey];
+  document.getElementById('popupEmoji').textContent = v.emoji;
+  document.getElementById('popupBaslik').textContent = v.baslik;
+  document.getElementById('popupMetin').textContent = v.metin;
+  document.getElementById('popupBilgi').textContent = v.bilgi;
+  document.getElementById('popupBtn').textContent = v.btn;
+  popupKb = cb;
+  document.getElementById('popup-arka').classList.remove('gizli');
+}
+
+function popupKapat() {
+  document.getElementById('popup-arka').classList.add('gizli');
+  if(popupKb) { popupKb(); popupKb = null; }
+}
+
+function puanPop(x, y, metin) {
+  const el = document.createElement('div');
+  el.className = 'puan-pop'; el.textContent = metin;
+  el.style.left = x + 'px'; el.style.top = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1200);
+}
+
+function konfetiBurst(x, y, sayi=16) {
+  const renkler = ['#FF6B35','#FFD700','#FF6B9D','#26C6DA','#AB47BC','#66BB6A','#FF8C42'];
+  for(let i=0; i<sayi; i++) {
+    const el = document.createElement('div');
+    el.className = 'konfeti';
+    el.style.left = x+'px'; el.style.top = y+'px';
+    el.style.width = (6+Math.random()*8)+'px';
+    el.style.height = (6+Math.random()*8)+'px';
+    el.style.background = renkler[Math.floor(Math.random()*renkler.length)];
+    const ang = Math.random()*Math.PI*2;
+    const dist = 80 + Math.random()*120;
+    document.body.appendChild(el);
+    el.animate([
+      {transform:`translate(0,0) rotate(0deg)`, opacity:1},
+      {transform:`translate(${Math.cos(ang)*dist}px,${Math.sin(ang)*dist}px) rotate(${Math.random()*720}deg)`, opacity:0}
+    ], {duration:900+Math.random()*600, easing:'cubic-bezier(0,0,0.2,1)', fill:'forwards'});
+    setTimeout(()=>el.remove(), 1600);
+  }
+}
+
+function buyukKonfeti() {
+  for(let i=0;i<60;i++) {
+    setTimeout(()=>konfetiBurst(
+      window.innerWidth*Math.random(),
+      window.innerHeight*0.3,3
+    ), Math.random()*1600);
+  }
+}
+
+function rozetGoster(metin, renk='#AB47BC') {
+  const r = document.getElementById('seviye-rozet');
+  r.textContent = metin;
+  r.style.background = `linear-gradient(135deg,${renk},${renk}cc)`;
+  r.classList.add('goster');
+  setTimeout(()=>r.classList.remove('goster'), 2400);
+}
+
+// ═══════════════════════════════════════════════════
+//  ANA SAYFA DEKOR
+// ═══════════════════════════════════════════════════
+(function() {
+  const wrap = document.getElementById('deko-pamuklar');
+  const emojiler = ['🌿','🌱','☁️','✨','🌾','🌸'];
+  for(let i=0;i<16;i++) {
+    const el = document.createElement('div');
+    el.className = 'deko-pamuk';
+    el.textContent = emojiler[i%emojiler.length];
+    el.style.left = (Math.random()*100)+'%';
+    el.style.animationDuration = (8+Math.random()*12)+'s';
+    el.style.animationDelay = (-Math.random()*15)+'s';
+    el.style.fontSize = (1.5+Math.random()*2.5)+'rem';
+    wrap.appendChild(el);
+  }
+})();
+
+function oyunuBaslat() {
+  sesTik();
+  balya = 0; haricKombo = 0;
+  document.getElementById('hud').style.display = 'flex';
+  hudGuncelle();
+  ekranGoster('asama1');
+  asamaBarGuncelle(1);
+  popupAc('a1', () => {});
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 1: EKİM
+// ═══════════════════════════════════════════════════
+function mevsimDegistir(yon) {
+  sesTik();
+  mevsimIdx = (mevsimIdx + yon + 4) % 4;
+  document.getElementById('mevsimKutu').textContent = mevsimler[mevsimIdx];
+  ekimKontrol();
+}
+function sicaklikDegistir(fark) {
+  sesTik();
+  toprakSicak = Math.max(0, Math.min(50, toprakSicak + fark));
+  document.getElementById('sicaklikDeger').textContent = toprakSicak + '°C';
+  ekimKontrol();
+}
+function ekimKontrol() {
+  const btn = document.getElementById('ekimBtn');
+  const dur = document.getElementById('ekimDurum');
+  if(mevsimIdx === 1 && toprakSicak >= 25 && toprakSicak <= 30) {
+    btn.disabled = false;
+    btn.className = 'ekimi-basla-btn aktif';
+    btn.textContent = '🌱 Koşullar Mükemmel! Ek! ✅';
+    dur.className = 'durum-kutu durum-dogru';
+    dur.textContent = '✅ İlkbahar + 25–30°C = Pamuk için ideal! Haydi ekelim!';
+    sesDogru();
+  } else {
+    btn.disabled = true;
+    btn.className = 'ekimi-basla-btn pasif';
+    btn.textContent = 'Şartlar Uygun Değil ❌';
+    dur.className = 'durum-kutu durum-yanlis';
+    const ipucu = mevsimIdx !== 1 ? 'İlkbahar\'ı seç!' : `Sıcaklık ${toprakSicak < 25 ? 'çok düşük' : 'çok yüksek'}! 25–30°C olmalı.`;
+    dur.textContent = '❌ ' + ipucu;
+  }
+}
+function ekimiBaslat() {
+  sesCapalama();
+  rozetGoster('🌱 Ekim Başarılı!', '#3E8A4F');
+  asamaBarGuncelle(2);
+  popupAc('a2', () => {
+    ekranGoster('asama2');
+    buyumeAnimasyonuBaslat();
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 2: BÜYÜME
+// ═══════════════════════════════════════════════════
+function buyumeAnimasyonuBaslat() {
+  const tohum = document.getElementById('bTohum');
+  const bitki = document.getElementById('bBitki');
+  const btn = document.getElementById('hasatGitBtn');
+  const bilgiB = document.getElementById('buyumeBaslik');
+  const bilgiM = document.getElementById('buyumeMetin');
+  tohum.style.opacity='0'; tohum.style.top='50%';
+  bitki.classList.remove('buyut'); btn.classList.remove('goster');
+  setTimeout(() => {
+    sesCapalama();
+    tohum.classList.add('goster');
+    bilgiB.textContent = '🫘 Tohum Toprağa Düşüyor...';
+    bilgiM.textContent = 'Çukurova\'nın verimli toprağına pamuk tohumu ekiliyor.';
+  }, 500);
+  setTimeout(() => {
+    sesSulama();
+    bilgiB.textContent = '💧 Yağmur Yağıyor...';
+    bilgiM.textContent = 'Sulama kanallarından tarlaya hayat veren su akıyor.';
+    const sahne = document.getElementById('buyumeSahne');
+    for(let i=0; i<10; i++) {
+      let d = document.createElement('div'); d.className = 'b-su';
+      d.textContent = '💧'; d.style.left = (20+Math.random()*60)+'%'; d.style.top = '0px';
+      sahne.appendChild(d);
+      setTimeout(()=>{ d.style.top='75%'; d.style.opacity='1'; }, 80);
+      setTimeout(()=>{ d.style.opacity='0'; }, 1200);
+      setTimeout(()=>d.remove(), 1600);
+    }
+  }, 2000);
+  setTimeout(() => {
+    sesBuyume();
+    tohum.style.opacity = '0';
+    bitki.classList.add('buyut');
+    bilgiB.textContent = '🌿 Pamuk Büyüyor!';
+    bilgiM.textContent = 'Çukurova güneşi altında bitki boy veriyor, kozalar oluşuyor...';
+  }, 4000);
+  setTimeout(() => {
+    sesDogru();
+    btn.classList.add('goster');
+    bilgiB.textContent = '☁️ Beyaz Altın Hazır!';
+    bilgiM.textContent = 'Kozalar açıldı! Hasat zamanı geldi. Tarlaya gidelim!';
+    konfetiBurst(window.innerWidth/2, window.innerHeight*0.4, 25);
+  }, 7500);
+}
+
+function asama3Git() {
+  sesTik();
+  asamaBarGuncelle(3);
+  popupAc('a3', () => {
+    ekranGoster('asama3');
+    hasatiBaslat();
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 3: HASAT
+// ═══════════════════════════════════════════════════
+let hasatAktif = false, hasatSure = 20, hasatInterval = null;
+let toplamPamuk = 0, toplananPamuk = 0;
+
+function hasatiBaslat() {
+  const alan = document.getElementById('asama3-alan');
+  alan.innerHTML = '';
+  balya = 0; haricKombo = 0; toplananPamuk = 0;
+  document.getElementById('sure-wrap').style.display = 'flex';
+  hudGuncelle();
+  for(let i=0; i<4; i++) {
+    let c = document.createElement('div'); c.className = 'bulut';
+    const w = 90+Math.random()*80;
+    c.style.width = w+'px'; c.style.height = (w*0.42)+'px';
+    c.style.top = (5+i*10)+'%';
+    c.style.animationDuration = (14+Math.random()*16)+'s';
+    c.style.animationDelay = (-Math.random()*20)+'s';
+    const b1=document.createElement('div'); b1.style.cssText=`position:absolute;background:white;border-radius:50%;width:${w*.55}px;height:${w*.55}px;top:-40%;left:18%;`;
+    const b2=document.createElement('div'); b2.style.cssText=`position:absolute;background:white;border-radius:50%;width:${w*.45}px;height:${w*.45}px;top:-30%;left:48%;`;
+    c.appendChild(b1); c.appendChild(b2); alan.appendChild(c);
+  }
+  toplamPamuk = 0;
+  const W = window.innerWidth;
+  const H = alan.offsetHeight;
+  const satirlar = [
+    {y:H*0.05, adet:Math.floor(W/120), sapH:100},
+    {y:H*0.20, adet:Math.floor(W/105), sapH:80},
+    {y:H*0.32, adet:Math.floor(W/95), sapH:65},
+  ];
+  satirlar.forEach(satir => {
+    const aralik = W / satir.adet;
+    for(let i=0; i<satir.adet; i++) {
+      const bitki = pamukBitkisiYap(satir.sapH);
+      bitki.style.left = (i*aralik + aralik/2 - 29) + 'px';
+      bitki.style.bottom = (H - satir.y - satir.sapH) + 'px';
+      bitki.querySelector('.p-koza').addEventListener('click', kozaTiklandi);
+      alan.appendChild(bitki);
+      toplamPamuk++;
+    }
+  });
+  hasatSure = 20; hasatAktif = true;
+  const bar = document.getElementById('sure-dolgu');
+  bar.style.width = '100%'; bar.style.background = 'linear-gradient(90deg,var(--turuncu),var(--gunes))';
+  clearInterval(hasatInterval);
+  hasatInterval = setInterval(() => {
+    hasatSure--;
+    const pct = hasatSure/20*100;
+    bar.style.width = pct+'%';
+    if(pct<30) bar.style.background = 'linear-gradient(90deg,#FF1744,var(--turuncu))';
+    if(hasatSure<=0) {
+      clearInterval(hasatInterval);
+      hasatBitti();
+    }
+  }, 1000);
+  const ruzgarInterval = setInterval(() => {
+    if(!hasatAktif) { clearInterval(ruzgarInterval); return; }
+    ruzgarEfekti();
+  }, 3000);
+}
+
+function pamukBitkisiYap(sapH) {
+  const bitki = document.createElement('div'); bitki.className = 'pamuk-bitki';
+  bitki.style.animation = `plantSway ${2+Math.random()*1.5}s ease-in-out infinite`;
+  bitki.style.animationDelay = Math.random()+'s';
+  const koza = document.createElement('div'); koza.className = 'p-koza';
+  const pufler = [[28,28,8,12],[22,22,2,6],[22,22,2,24],[18,18,18,2],[18,18,20,32]];
+  pufler.forEach(([w,h,t,l]) => {
+    const p=document.createElement('div'); p.className='p-puf';
+    p.style.width=w+'px'; p.style.height=h+'px'; p.style.top=t+'px'; p.style.left=l+'px';
+    koza.appendChild(p);
+  });
+  const kap=document.createElement('div'); kap.className='p-kapsul'; koza.appendChild(kap);
+  const sap=document.createElement('div'); sap.className='p-sap'; sap.style.height=sapH+'px';
+  const l1=document.createElement('div'); l1.className='p-yaprak'; l1.style.cssText=`width:26px;top:${sapH*.3}px;left:-18px;animation-delay:${Math.random()}s;`;
+  const l2=document.createElement('div'); l2.className='p-yaprak sag'; l2.style.cssText=`width:26px;top:${sapH*.55}px;right:-18px;animation-delay:${Math.random()+.5}s;`;
+  sap.appendChild(l1); sap.appendChild(l2);
+  bitki.appendChild(koza); bitki.appendChild(sap);
+  return bitki;
+}
+
+const swayStyle=document.createElement('style');
+swayStyle.textContent=`@keyframes plantSway{0%,100%{transform-origin:bottom center;transform:rotate(-4deg);}50%{transform-origin:bottom center;transform:rotate(4deg);}}`;
+document.head.appendChild(swayStyle);
+
+function kozaTiklandi(e) {
+  if(!hasatAktif) return;
+  const koza = e.currentTarget;
+  if(koza.classList.contains('toplandi')) return;
+  koza.classList.add('toplandi');
+  toplananPamuk++;
+  balya++;
+  sesSepet();
+  const simdi = Date.now();
+  if(simdi - sonHasatZaman < 700) haricKombo = Math.min(haricKombo+1, 10);
+  else haricKombo = 1;
+  sonHasatZaman = simdi;
+  hudGuncelle();
+  const rect = koza.getBoundingClientRect();
+  sepeteUc(rect.left+rect.width/2, rect.top+rect.height/2);
+  puanPop(rect.left+rect.width/2, rect.top, `+${haricKombo*10}`);
+  if(haricKombo>=3) komboGoster(haricKombo);
+  if(haricKombo>=5) konfetiBurst(rect.left, rect.top, 12);
+  sepetGuncelle();
+  if(toplananPamuk >= toplamPamuk) hasatBitti();
+}
+
+function sepeteUc(sx, sy) {
+  const el = document.createElement('div'); el.className = 'ucuyor'; el.textContent = '☁️';
+  el.style.left=sx+'px'; el.style.top=sy+'px';
+  document.body.appendChild(el);
+  const sep = document.getElementById('sepet');
+  const br = sep.getBoundingClientRect();
+  const ex=br.left+br.width/2, ey=br.top+br.height/2;
+  const cx=sx+(ex-sx)*0.3+(Math.random()-.5)*120, cy=sy-90-Math.random()*60;
+  let start=null;
+  function adim(ts){
+    if(!start) start=ts;
+    const t=Math.min((ts-start)/500,1), mt=1-t;
+    const x=mt*mt*sx+2*mt*t*cx+t*t*ex;
+    const y=mt*mt*sy+2*mt*t*cy+t*t*ey;
+    el.style.left=x+'px'; el.style.top=y+'px';
+    el.style.transform=`translate(-50%,-50%) scale(${1-t*.5}) rotate(${t*360}deg)`;
+    el.style.opacity=String(1-t*.5);
+    if(t<1) requestAnimationFrame(adim); else el.remove();
+  }
+  requestAnimationFrame(adim);
+}
+
+function komboGoster(n) {
+  const el = document.getElementById('kombo-goster');
+  el.textContent = n>=8 ? `🔥 x${n} EFSANE!` : `⚡ x${n} KOMBO!`;
+  el.classList.add('goster');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('goster'), 900);
+}
+
+function sepetGuncelle() {
+  const pct = Math.min(toplananPamuk/toplamPamuk, 1);
+  document.getElementById('sepet-pamuk').style.height = (pct*60)+'px';
+}
+
+function ruzgarEfekti() {
+  for(let i=0;i<5;i++) {
+    const el=document.createElement('div'); el.className='ruzgar-p'; el.textContent='〰️';
+    el.style.left=(Math.random()*70)+'%'; el.style.top=(20+Math.random()*50)+'%';
+    el.style.animationDuration=(0.7+Math.random()*.8)+'s';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 1500);
+  }
+  document.querySelectorAll('.pamuk-bitki').forEach(p=>{
+    p.style.animationDuration='0.25s';
+    setTimeout(()=>p.style.animationDuration='',600);
+  });
+}
+
+function hasatBitti() {
+  clearInterval(hasatInterval);
+  hasatAktif = false;
+  document.getElementById('sure-wrap').style.display = 'none';
+  if(balya < 3) balya = 3;
+  rozetGoster(`🧺 ${balya} Balya Toplandı!`, '#3E8A4F');
+  buyukKonfeti();
+  asamaBarGuncelle(4);
+  setTimeout(() => {
+    popupAc('a4', () => {
+      ekranGoster('asama4');
+      carkiBaslat();
+    });
+  }, 1500);
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 4: ÇIKRIK
+// ═══════════════════════════════════════════════════
+function carkiBaslat() {
+  const container = document.getElementById('cark-wrap');
+  const disk = document.getElementById('cark-dis');
+  let surukleniyor = false;
+  let toplamAci = 0, oncekiAci = null, gorunurAci = 0;
+  const aciHesapla = (x, y) => {
+    const r = container.getBoundingClientRect();
+    return Math.atan2(y - (r.top+r.height/2), x - (r.left+r.width/2)) * (180/Math.PI);
+  };
+  const basla = (e) => {
+    surukleniyor = true;
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    oncekiAci = aciHesapla(cx, cy);
+    sesCarkBaslat();
+  };
+  const surkle = (e) => {
+    if(!surukleniyor) return; e.preventDefault();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    const simdi = aciHesapla(cx, cy);
+    let delta = simdi - oncekiAci;
+    if(delta>180) delta-=360; if(delta<-180) delta+=360;
+    toplamAci += Math.abs(delta);
+    gorunurAci += delta;
+    disk.style.transform = `rotate(${gorunurAci}deg)`;
+    oncekiAci = simdi;
+    const pct = Math.min((toplamAci/1080)*100, 100);
+    document.getElementById('iplik-dolgu').style.width = pct+'%';
+    document.getElementById('iplikYuzde').textContent = `İplik Sarılıyor: ${Math.floor(pct)}%`;
+    if(pct>=100) {
+      surukleniyor=false; sesCarkDurdur(); sesDogru();
+      rozetGoster('🧵 İplik Hazır!', '#5B21B6');
+      buyukKonfeti();
+      asamaBarGuncelle(5);
+      setTimeout(()=>popupAc('a5',()=>{ekranGoster('asama5'); dikisiBaslatHazirla();}), 1000);
+    }
+  };
+  const dur = () => { surukleniyor=false; sesCarkDurdur(); };
+  container.addEventListener('mousedown', basla);
+  document.addEventListener('mousemove', surkle, {passive:false});
+  document.addEventListener('mouseup', dur);
+  container.addEventListener('touchstart', basla, {passive:false});
+  document.addEventListener('touchmove', surkle, {passive:false});
+  document.addEventListener('touchend', dur);
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 5: DİKİŞ
+// ═══════════════════════════════════════════════════
+let dikisIlerleme = 0, dikisAktifMi = false, dikisInterval = null;
+
+function dikisiBaslatHazirla() {
+  dikisIlerleme = 0;
+  document.getElementById('dikis-dolgu').style.width = '0%';
+  document.getElementById('dikisYuzde').textContent = 'Dikiş İlerlemesi: 0%';
+  document.getElementById('kumasSerit').style.clipPath = 'inset(0 100% 0 0)';
+  const btn = document.getElementById('dikisBtn');
+  btn.addEventListener('mousedown', dikisiBaslat);
+  btn.addEventListener('mouseup', dikisiDurdur2);
+  btn.addEventListener('mouseleave', dikisiDurdur2);
+}
+function dikisiBaslat(e) {
+  if(e) e.preventDefault();
+  if(dikisAktifMi) return;
+  dikisAktifMi = true;
+  document.getElementById('makineIgne').classList.add('dikiyor');
+  sesDikisBaslat();
+  dikisInterval = setInterval(() => {
+    dikisIlerleme = Math.min(dikisIlerleme+2, 100);
+    document.getElementById('dikis-dolgu').style.width = dikisIlerleme+'%';
+    document.getElementById('dikisYuzde').textContent = `Dikiş İlerlemesi: ${dikisIlerleme}%`;
+    const kalan = 100 - dikisIlerleme;
+    document.getElementById('kumasSerit').style.clipPath = `inset(0 ${kalan}% 0 0)`;
+    if(dikisIlerleme>=100) {
+      dikisiDurdur2();
+      sonucuGoster();
+    }
+  }, 60);
+}
+function dikisiDurdur(e) { if(e) e.preventDefault(); dikisiDurdur2(); }
+function dikisiDurdur2() {
+  dikisAktifMi = false;
+  clearInterval(dikisInterval);
+  document.getElementById('makineIgne').classList.remove('dikiyor');
+  sesDikisDurdur();
+}
+function sonucuGoster() {
+  sesDikisDurdur();
+  sesKutlama();
+  document.getElementById('dikisKapsul').style.display = 'none';
+  const sonuc = document.getElementById('sonuc-kutu');
+  sonuc.style.display = 'block';
+  document.getElementById('sonucBalya').textContent = balya;
+  const tisortler = Math.max(1, Math.floor(balya/3));
+  document.getElementById('tisortSayisi').textContent = tisortler;
+  let emojiler = '';
+  for(let i=0; i<Math.min(tisortler,20); i++) emojiler += '👕';
+  if(tisortler>20) emojiler += `+${tisortler-20}`;
+  document.getElementById('tisortler').textContent = emojiler;
+  const bilgi = sonucBilgiler[Math.floor(Math.random()*sonucBilgiler.length)];
+  document.getElementById('sonucBilgi').textContent = '💡 ' + bilgi;
+  asamaBarGuncelle(5);
+  buyukKonfeti();
+  rozetGoster('🏆 Tişörtler Hazır!', '#B7791F');
+}
+function oyunuYenidenBaslat() {
+  sesTik();
+  mevsimIdx=0; toprakSicak=10; balya=0; haricKombo=0; dikisIlerleme=0;
+  document.getElementById('dikisKapsul').style.display='';
+  document.getElementById('sonuc-kutu').style.display='none';
+  document.getElementById('iplik-dolgu').style.width='0%';
+  document.getElementById('iplikYuzde').textContent='İplik Sarılıyor: 0%';
+  document.getElementById('dikis-dolgu').style.width='0%';
+  document.getElementById('mevsimKutu').textContent=mevsimler[0];
+  document.getElementById('sicaklikDeger').textContent='10°C';
+  document.getElementById('ekimDurum').className='durum-kutu durum-yanlis';
+  document.getElementById('ekimDurum').textContent='❌ Pamuk için koşullar henüz uygun değil. İlkbahar\'ı seç ve sıcaklığı 25–30°C yap!';
+  document.getElementById('ekimBtn').disabled=true;
+  document.getElementById('ekimBtn').className='ekimi-basla-btn pasif';
+  document.getElementById('ekimBtn').textContent='Şartlar Uygun Değil ❌';
+  document.getElementById('asama-dolgu').style.width='0%';
+  hudGuncelle();
+  ekranGoster('anasayfa');
+  document.getElementById('hud').style.display='none';
+}
+</script>
+</body>
+</html>
