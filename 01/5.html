@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adana – Seyhan ve Ceyhan Nehirleri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Lora:ital,wght@0,500;0,700;1,400&display=swap');
+
+        /* Sistem İmlecini Gizle (Mobilde zaten dokunmatik) */
+        * { cursor: none !important; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 50%, #80deea 100%);
+            min-height: 100vh; margin: 0; padding: 0; 
+            overflow-x: hidden; overflow-y: auto; /* Mobil scroll izni */
+            color: #1a202c;
+            padding-bottom: 3rem;
+        }
+
+        .title-font { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.02em; }
+        .body-font { font-family: 'Lora', serif; font-weight: 500; }
+
+        @keyframes bgMove { 0% { background-position: 0 0; } 100% { background-position: 100px 100px; } }
+        body::before {
+            content: ''; position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300acc1' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            animation: bgMove 20s linear infinite; z-index: -1; pointer-events: none;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 1.5rem;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        /* ÖZEL İMLEÇ - Kesinlikle en üstte kalmasını sağlayan ayarlar */
+        #custom-cursor {
+            position: fixed; 
+            top: 0; left: 0;
+            width: 32px; height: 32px; font-size: 28px;
+            pointer-events: none !important; /* Tıklamaların alt katmana geçmesini sağlar */
+            z-index: 999999 !important; /* Her şeyin üzerinde tutar */
+            transform: translate(-50%, -50%);
+            text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 15px rgba(0, 172, 193, 0.4); } 50% { box-shadow: 0 0 30px rgba(0, 172, 193, 0.8); } }
+
+        .river-path { fill: none; stroke: #00acc1; stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1000; stroke-dashoffset: 1000; transition: stroke-dashoffset 4s ease-out; }
+        .river-path.active { stroke-dashoffset: 0; }
+
+        /* Tıklanabilir Harita Elemanları */
+        .map-marker {
+            width: 24px; height: 24px; background: white; border: 4px solid #00acc1;
+            border-radius: 50%; position: absolute;
+            transform: translate(-50%, -50%); transition: all 0.2s; z-index: 20;
+            pointer-events: auto !important; /* Tıklanabilirliği garanti eder */
+        }
+        .map-marker:hover { transform: translate(-50%, -50%) scale(1.3); background: #00acc1; border-color: white; }
+        .map-marker.active-hint { animation: markerPulse 1s infinite; border-color: #ef4444; }
+
+        @keyframes markerPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 50% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } }
+
+        .dam-icon { 
+            font-size: 2rem; position: absolute; transform: translate(-50%, -50%); 
+            transition: transform 0.2s; opacity: 0; pointer-events: none; z-index: 25;
+        }
+        .dam-icon.active { opacity: 1; pointer-events: auto !important; animation: pulseGlow 1s infinite; border-radius: 50%; }
+        .dam-icon:hover { transform: translate(-50%, -50%) scale(1.3); }
+
+        .drag-item {
+            padding: 10px 20px; background: #334155; color: white;
+            border-radius: 12px; font-weight: bold; pointer-events: auto !important;
+            user-select: none; transition: transform 0.1s;
+        }
+        .drag-item:active { transform: scale(0.95); }
+        
+        .drop-zone {
+            width: 100px; height: 40px; border: 3px dashed #94a3b8;
+            border-radius: 12px; display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: #64748b; transition: all 0.2s;
+            position: absolute; transform: translate(-50%, -50%); z-index: 15;
+            background: rgba(255,255,255,0.8); pointer-events: auto !important;
+        }
+
+        .progress-track { background: #e2e8f0; border-radius: 999px; height: 10px; overflow: hidden; }
+        .progress-fill { background: linear-gradient(90deg, #00acc1, #ef4444); width: 0%; height: 100%; transition: width 0.3s; }
+
+        /* Sadece Dokunmatik Ekranlarda (Mobil/Tablet) İmleci Orijinaline Döndür */
+        @media (hover: none) and (pointer: coarse) {
+            #custom-cursor { display: none !important; }
+            * { cursor: auto !important; }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center">
+
+    <div id="custom-cursor">💧</div>
+
+    <img src="orjinal.svg" alt="Logo" class="fixed top-4 left-4 h-10 md:h-12 w-auto z-50 bg-white/50 rounded-lg p-1 backdrop-blur-sm">
+
+    <main class="w-full max-w-5xl p-4 pt-20 relative flex flex-col items-center">
+        
+        <header class="w-full glass-panel p-6 text-center mb-6">
+            <h1 class="modern-title text-3xl md:text-5xl text-slate-800 mb-2">Adana – <span style="color:#00acc1">Seyhan ve Ceyhan</span></h1>
+            <p class="body-font text-sm md:text-base text-slate-600 mb-4">Toroslar'dan Akdeniz'e, Çukurova'nın Can Damarları</p>
+            
+            <a href="https://drive.google.com/file/d/1WPFKHXBgYVkfJ0P-FrzOPUG9_dyC3RvT/view" target="_blank" class="inline-block bg-cyan-100 text-cyan-800 px-6 py-2 rounded-full font-bold hover:bg-cyan-200 transition border border-cyan-300 text-xs md:text-sm" style="pointer-events: auto !important;">
+                📄 Emre Erkmen'in çalışmasına ulaşmak için tıklayın
+            </a>
+            
+            <div class="progress-track mt-6 max-w-md mx-auto pointer-events-none">
+                <div class="progress-fill" id="game-progress"></div>
+            </div>
+        </header>
+
+        <section id="stage-0" class="w-full glass-panel p-6 md:p-10 text-center animate-pop" style="pointer-events: auto !important;">
+            <img src="nehirler.png" alt="Seyhan ve Ceyhan" class="w-full h-48 md:h-64 object-cover rounded-2xl mb-6 shadow-md pointer-events-none">
+            <p class="body-font text-base md:text-lg text-slate-700 mb-8 max-w-2xl mx-auto leading-relaxed pointer-events-none">
+                Merhaba Genç Coğrafyacı! Türkiye'nin en verimli ovalarından biri olan Çukurova'yı besleyen Seyhan ve Ceyhan nehirlerinin sırlarını keşfetmeye hazır mısın? Nehirlerin fısıltısını dinle, görevleri tamamla ve Çukurova'ya hayat ver! 🎧
+            </p>
+            <button onclick="startGame()" class="bg-cyan-600 text-white px-8 md:px-10 py-3 md:py-4 rounded-full font-black text-lg md:text-xl shadow-[0_6px_0_#00838f] hover:translate-y-1 hover:shadow-[0_3px_0_#00838f] transition-all w-full md:w-auto" style="pointer-events: auto !important;">
+                Maceraya Başla! 🚀
+            </button>
+        </section>
+
+        <section id="game-arena" class="hidden w-full flex-col md:flex-row gap-6 items-start">
+            
+            <aside class="w-full md:w-1/3 glass-panel p-6 relative">
+                <h2 class="modern-title text-2xl text-slate-800 mb-1 pointer-events-none" id="stage-title">Görev 1</h2>
+                <p class="body-font text-xs text-slate-500 mb-4 uppercase tracking-widest font-bold pointer-events-none" id="stage-subtitle">Doğuş Noktaları</p>
+                
+                <div id="instruction-box" class="bg-white/60 p-4 rounded-xl border border-slate-200 mb-6 shadow-inner pointer-events-none">
+                    <p class="body-font text-slate-800 font-medium text-sm leading-relaxed" id="instruction-text">Yükleniyor...</p>
+                </div>
+
+                <div id="s1-controls" class="hidden flex flex-col gap-3">
+                    <button onclick="playClue('seyhan_dogus')" class="bg-slate-700 text-white px-4 py-3 rounded-xl font-bold hover:bg-slate-800 shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2" style="pointer-events: auto !important;">🎧 Seyhan'ı Dinle</button>
+                    <button onclick="playClue('ceyhan_dogus')" class="bg-slate-700 text-white px-4 py-3 rounded-xl font-bold hover:bg-slate-800 shadow-md active:scale-95 transition-transform flex items-center justify-center gap-2" style="pointer-events: auto !important;">🎧 Ceyhan'ı Dinle</button>
+                </div>
+
+                <div id="s2-controls" class="hidden flex flex-col gap-4 items-center">
+                    <p class="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1 rounded-full pointer-events-none">Önce isme dokun, sonra haritaya!</p>
+                    <div class="flex gap-4">
+                        <div class="drag-item" id="drag-seyhun" onclick="selectName('seyhun', this)">Seyhun</div>
+                        <div class="drag-item" id="drag-ceyhun" onclick="selectName('ceyhun', this)">Ceyhun</div>
+                    </div>
+                </div>
+
+                <div id="s3-controls" class="hidden text-center mt-6 pointer-events-none">
+                    <div class="text-xs font-bold text-slate-500 mb-1 uppercase tracking-widest bg-slate-100 inline-block px-3 py-1 rounded-full">Çukurova Enerjisi</div>
+                    <div class="text-5xl mt-3 font-black text-yellow-500 drop-shadow-md" id="energy-meter">⚡ 0%</div>
+                </div>
+            </aside>
+
+            <div class="w-full md:w-2/3 glass-panel p-2 relative overflow-hidden flex items-center justify-center bg-blue-50/50">
+                <div class="relative w-full" style="max-width: 800px; aspect-ratio: 4/3;">
+                    
+                    <svg viewBox="0 0 800 600" class="w-full h-full absolute inset-0 pointer-events-none">
+                        <path d="M 50 100 Q 400 20 750 100 Q 780 300 700 500 L 50 500 Z" fill="#dcedc8" stroke="#a5d6a7" stroke-width="2"/>
+                        <path d="M 0 500 L 800 500 Q 400 650 0 500" fill="#b2ebf2" />
+                        
+                        <text x="10%" y="15%" font-family="Montserrat" font-weight="bold" fill="#607d8b" font-size="16">DOĞU TOROSLAR</text>
+                        <path d="M 70 120 L 110 70 L 150 120 M 130 120 L 170 70 L 210 120 M 190 120 L 230 70 L 270 120" stroke="#78909c" stroke-width="4" stroke-linejoin="round" fill="none"/>
+
+                        <circle cx="50%" cy="70%" r="8" fill="#ef4444" />
+                        <text x="45%" y="75%" font-family="Montserrat" font-weight="bold" fill="#b91c1c" font-size="18">ADANA</text>
+
+                        <path id="path-seyhan" class="river-path" d="M 150 150 Q 200 250 300 300 L 400 420 Q 420 460 380 500" />
+                        <path id="path-ceyhan" class="river-path" d="M 650 150 Q 550 250 500 300 L 550 380 Q 580 430 650 500" />
+                    </svg>
+
+                    <div id="map-markers-layer" class="absolute inset-0 pointer-events-none z-10">
+                        
+                        <div id="mark-kayseri" class="map-marker hidden" style="left:18.75%; top:25%;" onclick="clickSource('kayseri')"></div>
+                        <div id="mark-maras" class="map-marker hidden" style="left:81.25%; top:25%;" onclick="clickSource('maras')"></div>
+                        
+                        <div id="drop-seyhan" class="drop-zone hidden" style="left:37.5%; top:45%;" onclick="placeName('drop-seyhan', this)">Seyhan'a</div>
+                        <div id="drop-ceyhan" class="drop-zone hidden" style="left:62.5%; top:45%;" onclick="placeName('drop-ceyhan', this)">Ceyhan'a</div>
+
+                        <div id="dam-seyhan" class="dam-icon hidden" style="left:42%; top:55%;" onclick="clickDam('seyhan')">🏗️</div>
+                        <div id="dam-berke" class="dam-icon hidden" style="left:65%; top:52%;" onclick="clickDam('berke')">🏗️</div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="stage-end" class="hidden w-full glass-panel p-8 md:p-12 text-center animate-pop mt-6" style="pointer-events: auto !important;">
+            <div class="text-7xl md:text-8xl mb-4 pointer-events-none">🏆</div>
+            <h2 class="modern-title text-3xl md:text-5xl text-slate-800 mb-4 pointer-events-none">Harikasın Coğrafyacı!</h2>
+            <p class="body-font text-lg md:text-xl text-slate-600 mb-8 pointer-events-none">Seyhan ve Ceyhan'ın sırlarını çözdün, Çukurova'ya can suyu ve enerji verdin.</p>
+            <button onclick="window.location.href='https://memleketim.github.io/01/index.html'" class="bg-cyan-600 text-white px-10 py-4 rounded-full font-black text-xl shadow-[0_6px_0_#00838f] hover:translate-y-1 hover:shadow-[0_3px_0_#00838f] transition-all" style="pointer-events: auto !important;">Macerayı Tamamla 🚩</button>
+        </section>
+
+    </main>
+
+    <audio id="aud-akak" src="sesler/su_akisi.mp3"></audio>
+    <audio id="aud-enerji" src="sesler/enerji.mp3"></audio>
+    <audio id="aud-win" src="sesler/final_kazan.mp3"></audio>
+
+    <script>
+        const audioFiles = {
+            seyhan_dogus: "sesler/s1_seyhan_dogus.mp3",
+            ceyhan_dogus: "sesler/s1_ceyhan_dogus.mp3",
+            ithaf_bilgi: "sesler/s2_ithaf_bilgi.mp3",
+            seyhan_baraj: "sesler/s3_seyhan_baraj.mp3",
+            berke_baraj: "sesler/s3_berke_baraj.mp3"
+        };
+
+        let gameState = { currentStage: 0, correctClicks: 0, barajlarActive: 0 };
+        let selectedName = null; 
+        let activeAudio = null;
+
+        // Dosyasız Ses Efektleri (Web Audio API)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSynth(freq, dur, type='sine') {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        }
+        const sfx = {
+            tik: () => playSynth(600, 0.1),
+            dogru: () => { playSynth(800, 0.1); setTimeout(()=>playSynth(1200, 0.2), 100); },
+            hata: () => playSynth(200, 0.3, 'sawtooth')
+        };
+
+        // Özel İmleç Takibi
+        document.addEventListener('mousemove', e => {
+            const cursor = document.getElementById('custom-cursor');
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        function updateProgress() {
+            const pct = (gameState.currentStage / 3) * 100;
+            document.getElementById('game-progress').style.width = pct + '%';
+        }
+
+        function startGame() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            sfx.tik();
+            document.getElementById('stage-0').style.display = 'none';
+            const arena = document.getElementById('game-arena');
+            arena.classList.remove('hidden');
+            arena.classList.add('flex'); 
+            initStage1();
+        }
+
+        function playClue(key) {
+            sfx.tik();
+            if(activeAudio) { activeAudio.pause(); activeAudio.currentTime = 0; }
+            activeAudio = new Audio(audioFiles[key]);
+            activeAudio.play().catch(() => {
+                let txt = "";
+                if(key === 'seyhan_dogus') txt = "Seyhan Nehri Kayseri Uzunyayla'dan doğar.";
+                if(key === 'ceyhan_dogus') txt = "Ceyhan Nehri Kahramanmaraş Elbistan'dan doğar.";
+                if(key === 'ithaf_bilgi') txt = "İsimlerini Orta Asya'daki Seyhun ve Ceyhun nehirlerinden almışlardır.";
+                if(key === 'seyhan_baraj') txt = "Seyhan Barajı Çukurova'yı sular.";
+                if(key === 'berke_baraj') txt = "Berke Barajı Türkiye'nin en yüksek barajlarındandır.";
+                const utt = new SpeechSynthesisUtterance(txt);
+                utt.lang = 'tr-TR'; window.speechSynthesis.speak(utt);
+            });
+        }
+
+        // --- STAGE 1 ---
+        function initStage1() {
+            gameState.currentStage = 1; updateProgress();
+            document.getElementById('s1-controls').classList.remove('hidden');
+            document.getElementById('instruction-text').innerText = "🎧 Önce yandaki butonlardan nehirlerin fısıltısını dinle. Sonra haritadaki yanıp sönen noktalardan doğru olanı seç!";
+            document.getElementById('mark-kayseri').classList.remove('hidden');
+            document.getElementById('mark-maras').classList.remove('hidden');
+            document.getElementById('mark-kayseri').classList.add('active-hint');
+            document.getElementById('mark-maras').classList.add('active-hint');
+        }
+
+        function clickSource(city) {
+            if(gameState.currentStage !== 1) return;
+            const isKayseriDone = document.getElementById('path-seyhan').classList.contains('active');
+            const isMarasDone = document.getElementById('path-ceyhan').classList.contains('active');
+            if((city === 'kayseri' && isKayseriDone) || (city === 'maras' && isMarasDone)) return;
+
+            sfx.dogru();
+            confetti({ particleCount: 30, origin: { x: city==='kayseri'?0.3:0.7, y: 0.4 } });
+            document.getElementById('aud-akak').play().catch(()=>{});
+
+            if(city === 'kayseri') {
+                document.getElementById('path-seyhan').classList.add('active');
+                document.getElementById('mark-kayseri').classList.remove('active-hint');
+            } else {
+                document.getElementById('path-ceyhan').classList.add('active');
+                document.getElementById('mark-maras').classList.remove('active-hint');
+            }
+
+            gameState.correctClicks++;
+            if(gameState.correctClicks === 2) setTimeout(initStage2, 4000);
+        }
+
+        // --- STAGE 2: Dokun - Eşleştir ---
+        function initStage2() {
+            sfx.dogru(); gameState.currentStage = 2; updateProgress();
+            
+            document.getElementById('stage-title').innerText = "Görev 2";
+            document.getElementById('stage-subtitle').innerText = "İsim Kökeni";
+            document.getElementById('s1-controls').classList.add('hidden');
+            document.getElementById('s2-controls').classList.remove('hidden');
+            document.getElementById('drop-seyhan').classList.remove('hidden');
+            document.getElementById('drop-ceyhan').classList.remove('hidden');
+
+            document.getElementById('instruction-text').innerText = "🎧 İsimlerin hikâyesini dinlemek için alttaki kelimelere tıkla. Seyhun ve Ceyhun isimlerini haritadaki doğru yerlere dokunarak yerleştir!";
+            playClue('ithaf_bilgi');
+        }
+
+        function selectName(nameId, el) {
+            sfx.tik();
+            document.querySelectorAll('.drag-item').forEach(i => i.classList.remove('ring-4', 'ring-yellow-400'));
+            el.classList.add('ring-4', 'ring-yellow-400');
+            selectedName = nameId;
+        }
+
+        function placeName(zoneId, el) {
+            if(!selectedName) return;
+            
+            if((selectedName === 'seyhun' && zoneId === 'drop-seyhan') || 
+               (selectedName === 'ceyhun' && zoneId === 'drop-ceyhan')) {
+                sfx.dogru();
+                el.classList.add('bg-green-500', 'text-white', 'border-green-500');
+                el.innerText = "✨ " + (selectedName === 'seyhun' ? "Seyhun" : "Ceyhun");
+                document.getElementById('drag-' + selectedName).style.display = 'none';
+                selectedName = null;
+                confetti({particleCount: 20});
+                
+                gameState.correctClicks++;
+                if(gameState.correctClicks === 4) setTimeout(initStage3, 1500);
+            } else {
+                sfx.hata();
+                el.style.backgroundColor = '#fecaca';
+                setTimeout(() => el.style.backgroundColor = 'rgba(255,255,255,0.8)', 500);
+            }
+        }
+
+        // --- STAGE 3: Barajlar ---
+        function initStage3() {
+            sfx.dogru(); gameState.currentStage = 3; updateProgress();
+            document.getElementById('stage-title').innerText = "Görev 3";
+            document.getElementById('stage-subtitle').innerText = "Enerji ve Sulama";
+            document.getElementById('s2-controls').classList.add('hidden');
+            document.getElementById('s3-controls').classList.remove('hidden');
+            document.getElementById('drop-seyhan').classList.add('hidden');
+            document.getElementById('drop-ceyhan').classList.add('hidden');
+
+            document.getElementById('instruction-text').innerText = "🎧 Barajların fısıltısını dinle. Haritada parlayan HES (Hidroelektrik Santrali) simgesine 🏗️ tıkla ve Çukurova'ya enerji ver!";
+            
+            document.getElementById('dam-seyhan').classList.remove('hidden');
+            document.getElementById('dam-berke').classList.remove('hidden');
+
+            setTimeout(() => activateDam('seyhan'), 1500);
+        }
+
+        function activateDam(river) {
+            const iconId = river === 'seyhan' ? 'dam-seyhan' : 'dam-berke';
+            const clueId = river === 'seyhan' ? 'seyhan_baraj' : 'berke_baraj';
+            const icon = document.getElementById(iconId);
+
+            icon.classList.add('active');
+            playClue(clueId);
+        }
+
+        function clickDam(river) {
+            const iconId = river === 'seyhan' ? 'dam-seyhan' : 'dam-berke';
+            const icon = document.getElementById(iconId);
+            if(!icon.classList.contains('active')) return;
+
+            sfx.dogru();
+            document.getElementById('aud-enerji').play().catch(()=>{});
+            icon.classList.remove('active');
+            icon.innerText = "⚡";
+            confetti({ particleCount: 40 });
+            
+            gameState.barajlarActive++;
+            const pct = (gameState.barajlarActive / 2) * 100;
+            document.getElementById('energy-meter').innerText = `⚡ ${pct}%`;
+
+            if(pct === 100) {
+                document.getElementById('energy-meter').classList.add('text-cyan-600');
+                document.querySelector('path[fill="#dcedc8"]').setAttribute('fill', '#c8e6c9'); // Haritayı aydınlat
+                setTimeout(showEndScreen, 2000);
+            } else {
+                setTimeout(() => activateDam('berke'), 2000);
+            }
+        }
+
+        // --- BİTİŞ ---
+        function showEndScreen() {
+            document.getElementById('aud-win').play().catch(()=>{});
+            document.getElementById('game-arena').style.display = 'none';
+            document.getElementById('stage-end').classList.remove('hidden');
+            document.getElementById('stage-end').classList.add('block');
+            confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+        }
+    </script>
+</body>
+</html>
