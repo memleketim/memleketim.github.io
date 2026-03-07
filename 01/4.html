@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Adana – Varda Viyadüğü Macerası</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   TEMEL VE GLOBAL STILLER
+═══════════════════════════════════════════ */
+:root {
+  --tas: #7C7369;
+  --tas-koyu: #4A453F;
+  --gokyuzu: #5D9CEC;
+  --gokyuzu-acik: #A0C8F6;
+  --vadi: #2D4A22;
+  --vadi-acik: #4F7942;
+  --kiremit: #C0392B;
+  --kiremit-acik: #E74C3C;
+  --krem: #FDF6E3;
+  --altin: #F1C40F;
+  --lacivert: #2C3E50;
+  --demir: #34495E;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  font-family: 'Baloo 2', 'Segoe UI', Tahoma, sans-serif;
+  cursor: none; user-select: none; -webkit-user-select: none;
+  background-color: var(--krem);
+}
+
+/* ÖZEL İMLEÇ */
+#cursor {
+  position: fixed; z-index: 99999; width: 44px; height: 44px;
+  pointer-events: none; transform: translate(-50%, -50%);
+  font-size: 32px; line-height: 44px; text-align: center;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)); transition: transform 0.1s;
+}
+#cursor.active { transform: translate(-50%,-50%) scale(1.2) rotate(-15deg); }
+
+/* EKRAN YÖNETİMİ */
+.ekran {
+  position: fixed; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: opacity 0.6s ease, transform 0.6s ease; overflow: hidden;
+}
+.ekran.gizli { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+/* ORTAK BUTON STİLİ */
+.ana-btn {
+  font-family: 'Baloo 2', sans-serif; font-weight: 800; font-size: 1.4rem;
+  background: linear-gradient(135deg, var(--kiremit-acik), var(--kiremit));
+  color: white; border: none; padding: 16px 48px;
+  border-radius: 50px; cursor: pointer;
+  box-shadow: 0 6px 0 #922B21, 0 15px 25px rgba(192, 57, 43, 0.3);
+  transition: transform 0.1s, box-shadow 0.1s; letter-spacing: 1px; text-decoration: none; display: inline-block;
+}
+.ana-btn:hover { transform: translateY(4px); box-shadow: 0 2px 0 #922B21, 0 8px 15px rgba(192, 57, 43, 0.2); }
+.ana-btn:active { transform: translateY(6px); box-shadow: none; }
+.ana-btn:disabled { filter: grayscale(1); opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ═══════════════════════════════════════════
+   ÜST BAR & LOGO
+═══════════════════════════════════════════ */
+#ust-bar {
+  position: fixed; top: 0; left: 0; width: 100%; padding: 15px 20px; z-index: 1000;
+  display: flex; justify-content: space-between; align-items: flex-start; pointer-events: none;
+}
+.logo-img { height: 60px; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2)); pointer-events: auto; }
+#asama-gosterge {
+  background: rgba(255,255,255,0.9); padding: 8px 16px; border-radius: 20px;
+  font-weight: 800; color: var(--lacivert); box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+  border: 2px solid var(--gokyuzu-acik); display: none; pointer-events: auto;
+}
+#asama-bar { position: fixed; top: 0; left: 0; right: 0; height: 6px; z-index: 1001; background: rgba(0,0,0,0.1); }
+#asama-dolgu { height: 100%; background: linear-gradient(90deg, var(--gokyuzu), var(--kiremit)); transition: width 0.6s ease; }
+
+/* ═══════════════════════════════════════════
+   ANA SAYFA
+═══════════════════════════════════════════ */
+#anasayfa {
+  background: radial-gradient(circle at 80% 20%, rgba(93, 156, 236, 0.2) 0%, transparent 40%),
+              radial-gradient(circle at 20% 80%, rgba(45, 74, 34, 0.15) 0%, transparent 40%),
+              linear-gradient(135deg, #FDF6E3 0%, #E8E2CD 100%);
+}
+.baslik-kapsayici { text-align: center; max-width: 700px; padding: 20px; z-index: 2; }
+.ana-baslik { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; color: var(--lacivert); line-height: 1.1; margin-bottom: 10px; text-shadow: 2px 2px 0px white; }
+.ana-baslik span { color: var(--kiremit); }
+.alt-baslik { font-family: 'Crimson Pro', serif; font-size: 1.2rem; font-style: italic; color: var(--tas-koyu); margin-bottom: 20px; }
+.kapak-kart {
+  background: rgba(255,255,255,0.85); border: 3px solid var(--tas); border-radius: 20px;
+  padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex; flex-direction: column; align-items: center; gap: 15px; backdrop-filter: blur(5px);
+}
+.kapak-resim { width: 100%; max-width: 300px; height: 180px; object-fit: cover; border-radius: 12px; border: 2px solid var(--tas-koyu); }
+.ogrenci-link {
+  display: inline-flex; align-items: center; gap: 8px; background: #f0f0f0; padding: 10px 20px;
+  border-radius: 12px; color: var(--lacivert); font-weight: 700; text-decoration: none; font-size: 0.9rem; border: 1px solid #ccc; transition: all 0.2s;
+}
+.ogrenci-link:hover { background: #e0e0e0; transform: translateY(-2px); }
+.arkaplan-bulut { position: absolute; font-size: 4rem; opacity: 0.2; pointer-events: none; animation: süzül linear infinite; }
+@keyframes süzül { from { transform: translateX(-10vw); } to { transform: translateX(110vw); } }
+
+/* ═══════════════════════════════════════════
+   POPUP
+═══════════════════════════════════════════ */
+#popup-arka { position: fixed; inset: 0; background: rgba(44, 62, 80, 0.7); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.3s; }
+#popup-arka.gizli { opacity: 0; pointer-events: none; }
+.popup-kutu { background: #FFF; border-radius: 24px; padding: 30px; max-width: 500px; width: 100%; text-align: center; border: 4px solid var(--gokyuzu); box-shadow: 0 20px 50px rgba(0,0,0,0.3); animation: popGiris 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes popGiris { from { transform: scale(0.8) translateY(30px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+.popup-ikon { font-size: 4rem; display: block; margin-bottom: 10px; }
+.popup-baslik { font-size: 1.8rem; font-weight: 800; color: var(--lacivert); margin-bottom: 10px; }
+.popup-metin { font-family: 'Crimson Pro', serif; font-size: 1.1rem; color: #444; line-height: 1.6; margin-bottom: 20px; }
+.popup-bilgi { background: #FDF2E9; border-left: 4px solid var(--kiremit); padding: 12px; border-radius: 8px; font-size: 0.95rem; font-style: italic; color: #A04000; margin-bottom: 25px; text-align: left; }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 1: BELGESEL
+═══════════════════════════════════════════ */
+#asama1 { background: linear-gradient(to bottom, #1a252c, #2C3E50); color: white; }
+.video-kapsayici { background: rgba(255,255,255,0.05); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 800px; width: 90%; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+.video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 2px solid var(--tas); }
+.video-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 2: TELGRAF (OKUMA ANLAMA)
+═══════════════════════════════════════════ */
+#asama2 { background: radial-gradient(circle, #FDEBD0 0%, #D4AC0D 100%); }
+.telgraf-kagit { background: #FFF9E6; border: 2px solid #B9770E; padding: 40px 30px; width: 90%; max-width: 550px; border-radius: 5px; box-shadow: 2px 5px 15px rgba(0,0,0,0.2); position: relative; font-family: 'Crimson Pro', serif; font-size: 1.3rem; color: #333; line-height: 1.8; text-align: justify; }
+.telgraf-kagit::before { content: 'TELGRAF'; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); font-family: 'Baloo 2', sans-serif; font-size: 1rem; color: #B9770E; font-weight: 800; letter-spacing: 4px; }
+.bosluk-yer { display: inline-block; min-width: 100px; border-bottom: 3px dashed var(--kiremit); color: var(--kiremit); font-weight: 600; text-align: center; padding: 0 10px; transition: all 0.3s; }
+.bosluk-yer.dolu { border-bottom: 3px solid #2ECC71; color: #27AE60; }
+.kelime-secenekler { display: flex; gap: 15px; justify-content: center; margin-top: 30px; }
+.kelime-btn { background: white; border: 2px solid var(--lacivert); color: var(--lacivert); font-family: 'Baloo 2', sans-serif; font-weight: 700; font-size: 1.1rem; padding: 10px 20px; border-radius: 10px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 0 var(--lacivert); }
+.kelime-btn:hover { transform: translateY(2px); box-shadow: 0 2px 0 var(--lacivert); }
+.kelime-btn.yanlis { background: #E74C3C; color: white; border-color: #C0392B; box-shadow: 0 2px 0 #C0392B; animation: sarsinti 0.3s; }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 3: İNŞAAT
+═══════════════════════════════════════════ */
+#asama3 { background: linear-gradient(180deg, var(--gokyuzu) 0%, #82B1FF 40%, var(--vadi-acik) 40%, var(--vadi) 100%); }
+.kopru-sahne { position: relative; width: 100%; max-width: 800px; height: 300px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 20px; }
+.kopru-ayak { width: 80px; height: 200px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="%237C7369"/><rect width="19" height="9" fill="%23685f55" x="0" y="0"/><rect width="19" height="9" fill="%23685f55" x="-10" y="10"/><rect width="19" height="9" fill="%23685f55" x="10" y="10"/></svg>'); border-left: 2px solid var(--tas-koyu); border-right: 2px solid var(--tas-koyu); box-shadow: inset -10px 0 20px rgba(0,0,0,0.3); }
+.kopru-kemer-alani { position: relative; width: 120px; height: 200px; display: flex; flex-direction: column; align-items: center; }
+.kemer-yol { width: 100%; height: 40px; background: var(--lacivert); border-bottom: 4px solid var(--tas-koyu); position: absolute; top: 0; left: 0; z-index: 2; }
+.kemer-eksik { width: 100px; height: 120px; border: 3px dashed rgba(255,255,255,0.6); border-radius: 50px 50px 0 0; position: absolute; top: 40px; background: rgba(255,255,255,0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 2rem; transition: all 0.2s; backdrop-filter: blur(2px); }
+.kemer-eksik:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+.kemer-tam { width: 100px; height: 120px; border-radius: 50px 50px 0 0; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect width="20" height="20" fill="%237C7369"/><path d="M0,10 L20,10 M10,0 L10,20" stroke="%234A453F" stroke-width="1"/></svg>'); position: absolute; top: 40px; opacity: 0; transform: translateY(-100px); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.kemer-tam.yerlesti { opacity: 1; transform: translateY(0); }
+.toz { position: absolute; width: 30px; height: 30px; background: rgba(200,190,180,0.6); border-radius: 50%; pointer-events: none; opacity: 1; animation: tozUcus 0.8s ease-out forwards; }
+@keyframes tozUcus { 0% { transform: scale(0.5) translate(0, 0); opacity: 1; } 100% { transform: scale(2) translate(var(--dx), var(--dy)); opacity: 0; } }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 4: YAZIM KURALLARI (İMLA)
+═══════════════════════════════════════════ */
+#asama4 { background: linear-gradient(135deg, #2E4053, #1B2631); }
+.imla-baslik { color: white; font-size: 1.8rem; margin-bottom: 5px; text-align: center; }
+.imla-alt { color: var(--gokyuzu-acik); font-family: 'Crimson Pro', serif; font-size: 1.1rem; margin-bottom: 25px; text-align: center; }
+.sandik-izgara { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 600px; width: 90%; }
+.sandik-cifti { background: rgba(255,255,255,0.1); padding: 15px; border-radius: 15px; border: 2px dashed rgba(255,255,255,0.2); display: flex; flex-direction: column; gap: 10px; }
+.sandik { background: #8E44AD; border: 3px solid #732D91; color: white; font-family: 'Baloo 2', sans-serif; font-size: 1.2rem; font-weight: 700; padding: 12px; border-radius: 10px; text-align: center; cursor: pointer; box-shadow: 0 5px 0 #732D91; transition: all 0.2s; }
+.sandik:hover { transform: translateY(2px); box-shadow: 0 3px 0 #732D91; }
+.sandik.dogru { background: #27AE60; border-color: #1E8449; box-shadow: 0 2px 0 #1E8449; transform: translateY(3px); pointer-events: none; }
+.sandik.yanlis { background: #C0392B; border-color: #922B21; box-shadow: 0 2px 0 #922B21; transform: translateY(3px); pointer-events: none; opacity: 0.5; }
+
+@keyframes sarsinti { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+/* ═══════════════════════════════════════════
+   AŞAMA 5: TREN GEÇİŞİ VE BAŞARI KUTUSU
+═══════════════════════════════════════════ */
+#asama5 { background: linear-gradient(180deg, #1C2833 0%, #34495E 60%, var(--vadi-acik) 60%, var(--vadi) 100%); }
+.tren-sahne { position: relative; width: 100vw; height: 350px; display: flex; align-items: center; margin-bottom: 20px; overflow: hidden; }
+.gece-kopru { position: absolute; top: 50%; left: 0; width: 200%; height: 100px; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="100"><rect width="120" height="20" fill="%232C3E50"/><rect width="40" height="80" y="20" x="40" fill="%231a252c"/></svg>') repeat-x; transform: translateY(-50%); border-top: 5px solid #111; }
+.tren { position: absolute; top: 50%; left: -150px; transform: translateY(-100%); font-size: 5rem; line-height: 1; filter: drop-shadow(5px 5px 0px rgba(0,0,0,0.5)); z-index: 10; }
+.duman-kapsayici { position: absolute; top: -30px; left: 40px; pointer-events: none; }
+.duman { position: absolute; font-size: 2rem; color: #FFF; opacity: 0; animation: dumanTüt 1s linear forwards; }
+@keyframes dumanTüt { 0% { transform: scale(0.5) translate(0,0); opacity: 0.8; } 100% { transform: scale(2) translate(-30px, -50px); opacity: 0; } }
+
+.gosterge-panel { background: #2C3E50; border: 4px solid #7F8C8D; border-radius: 20px; padding: 20px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.5); position: relative; z-index: 20; }
+.bar-dis { width: 100%; height: 30px; background: #111; border-radius: 15px; position: relative; overflow: hidden; border: 2px solid #555; margin-bottom: 15px; }
+.yesil-bolge { position: absolute; left: 50%; width: 35%; height: 100%; background: rgba(46, 204, 113, 0.4); border-left: 2px dashed #2ECC71; border-right: 2px dashed #2ECC71; }
+.ibrem { position: absolute; left: 0%; top: -5px; width: 6px; height: 40px; background: #E74C3C; border-radius: 3px; box-shadow: 0 0 10px red; }
+.basinc-btn { background: radial-gradient(circle, #E74C3C, #C0392B); width: 100px; height: 100px; border-radius: 50%; border: 6px solid #7F8C8D; color: white; font-weight: 800; font-size: 1.2rem; cursor: pointer; box-shadow: 0 10px 0 #922B21, inset 0 5px 10px rgba(255,255,255,0.4); display: flex; align-items: center; justify-content: center; margin: 0 auto; user-select: none; touch-action: manipulation; }
+.basinc-btn.basili { transform: translateY(10px); box-shadow: 0 0 0 #922B21, inset 0 5px 10px rgba(0,0,0,0.4); }
+.gecis-bar-dis { height: 10px; background: #34495E; border-radius: 5px; overflow: hidden; margin-top: 15px;}
+#gecis-dolgu { height: 100%; width: 0%; background: #F1C40F; transition: width 0.1s linear; }
+
+/* Kutlama Kutusu (5. Aşama İçinde Belirecek) */
+.sonuc-kutu { 
+  background: white; border-radius: 30px; padding: 30px; max-width: 600px; width: 90%; 
+  text-align: center; border: 4px solid var(--altin); box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
+  position: absolute; z-index: 100; display: none; overflow: hidden;
+}
+.sonuc-kutu::before { content: '🚂'; position: absolute; font-size: 12rem; opacity: 0.05; top: -30px; right: -30px; pointer-events: none; }
+.sonuc-baslik { font-size: 2.2rem; color: var(--lacivert); margin-bottom: 10px; line-height: 1.1; text-shadow: 1px 1px 0 #fff;}
+.sonuc-rozet { display: inline-block; background: var(--altin); color: var(--lacivert); padding: 8px 20px; border-radius: 30px; font-weight: 800; font-size: 1.1rem; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4); }
+.sonuc-bilgi { font-family: 'Crimson Pro', serif; font-size: 1.05rem; color: #444; line-height: 1.5; background: #F8F9F9; padding: 15px; border-radius: 15px; border-left: 5px solid var(--lacivert); margin-bottom: 25px; text-align: left; }
+.sonuc-bilgi strong { color: var(--kiremit); font-size: 1.2rem; display: block; margin-bottom: 5px;}
+.sonuc-bilgi b { color: var(--vadi); }
+.konfeti { position: fixed; pointer-events: none; z-index: 9999; border-radius: 3px; }
+
+</style>
+</head>
+<body>
+
+<audio id="trenSesi" src="tren.mp3" loop></audio>
+<div id="cursor">🚂</div>
+
+<div id="ust-bar">
+  <img src="orjinal.svg" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+  <div id="asama-gosterge">Bölüm 1/5</div>
+</div>
+<div id="asama-bar"><div id="asama-dolgu" style="width:0%"></div></div>
+
+<div id="popup-arka" class="gizli">
+  <div class="popup-kutu">
+    <span class="popup-ikon" id="popIkon">📜</span>
+    <h2 class="popup-baslik" id="popBaslik">Başlık</h2>
+    <p class="popup-metin" id="popMetin">Metin detayları...</p>
+    <div class="popup-bilgi" id="popBilgi">Ekstra Bilgi</div>
+    <button class="ana-btn" onclick="popupKapat()">Devam Et ➡️</button>
+  </div>
+</div>
+
+<div class="ekran" id="anasayfa">
+  <div class="arkaplan-bulut" style="top:10%; animation-duration:40s;">☁️</div>
+  <div class="arkaplan-bulut" style="top:40%; animation-duration:55s; font-size:3rem; opacity:0.15">☁️</div>
+  <div class="baslik-kapsayici">
+    <h1 class="ana-baslik">Adana<br><span>Varda Viyadüğü</span></h1>
+    <div class="alt-baslik">"Alman Köprüsü'nün Asırlık Sırrı"</div>
+    <div class="kapak-kart">
+      <img src="varda.png" alt="Varda Köprüsü" class="kapak-resim" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'180\'><rect width=\'300\' height=\'180\' fill=\'%237C7369\'/></svg>'">
+      <p>Tarihe tanıklık eden, mühendislik harikası devasa taş köprünün hikayesine adım at!</p>
+      <a href="https://drive.google.com/file/d/1rnedEFXsQD4r0DNQRJ_lJx99NKjUZP1Z/view?usp=drive_link" target="_blank" class="ogrenci-link">📄 Can Yıldırım'ın Çalışmasını İncele</a>
+    </div>
+    <button class="ana-btn" onclick="oyunaBasla()">Maceraya Başla 🚂</button>
+  </div>
+</div>
+
+<div class="ekran gizli" id="asama1">
+  <div class="video-kapsayici">
+    <h2>Varda Köprüsü'nün tarihini öğrenmek için videoyu izleyebilirsiniz.</h2>
+    <div class="video-wrapper">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/7H3OyGDj6b4?si=1_fNOOOv5-G1bge3" frameborder="0" allowfullscreen></iframe>
+    </div>
+    <button class="ana-btn" onclick="asamaGec(2)">Telgrafı Oku 📜</button>
+  </div>
+</div>
+
+<div class="ekran gizli" id="asama2">
+  <div class="telgraf-kagit">
+    Alman mühendisler tarafından inşa edilen ve çelik kafes örme tekniğiyle yapılan bu devasa <span id="telgraf-bosluk" class="bosluk-yer">_______</span> (yüksek köprü), Toros dağlarının zorlu vadilerine yüzyıldır meydan okuyor.
+    
+    <div class="kelime-secenekler" id="kelime-butonlari">
+      <button class="kelime-btn" onclick="telgrafSec(this, false, 'İstasyon')">İstasyon</button>
+      <button class="kelime-btn" onclick="telgrafSec(this, true, 'Viyadük')">Viyadük</button>
+      <button class="kelime-btn" onclick="telgrafSec(this, false, 'Tünel')">Tünel</button>
+    </div>
+  </div>
+  <button class="ana-btn" id="telgraf-ileri" style="margin-top: 30px; display: none;" onclick="asamaGec(3)">İnşaa Alanına Git 🔨</button>
+</div>
+
+<div class="ekran gizli" id="asama3">
+  <h2 style="color:var(--lacivert); font-size:2rem; margin-top:-50px; margin-bottom:50px; background:rgba(255,255,255,0.8); padding:10px 20px; border-radius:15px; text-align:center;">Eksik Kemerleri Tamamla!</h2>
+  <div class="kopru-sahne">
+    <div style="width: 100px; height: 250px; background: var(--tas-koyu); border-radius: 20px 0 0 0;"></div>
+    
+    <div class="kopru-kemer-alani">
+      <div class="kemer-yol"></div>
+      <div class="kemer-eksik" onclick="kemerYerlestir(this)">🏗️</div>
+      <div class="kemer-tam"></div>
+    </div>
+    <div class="kopru-ayak"></div>
+    
+    <div class="kopru-kemer-alani">
+      <div class="kemer-yol"></div>
+      <div class="kemer-eksik" onclick="kemerYerlestir(this)">🏗️</div>
+      <div class="kemer-tam"></div>
+    </div>
+    <div class="kopru-ayak"></div>
+
+    <div class="kopru-kemer-alani">
+      <div class="kemer-yol"></div>
+      <div class="kemer-eksik" onclick="kemerYerlestir(this)">🏗️</div>
+      <div class="kemer-tam"></div>
+    </div>
+    <div style="width: 100px; height: 250px; background: var(--tas-koyu); border-radius: 0 20px 0 0;"></div>
+  </div>
+  <button class="ana-btn" id="insaat-ileri-btn" style="opacity:0; pointer-events:none;" onclick="asamaGec(4)">Kargoları Yükle 📦</button>
+</div>
+
+<div class="ekran gizli" id="asama4">
+  <div class="imla-baslik">Doğru Kargoları Seç!</div>
+  <div class="imla-alt">Trene sadece <b>doğru yazılmış</b> kelimeleri yükleyebilirsin. Yanlış olanlara dokunma!</div>
+  
+  <div class="sandik-izgara">
+    <div class="sandik-cifti">
+      <div class="sandik" onclick="sandikSec(this, false, 1)">Tiren</div>
+      <div class="sandik" onclick="sandikSec(this, true, 1)">Tren</div>
+    </div>
+    <div class="sandik-cifti">
+      <div class="sandik" onclick="sandikSec(this, true, 2)">Telgraf</div>
+      <div class="sandik" onclick="sandikSec(this, false, 2)">Telegraf</div>
+    </div>
+    <div class="sandik-cifti">
+      <div class="sandik" onclick="sandikSec(this, false, 3)">Viyedük</div>
+      <div class="sandik" onclick="sandikSec(this, true, 3)">Viyadük</div>
+    </div>
+    <div class="sandik-cifti">
+      <div class="sandik" onclick="sandikSec(this, true, 4)">Mühendis</div>
+      <div class="sandik" onclick="sandikSec(this, false, 4)">Mühendiz</div>
+    </div>
+  </div>
+  
+  <button class="ana-btn" id="imla-ileri-btn" style="margin-top: 30px;" disabled onclick="asamaGec(5)">Trenin Geçişini Sağla 🚂</button>
+</div>
+
+<div class="ekran gizli" id="asama5">
+  <div class="tren-sahne">
+    <div class="gece-kopru" id="hareketli-kopru"></div>
+    <div class="tren" id="oyuncu-tren">🚂<div class="duman-kapsayici" id="duman-alani"></div></div>
+  </div>
+  
+  <div class="gosterge-panel" id="oyun-paneli">
+    <div style="color:white; font-size:1.2rem; margin-bottom:10px;">Kazan Basıncı: <span id="basinc-deger" style="color:#F1C40F">0%</span></div>
+    <div class="bar-dis">
+      <div class="yesil-bolge"></div>
+      <div class="ibrem" id="basinc-ibre"></div>
+    </div>
+    <div style="font-size:0.8rem; color:#BDC3C7; margin-bottom:15px; font-style:italic;">İbreyi YEŞİL alanda tutarak treni ilerlet!</div>
+    <div class="basinc-btn" id="bas-btn">BAS<br>KÖMÜRÜ!</div>
+    <div class="gecis-bar-dis"><div id="gecis-dolgu"></div></div>
+    <div style="color:#BDC3C7; font-size:0.8rem; margin-top:5px;">Köprü Geçiş İlerlemesi: <span id="gecis-yuzde">0%</span></div>
+  </div>
+
+  <div class="sonuc-kutu" id="sonuc-kutusu">
+    <h1 class="sonuc-baslik">Harika İş Çıkardın!</h1>
+    <div class="sonuc-rozet">🏆 Usta Makinist & Baş Mühendis</div>
+    <div class="sonuc-bilgi">
+      <strong>Kargolar Güvenle Hedefe Ulaştı! 📦</strong>
+      En başta videoda tarihini ve 1912'deki yapım sürecini öğrendiğin o devasa Alman Köprüsü'nün, yani <b>Viyadük'ün</b> üzerinden treni başarıyla geçirdin.<br><br>
+      Hem eksik kemerleri tamamlayarak mühendisliğini, hem de doğru kelimeleri seçerek Türkçe dil becerilerini gösterdin!
+    </div>
+    <button class="ana-btn" onclick="window.location.href = 'https://memleketim.github.io/01/index.html'">Menüye Dön 🏠</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  SES SİSTEMİ
+// ═══════════════════════════════════════════════════
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+function calSes(freq, type='sine', duration=0.1, gainVal=0.3, delay=0) {
+  try {
+    initAudio();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay);
+    gain.gain.setValueAtTime(0, audioCtx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(gainVal, audioCtx.currentTime + delay + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + duration);
+    osc.start(audioCtx.currentTime + delay); osc.stop(audioCtx.currentTime + delay + duration + 0.1);
+  } catch(e){}
+}
+
+function sesTik() { calSes(600, 'sine', 0.1, 0.2); }
+function sesTasYerlesme() { calSes(150, 'square', 0.2, 0.4); calSes(100, 'sawtooth', 0.3, 0.4, 0.05); }
+function sesDogru() { [440, 659].forEach((f, i) => calSes(f, 'sine', 0.2, 0.3, i*0.1)); }
+function sesYanlis() { calSes(150, 'sawtooth', 0.3, 0.3); }
+function sesBasari() { [440, 554, 659, 880].forEach((f, i) => calSes(f, 'sine', 0.3, 0.3, i*0.1)); }
+
+// İMLEÇ
+const cursorEl = document.getElementById('cursor');
+document.addEventListener('mousemove', e => { cursorEl.style.left = e.clientX + 'px'; cursorEl.style.top = e.clientY + 'px'; });
+document.addEventListener('mousedown', () => cursorEl.classList.add('active'));
+document.addEventListener('mouseup', () => cursorEl.classList.remove('active'));
+
+// ═══════════════════════════════════════════════════
+//  OYUN AKIŞI & POPUPLAR
+// ═══════════════════════════════════════════════════
+const toplamAsama = 5;
+const popupler = {
+  1: { ikon: '🎬', baslik: 'Tarihe Yolculuk', metin: '1900\'lerin başına gidiyoruz. Hicaz Demiryolu projesinin en zorlu aşaması: Toros dağlarını aşmak.', bilgi: 'Dinleme ve İzleme becerilerini kullanarak Varda Köprüsü\'nün yapım hikayesini anla.' },
+  2: { ikon: '📜', baslik: 'Eksik Telgraf', metin: 'İnşaat alanından bir telgraf geldi ama bazı kelimeler silinmiş!', bilgi: 'Cümlenin anlamına (bağlama) en uygun kelimeyi bularak okuduğunu anlama yeteneğini göster. Viyadük kelimesinin büyük bir köprü anlamına geldiğini unutma.' },
+  3: { ikon: '🧱', baslik: 'Mühendislik Harikası', metin: 'Köprünün inşası yıllar sürdü. Şimdi sıra sende! İskeleleri kurduk, son kemerleri sen yerleştir.', bilgi: 'Mühendislik planına sadık kalarak görsel dikkatinle köprüyü tamamla.' },
+  4: { ikon: '📦', baslik: 'Kargo Denetimi', metin: 'Trene yüklenecek sandıkların üstündeki yazıları kontrol etmelisin. Sadece doğru yazılanları seç!', bilgi: 'Türkçe yazım kurallarına (imla) dikkat ederek yanlış yazılan kelimeleri ele.' },
+  5: { ikon: '🚂', baslik: 'İlk Sefer', metin: 'Her şey hazır! Buharlı trenin karşıya geçmesi için buhar kazanını doğru basınçta tutman gerekiyor.', bilgi: 'Kömür butonuna basılı tut, basınç yükseldiğinde bırakıp ibreyi YEŞİL alanda tut!' }
+};
+
+function oyunaBasla() {
+  initAudio(); sesTik();
+  document.getElementById('ust-bar').style.pointerEvents = 'auto';
+  document.getElementById('asama-gosterge').style.display = 'block';
+  asamaGec(1);
+}
+
+function asamaGec(no) {
+  sesTik();
+  document.getElementById('asama-dolgu').style.width = ((no/toplamAsama)*100) + '%';
+  document.getElementById('asama-gosterge').textContent = `Bölüm ${no}/${toplamAsama}`;
+
+  if (popupler[no]) {
+    popupAc(popupler[no].ikon, popupler[no].baslik, popupler[no].metin, popupler[no].bilgi, () => {
+      ekranGoster('asama' + no);
+      if(no === 5) trenOyununuBaslat();
+    });
+  }
+}
+
+function ekranGoster(id) {
+  document.querySelectorAll('.ekran').forEach(e => e.classList.add('gizli'));
+  document.getElementById(id).classList.remove('gizli');
+  if(id === 'asama3') cursorEl.textContent = '🔨';
+  else cursorEl.textContent = '🚂';
+}
+
+function popupAc(ikon, baslik, metin, bilgi, callback) {
+  document.getElementById('popIkon').textContent = ikon;
+  document.getElementById('popBaslik').textContent = baslik;
+  document.getElementById('popMetin').textContent = metin;
+  document.getElementById('popBilgi').innerHTML = '💡 ' + bilgi;
+  document.getElementById('popup-arka').classList.remove('gizli');
+  window.popupCallback = callback;
+}
+function popupKapat() {
+  sesTik();
+  document.getElementById('popup-arka').classList.add('gizli');
+  if(typeof window.popupCallback === 'function') { window.popupCallback(); window.popupCallback = null; }
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 2: TELGRAF OYUNU
+// ═══════════════════════════════════════════════════
+function telgrafSec(btn, isCorrect, kelime) {
+  if(isCorrect) {
+    sesDogru();
+    const bosluk = document.getElementById('telgraf-bosluk');
+    bosluk.textContent = kelime;
+    bosluk.classList.add('dolu');
+    document.getElementById('kelime-butonlari').style.display = 'none';
+    document.getElementById('telgraf-ileri').style.display = 'inline-block';
+  } else {
+    sesYanlis();
+    btn.classList.add('yanlis');
+    setTimeout(() => btn.classList.remove('yanlis'), 400);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 3: KEMER YERLEŞTİRME
+// ═══════════════════════════════════════════════════
+let yerlesenKemer = 0;
+function kemerYerlestir(el) {
+  if(el.style.opacity === '0') return;
+  sesTasYerlesme();
+  el.style.opacity = '0'; el.style.pointerEvents = 'none';
+  el.nextElementSibling.classList.add('yerlesti');
+  
+  const rect = el.getBoundingClientRect();
+  for(let i=0; i<8; i++) {
+    let t = document.createElement('div'); t.className = 'toz';
+    t.style.left = (rect.left + rect.width/2 - 15) + 'px'; t.style.top = (rect.top + rect.height/2 - 15) + 'px';
+    t.style.setProperty('--dx', (Math.random()*100 - 50) + 'px'); t.style.setProperty('--dy', (Math.random()*100 - 50) + 'px');
+    document.body.appendChild(t); setTimeout(() => t.remove(), 800);
+  }
+  
+  yerlesenKemer++;
+  if(yerlesenKemer === 3) {
+    setTimeout(() => { sesBasari(); document.getElementById('insaat-ileri-btn').style.opacity = '1'; document.getElementById('insaat-ileri-btn').style.pointerEvents = 'auto'; }, 800);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 4: YAZIM KURALLARI (İMLA)
+// ═══════════════════════════════════════════════════
+let dogruSandikSayisi = 0;
+function sandikSec(el, isCorrect, ciftId) {
+  const parent = el.parentElement;
+  Array.from(parent.children).forEach(child => child.style.pointerEvents = 'none');
+
+  if(isCorrect) {
+    sesDogru();
+    el.classList.add('dogru');
+    dogruSandikSayisi++;
+    if(dogruSandikSayisi === 4) {
+      document.getElementById('imla-ileri-btn').disabled = false;
+      sesBasari();
+    }
+  } else {
+    sesYanlis();
+    el.classList.add('yanlis');
+    Array.from(parent.children).forEach(child => {
+      if(child !== el) child.classList.add('dogru');
+    });
+    dogruSandikSayisi++; 
+    if(dogruSandikSayisi === 4) {
+      document.getElementById('imla-ileri-btn').disabled = false;
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  AŞAMA 5: TREN MİNİ OYUNU VE DOĞRUDAN KUTLAMA
+// ═══════════════════════════════════════════════════
+let basinc = 0, ilerleme = 0, basiliyor = false, oyunDongu = null, sonZaman = 0;
+const hedefAlanBas = 50, hedefAlanBit = 85; 
+
+const btnBas = document.getElementById('bas-btn');
+const btnMDown = (e) => { e.preventDefault(); basiliyor = true; btnBas.classList.add('basili'); };
+const btnMUp = (e) => { e.preventDefault(); basiliyor = false; btnBas.classList.remove('basili'); };
+
+btnBas.addEventListener('mousedown', btnMDown); btnBas.addEventListener('touchstart', btnMDown, {passive:false});
+window.addEventListener('mouseup', btnMUp); window.addEventListener('touchend', btnMUp);
+
+let sonDumanZaman = 0, kopruKayma = 0;
+
+function trenOyununuBaslat() {
+  basinc = 0; ilerleme = 0; basiliyor = false; sonZaman = 0;
+  document.getElementById('oyuncu-tren').style.left = '20px';
+  const ts = document.getElementById('trenSesi'); ts.volume = 0; ts.play().catch(()=>{}); 
+  if(oyunDongu) cancelAnimationFrame(oyunDongu);
+  oyunDongu = requestAnimationFrame(dongu);
+}
+
+function dongu(timestamp) {
+  if (!sonZaman) sonZaman = timestamp;
+  let dt = timestamp - sonZaman; sonZaman = timestamp;
+  if (dt > 100) dt = 16; 
+  let hiz = dt / 16.66; 
+
+  basinc += basiliyor ? (0.8 * hiz) : (-0.6 * hiz);
+  basinc = Math.max(0, Math.min(100, basinc));
+  
+  document.getElementById('basinc-ibre').style.left = basinc + '%';
+  const dg = document.getElementById('basinc-deger');
+  dg.textContent = Math.floor(basinc) + '%';
+  
+  const ts = document.getElementById('trenSesi');
+  if(basinc >= hedefAlanBas && basinc <= hedefAlanBit) {
+    dg.style.color = '#2ECC71'; ilerleme += 0.18 * hiz; kopruKayma -= 2.5 * hiz; 
+    if(ts.volume < 0.8) ts.volume = Math.min(0.8, ts.volume + 0.05);
+  } else {
+    dg.style.color = basinc > hedefAlanBit ? '#E74C3C' : '#F1C40F';
+    if(ts.volume > 0) ts.volume = Math.max(0, ts.volume - 0.05);
+  }
+  
+  document.getElementById('hareketli-kopru').style.backgroundPosition = kopruKayma + 'px 0';
+  ilerleme = Math.min(100, ilerleme);
+  document.getElementById('gecis-dolgu').style.width = ilerleme + '%';
+  document.getElementById('gecis-yuzde').textContent = Math.floor(ilerleme) + '%';
+  document.getElementById('oyuncu-tren').style.left = (20 + (ilerleme * 0.5)) + 'px';
+
+  if(timestamp - sonDumanZaman > Math.max(50, 250 - basinc)) {
+    const d = document.createElement('div'); d.className = 'duman'; d.textContent = '☁️';
+    d.style.left = (Math.random() * 20 - 10) + 'px'; d.style.top = (Math.random() * 10 - 5) + 'px';
+    document.getElementById('duman-alani').appendChild(d); setTimeout(() => d.remove(), 1000);
+    sonDumanZaman = timestamp;
+  }
+
+  // TREN KARŞIYA GEÇTİĞİNDE DOĞRUDAN KUTLAMAYA GEÇİŞ YAPIYORUZ
+  if(ilerleme >= 100) { 
+    ts.pause(); 
+    setTimeout(() => bitisKutlamasi(), 300); 
+    return; 
+  }
+  oyunDongu = requestAnimationFrame(dongu);
+}
+
+// ═══════════════════════════════════════════════════
+//  KUTLAMA (5. Aşamanın içinde beliriyor)
+// ═══════════════════════════════════════════════════
+function bitisKutlamasi() {
+  sesBasari();
+  
+  // Üst barı ve oyun panelini gizle
+  document.getElementById('ust-bar').style.display = 'none';
+  document.getElementById('oyun-paneli').style.display = 'none';
+  
+  // Başarı kutusunu animasyonla göster
+  const kutu = document.getElementById('sonuc-kutusu');
+  kutu.style.display = 'block';
+  kutu.style.animation = 'popGiris 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards';
+
+  // Coşkulu konfeti şöleni
+  for(let i=0; i<100; i++) setTimeout(() => firlatKonfeti(), i*25);
+}
+
+function firlatKonfeti() {
+  const renkler = ['#E74C3C', '#3498DB', '#F1C40F', '#2ECC71', '#9B59B6'];
+  const t = document.createElement('div'); t.className = 'konfeti';
+  t.style.background = renkler[Math.floor(Math.random() * renkler.length)];
+  t.style.width = (10 + Math.random()*10) + 'px'; t.style.height = (10 + Math.random()*10) + 'px';
+  t.style.left = (window.innerWidth / 2) + 'px'; t.style.top = window.innerHeight + 'px';
+  document.body.appendChild(t);
+  
+  const aci = (Math.random() * Math.PI) + Math.PI; 
+  const hiz = 15 + Math.random() * 25; 
+  const ucusSure = 1500 + Math.random() * 1000;
+  
+  t.animate([ 
+    { transform: `translate(0, 0) rotate(0)`, opacity: 1 }, 
+    { transform: `translate(${Math.cos(aci)*hiz*20}px, ${Math.sin(aci)*hiz*20 + 200}px) rotate(${Math.random()*720}deg)`, opacity: 0 } 
+  ], { duration: ucusSure, easing: 'cubic-bezier(0.25, 1, 0.5, 1)', fill: 'forwards' });
+  
+  setTimeout(() => t.remove(), ucusSure);
+}
+</script>
+</body>
+</html>
