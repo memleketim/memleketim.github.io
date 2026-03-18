@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="tr" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kahramanlığın İzinde - Çanakkale Zaferi Sergisi</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800;900&amp;family=Crimson+Pro:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    html, body { height: 100%; margin: 0; }
+    * { box-sizing: border-box; }
+
+    .font-heading { font-family: 'Playfair Display', Georgia, serif; }
+    .font-body { font-family: 'Crimson Pro', Georgia, serif; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideLeft {
+      from { opacity: 0; transform: translateX(-40px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(180, 40, 40, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(180, 40, 40, 0.6); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .anim-fade-up { animation: fadeUp 0.8s ease-out forwards; opacity: 0; }
+    .anim-fade-in { animation: fadeIn 1s ease-out forwards; opacity: 0; }
+    .anim-slide-left { animation: slideLeft 0.8s ease-out forwards; opacity: 0; }
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.6s; }
+    .delay-4 { animation-delay: 0.8s; }
+    .delay-5 { animation-delay: 1s; }
+    .delay-6 { animation-delay: 1.2s; }
+
+    .hero-gradient {
+      background: linear-gradient(135deg, #1a0a0a 0%, #2d1010 30%, #1a1a2e 70%, #0d0d1a 100%);
+    }
+
+    .crescent-star {
+      position: absolute;
+      opacity: 0.06;
+      pointer-events: none;
+    }
+
+    .btn-exhibit {
+      background: linear-gradient(135deg, #8b1a1a, #c0392b, #8b1a1a);
+      background-size: 200% auto;
+      animation: shimmer 3s linear infinite, pulse-glow 3s ease-in-out infinite;
+      transition: all 0.3s ease;
+    }
+    .btn-exhibit:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #a01e1e, #e74c3c, #a01e1e);
+    }
+
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+    .video-wrapper iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+
+    .card-glow {
+      transition: all 0.4s ease;
+    }
+    .card-glow:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(180, 40, 40, 0.2);
+    }
+
+    .divider-ornament {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: center;
+    }
+    .divider-ornament::before,
+    .divider-ornament::after {
+      content: '';
+      height: 1px;
+      width: 80px;
+      background: linear-gradient(to right, transparent, #8b1a1a, transparent);
+    }
+
+    .star-float { animation: float 4s ease-in-out infinite; }
+    .star-float-2 { animation: float 5s ease-in-out infinite 1s; }
+
+    .scroll-indicator {
+      animation: fadeUp 1.5s ease-in-out infinite alternate;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full font-body">
+  <div id="app-wrapper" class="w-full h-full overflow-auto"><!-- HERO SECTION -->
+   <section class="hero-gradient relative w-full overflow-hidden" style="min-height: 100%;"><!-- Decorative elements -->
+    <div class="crescent-star" style="top: 8%; left: 5%; font-size: 120px;">
+     ☪
+    </div>
+    <div class="crescent-star" style="top: 15%; right: 8%; font-size: 80px;">
+     ★
+    </div>
+    <div class="crescent-star" style="bottom: 20%; left: 12%; font-size: 60px;">
+     ★
+    </div>
+    <div class="crescent-star" style="bottom: 10%; right: 15%; font-size: 100px;">
+     ☪
+    </div><!-- Subtle top pattern -->
+    <div class="absolute top-0 left-0 w-full h-1" style="background: linear-gradient(90deg, transparent, #c0392b, #e74c3c, #c0392b, transparent);"></div>
+    <div class="relative z-10 flex flex-col items-center justify-center px-4 py-16 md:py-24" style="min-height: 100%;"><!-- Date badge -->
+     <div class="anim-fade-up mb-6">
+      <div class="inline-flex items-center gap-2 px-5 py-2 rounded-full border" style="border-color: rgba(192,57,43,0.4); background: rgba(139,26,26,0.15);"><span class="star-float" style="color: #e74c3c;">★</span> <span class="text-sm tracking-widest uppercase" style="color: #d4a574; font-family: 'Crimson Pro', serif; letter-spacing: 0.2em;">18 Mart Çanakkale Zaferi</span> <span class="star-float-2" style="color: #e74c3c;">★</span>
+      </div>
+     </div><!-- Main title -->
+     <h1 id="el-main-title" class="font-heading text-center anim-fade-up delay-1" style="font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; line-height: 1.15; color: #f5e6d3; max-width: 800px;">Kahramanlığın İzinde</h1><!-- Subtitle -->
+     <p id="el-subtitle" class="font-heading text-center anim-fade-up delay-2 mt-4" style="font-size: clamp(1rem, 2.2vw, 1.5rem); font-weight: 400; color: #d4a574; max-width: 700px; line-height: 1.5;">Öğrencilerimizin Gözünden Çanakkale Zaferi</p><!-- Ornamental divider -->
+     <div class="divider-ornament anim-fade-in delay-3 mt-6 mb-6"><span style="color: #c0392b; font-size: 18px;">◆</span>
+     </div><!-- Badge -->
+     <div class="anim-fade-up delay-3 mb-8">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-lg" style="background: rgba(139,26,26,0.2); border: 1px solid rgba(192,57,43,0.3);"><span style="color: #e74c3c;"> <i data-lucide="sparkles" style="width:18px; height:18px;"></i> </span> <span style="color: #d4a574; font-size: 0.9rem; letter-spacing: 0.05em;">Yapay Zeka Destekli Resim Sergisi</span>
+      </div>
+     </div><!-- Description -->
+     <p id="el-description" class="text-center anim-fade-up delay-4 mb-10" style="color: #b8a08a; font-size: clamp(0.95rem, 1.5vw, 1.15rem); max-width: 600px; line-height: 1.8;">Ülkem Yanımda Platformu olarak, 18 Mart Çanakkale Zaferi'ni hem teknoloji hem de sanatla anıyoruz. Öğrencilerimiz yapay zeka destekli araçlarla, Çanakkale ruhunu tuvallerine yansıttı.</p><!-- CTA Button --> <a id="el-cta-btn" href="sergi.html" target="_blank" rel="noopener noreferrer" class="btn-exhibit anim-fade-up delay-5 inline-flex items-center gap-3 px-8 py-4 rounded-xl text-white font-heading no-underline" style="font-size: 1.15rem; font-weight: 700; letter-spacing: 0.03em; text-decoration: none;"> <i data-lucide="compass" style="width:22px; height:22px;"></i> <span id="el-btn-text">Sergiyi Kendin Gez</span> <i data-lucide="arrow-right" style="width:20px; height:20px;"></i> </a>
+     <p class="anim-fade-in delay-6 mt-4" style="color: rgba(180,160,138,0.5); font-size: 0.8rem;">Sanal sergi deneyimi için tıklayın</p><!-- Scroll indicator -->
+     <div class="scroll-indicator mt-12" style="color: rgba(212,165,116,0.4);"><i data-lucide="chevrons-down" style="width:28px; height:28px;"></i>
+     </div>
+    </div>
+   </section><!-- VIDEO SECTION -->
+   <section class="w-full relative" style="background: linear-gradient(180deg, #0d0d1a 0%, #1a0f0f 50%, #1a0a0a 100%);">
+    <div class="max-w-4xl mx-auto px-4 py-16 md:py-24">
+     <div class="text-center mb-10">
+      <div class="divider-ornament mb-4"><span style="color: #c0392b; font-size: 14px;">◆</span>
+      </div>
+      <h2 class="font-heading" style="font-size: clamp(1.5rem, 3vw, 2.2rem); font-weight: 700; color: #f5e6d3;">Sergimizden Kareler</h2>
+      <p class="mt-3" style="color: #b8a08a; font-size: 1rem; max-width: 500px; margin: 12px auto 0;">Öğrencilerimizin Çanakkale ruhunu yansıtan eserlerini videomuzda keşfedin.</p>
+     </div><!-- Video embed -->
+     <div class="card-glow rounded-2xl p-1" style="background: linear-gradient(135deg, rgba(139,26,26,0.3), rgba(30,30,50,0.5));">
+      <div class="video-wrapper"><iframe src="https://www.youtube.com/embed/Xw69eHbjTb0" title="Çanakkale Zaferi Sergisi" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen loading="lazy"></iframe>
+      </div>
+     </div><!-- Video caption -->
+     <div class="flex items-center justify-center gap-2 mt-6" style="color: rgba(180,160,138,0.6); font-size: 0.85rem;"><i data-lucide="play-circle" style="width:16px; height:16px;"></i> <span>Ülkem Yanımda Platformu — Çanakkale Zaferi Özel</span>
+     </div>
+    </div>
+   </section><!-- INFO CARDS SECTION -->
+   <section class="w-full" style="background: linear-gradient(180deg, #1a0a0a 0%, #1a1018 50%, #0d0d1a 100%);">
+    <div class="max-w-5xl mx-auto px-4 py-16 md:py-20">
+     <div class="grid grid-cols-1 md:grid-cols-3 gap-6"><!-- Card 1 -->
+      <div class="card-glow rounded-2xl p-6 text-center" style="background: rgba(30,20,20,0.6); border: 1px solid rgba(139,26,26,0.2);">
+       <div class="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center" style="background: rgba(139,26,26,0.2);"><i data-lucide="palette" style="width:28px; height:28px; color: #e74c3c;"></i>
+       </div>
+       <h3 class="font-heading mb-2" style="font-size: 1.15rem; font-weight: 700; color: #f5e6d3;">Yapay Zeka ile Sanat</h3>
+       <p style="color: #b8a08a; font-size: 0.92rem; line-height: 1.7;">Öğrencilerimiz yapay zeka araçlarıyla Çanakkale destanını görselleştirdi. Teknoloji ve sanatın buluştuğu bu sergi, tarihi farklı bir perspektiften sunuyor.</p>
+      </div><!-- Card 2 -->
+      <div class="card-glow rounded-2xl p-6 text-center" style="background: rgba(30,20,20,0.6); border: 1px solid rgba(139,26,26,0.2);">
+       <div class="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center" style="background: rgba(139,26,26,0.2);"><i data-lucide="heart" style="width:28px; height:28px; color: #e74c3c;"></i>
+       </div>
+       <h3 class="font-heading mb-2" style="font-size: 1.15rem; font-weight: 700; color: #f5e6d3;">Vatan Sevgisi</h3>
+       <p style="color: #b8a08a; font-size: 0.92rem; line-height: 1.7;">Her bir eser, öğrencilerimizin Çanakkale şehitlerine duyduğu minnet ve saygıyı yansıtıyor. Genç nesillerin gözünden kahramanlık hikayeleri.</p>
+      </div><!-- Card 3 -->
+      <div class="card-glow rounded-2xl p-6 text-center" style="background: rgba(30,20,20,0.6); border: 1px solid rgba(139,26,26,0.2);">
+       <div class="mx-auto mb-4 w-14 h-14 rounded-full flex items-center justify-center" style="background: rgba(139,26,26,0.2);"><i data-lucide="users" style="width:28px; height:28px; color: #e74c3c;"></i>
+       </div>
+       <h3 class="font-heading mb-2" style="font-size: 1.15rem; font-weight: 700; color: #f5e6d3;">Ülkem Yanımda</h3>
+       <p style="color: #b8a08a; font-size: 0.92rem; line-height: 1.7;">Platformumuz, öğrencilerin milli değerlerle bağ kurmasını sağlıyor. Eğitim ve teknoloji bir arada, geleceğe köprü kuruyoruz.</p>
+      </div>
+     </div><!-- Bottom CTA -->
+     <div class="text-center mt-14">
+      <div class="divider-ornament mb-6"><span style="color: #c0392b; font-size: 14px;">◆</span>
+      </div>
+      <p class="font-heading mb-6" style="color: #d4a574; font-size: clamp(1.1rem, 2vw, 1.4rem); font-weight: 600;">Sanal sergiyi keşfetmeye hazır mısınız?</p><a id="el-cta-btn-2" href="sergi.html" target="_blank" rel="noopener noreferrer" class="btn-exhibit inline-flex items-center gap-3 px-7 py-3.5 rounded-xl text-white font-heading no-underline" style="font-size: 1.05rem; font-weight: 700; text-decoration: none;"> <i data-lucide="eye" style="width:20px; height:20px;"></i> <span id="el-btn-text-2">Sergiyi Deneyimle</span> </a>
+     </div>
+    </div>
+   </section><!-- QUOTE SECTION -->
+   <section class="w-full" style="background: linear-gradient(180deg, #0d0d1a 0%, #1a0a0a 100%);">
+    <div class="max-w-3xl mx-auto px-4 py-16 text-center">
+     <div style="color: rgba(192,57,43,0.3); font-size: 4rem; line-height: 1; font-family: 'Playfair Display', serif;">
+      "
+     </div>
+     <blockquote class="font-heading" style="color: #f5e6d3; font-size: clamp(1.1rem, 2.5vw, 1.6rem); font-weight: 600; line-height: 1.6; font-style: italic;">
+      Bu memleketin toprakları üzerinde kanlarını döken kahramanlar! Burada bir dost vatanın toprağındasınız. Huzur ve sükun içinde uyuyunuz.
+     </blockquote>
+     <p class="mt-6" style="color: #d4a574; font-size: 1rem; font-weight: 500; letter-spacing: 0.1em;">— Mustafa Kemal Atatürk</p>
+     <div class="divider-ornament mt-8"><span style="color: rgba(192,57,43,0.4); font-size: 12px;">◆</span>
+     </div>
+    </div>
+   </section><!-- FOOTER -->
+   <footer class="w-full text-center px-4 py-8" style="background: #0a0608; border-top: 1px solid rgba(139,26,26,0.15);">
+    <div class="flex items-center justify-center gap-2 mb-3"><span style="color: #c0392b; font-size: 1.2rem;">☪</span> <span class="font-heading" style="color: #d4a574; font-size: 0.95rem; font-weight: 600;">Ülkem Yanımda Platformu</span>
+    </div>
+    <p style="color: rgba(180,160,138,0.4); font-size: 0.8rem;">18 Mart Çanakkale Zaferi'ni saygı ve minnetle anıyoruz.</p>
+   </footer>
+  </div>
+  <script>
+    // Element SDK
+    const defaultConfig = {
+      main_title: "Kahramanlığın İzinde",
+      subtitle: "Öğrencilerimizin Gözünden Çanakkale Zaferi",
+      description_text: "Ülkem Yanımda Platformu olarak, 18 Mart Çanakkale Zaferi'ni hem teknoloji hem de sanatla anıyoruz. Öğrencilerimiz yapay zeka destekli araçlarla, Çanakkale ruhunu tuvallerine yansıttı.",
+      button_text: "Sergiyi Kendin Gez",
+      background_color: "#1a0a0a",
+      surface_color: "#1e1414",
+      text_color: "#f5e6d3",
+      primary_action_color: "#c0392b",
+      secondary_action_color: "#d4a574",
+      font_family: "Playfair Display",
+      font_size: 16
+    };
+
+    function applyConfig(config) {
+      const c = { ...defaultConfig, ...config };
+
+      // Text content
+      document.getElementById('el-main-title').textContent = c.main_title;
+      document.getElementById('el-subtitle').textContent = c.subtitle;
+      document.getElementById('el-description').textContent = c.description_text;
+      document.getElementById('el-btn-text').textContent = c.button_text;
+      document.getElementById('el-btn-text-2').textContent = c.button_text;
+
+      // Colors
+      const root = document.documentElement;
+
+      // Background
+      const sections = document.querySelectorAll('.hero-gradient');
+      sections.forEach(s => {
+        s.style.background = `linear-gradient(135deg, ${c.background_color} 0%, ${adjustColor(c.background_color, 20)} 30%, #1a1a2e 70%, #0d0d1a 100%)`;
+      });
+
+      // Surface color on cards
+      document.querySelectorAll('.card-glow').forEach(card => {
+        if (!card.querySelector('iframe')) {
+          card.style.background = hexToRgba(c.surface_color, 0.6);
+          card.style.borderColor = hexToRgba(c.primary_action_color, 0.2);
+        }
+      });
+
+      // Text color
+      document.getElementById('el-main-title').style.color = c.text_color;
+      document.querySelectorAll('.font-heading').forEach(el => {
+        if (el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'H3') {
+          el.style.color = c.text_color;
+        }
+      });
+
+      // Primary action on buttons
+      document.querySelectorAll('.btn-exhibit').forEach(btn => {
+        btn.style.background = `linear-gradient(135deg, ${darken(c.primary_action_color, 20)}, ${c.primary_action_color}, ${darken(c.primary_action_color, 20)})`;
+      });
+
+      // Secondary action color
+      document.getElementById('el-subtitle').style.color = c.secondary_action_color;
+
+      // Font
+      const fontStack = `${c.font_family}, Georgia, serif`;
+      document.querySelectorAll('.font-heading').forEach(el => {
+        el.style.fontFamily = fontStack;
+      });
+
+      // Font size
+      const base = c.font_size;
+      document.getElementById('el-main-title').style.fontSize = `clamp(${base * 1.8}px, 5vw, ${base * 3.5}px)`;
+      document.getElementById('el-subtitle').style.fontSize = `clamp(${base * 0.9}px, 2.2vw, ${base * 1.4}px)`;
+      document.getElementById('el-description').style.fontSize = `${base * 1.05}px`;
+    }
+
+    function hexToRgba(hex, alpha) {
+      hex = hex.replace('#', '');
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+
+    function adjustColor(hex, amount) {
+      hex = hex.replace('#', '');
+      let r = Math.min(255, parseInt(hex.substring(0, 2), 16) + amount);
+      let g = Math.min(255, parseInt(hex.substring(2, 4), 16) + amount);
+      let b = Math.min(255, parseInt(hex.substring(4, 6), 16) + amount);
+      return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+    }
+
+    function darken(hex, amount) {
+      hex = hex.replace('#', '');
+      let r = Math.max(0, parseInt(hex.substring(0, 2), 16) - amount);
+      let g = Math.max(0, parseInt(hex.substring(2, 4), 16) - amount);
+      let b = Math.max(0, parseInt(hex.substring(4, 6), 16) - amount);
+      return `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+    }
+
+    // Initialize Element SDK
+    window.elementSdk.init({
+      defaultConfig,
+      onConfigChange: async (config) => {
+        applyConfig(config);
+      },
+      mapToCapabilities: (config) => ({
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+        }
+      }),
+      mapToEditPanelValues: (config) => new Map([
+        ["main_title", config.main_title || defaultConfig.main_title],
+        ["subtitle", config.subtitle || defaultConfig.subtitle],
+        ["description_text", config.description_text || defaultConfig.description_text],
+        ["button_text", config.button_text || defaultConfig.button_text]
+      ])
+    });
+
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9de2d528d1f41628',t:'MTc3MzgyMjE3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

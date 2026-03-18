@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>18 Mart Çanakkale Zaferi | Yapay Zeka Resimleri</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&display=swap');
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c96a;
+    --dark: #0a0806;
+    --dark2: #14100c;
+    --dark3: #1e1810;
+    --wall: #1a1510;
+    --floor-light: #2a2018;
+    --floor-dark: #0d0a07;
+    --text-light: #f5ead0;
+    --text-muted: #9a8060;
+    --red: #8b1a1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--dark);
+    color: var(--text-light);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── INTRO SCREEN ── */
+  #intro {
+    position: fixed; inset: 0; z-index: 100;
+    background: #000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: opacity 1.2s ease;
+  }
+  #intro.fade-out { opacity: 0; pointer-events: none; }
+
+  .intro-ornament {
+    width: 120px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 1rem auto;
+  }
+  .intro-star {
+    font-size: 2.5rem; color: var(--gold);
+    text-shadow: 0 0 30px rgba(201,168,76,0.8);
+    animation: pulse-gold 2s ease-in-out infinite;
+  }
+  @keyframes pulse-gold {
+    0%,100% { text-shadow: 0 0 20px rgba(201,168,76,0.6); }
+    50% { text-shadow: 0 0 50px rgba(201,168,76,1), 0 0 80px rgba(201,168,76,0.4); }
+  }
+  #intro h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.4rem, 4vw, 2.8rem);
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--gold-light);
+    text-shadow: 0 0 40px rgba(201,168,76,0.5);
+    line-height: 1.3;
+    max-width: 700px;
+    padding: 0 1rem;
+  }
+  #intro h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1rem, 2.5vw, 1.4rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-muted);
+    letter-spacing: 0.2em;
+    margin-top: 0.5rem;
+  }
+  .intro-sub {
+    margin-top: 2.5rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:0.3} 50%{opacity:1} }
+
+  .intro-count {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: #5a4828;
+  }
+
+  /* ── 3D GALLERY SCENE ── */
+  #scene {
+    position: fixed; inset: 0;
+    overflow: hidden;
+    background: var(--dark);
+  }
+
+  /* Perspective container */
+  #gallery-world {
+    position: absolute;
+    width: 100%; height: 100%;
+    perspective: 700px;
+    perspective-origin: 50% 45%;
+  }
+
+  /* The room itself */
+  #room {
+    position: absolute;
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear;
+  }
+
+  /* FLOOR */
+  .floor {
+    position: absolute;
+    bottom: 0; left: -50%; right: -50%;
+    height: 55vh;
+    transform-origin: bottom center;
+    transform: rotateX(75deg);
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--floor-dark) 0px,
+        var(--floor-dark) 1px,
+        transparent 1px,
+        transparent 120px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        var(--floor-dark) 0px,
+        var(--floor-dark) 1px,
+        var(--floor-light) 1px,
+        var(--floor-light) 120px
+      );
+    background-color: #1a1208;
+  }
+
+  /* CEILING */
+  .ceiling {
+    position: absolute;
+    top: 0; left: -50%; right: -50%;
+    height: 30vh;
+    transform-origin: top center;
+    transform: rotateX(-70deg);
+    background: #0d0a06;
+    border-bottom: 1px solid #2a1f10;
+  }
+
+  /* LEFT WALL */
+  .wall-left {
+    position: absolute;
+    top: 0; bottom: 0; left: -100%;
+    width: 60%;
+    transform-origin: right center;
+    transform: rotateY(70deg);
+    background: linear-gradient(to right, #0a0806, var(--wall));
+  }
+
+  /* RIGHT WALL */
+  .wall-right {
+    position: absolute;
+    top: 0; bottom: 0; right: -100%;
+    width: 60%;
+    transform-origin: left center;
+    transform: rotateY(-70deg);
+    background: linear-gradient(to left, #0a0806, var(--wall));
+  }
+
+  /* BACK WALL */
+  .wall-back {
+    position: absolute;
+    top: 0; bottom: 0; left: 0; right: 0;
+    background: var(--wall);
+  }
+
+  /* Spotlight effect on ceiling */
+  .spotlight {
+    position: absolute;
+    width: 100%; height: 100%;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,240,180,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ── ARTWORK RAIL ── */
+  .artwork-rail {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+
+  /* Individual artwork frame */
+  .artwork-item {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0 clamp(30px, 5vw, 80px);
+    cursor: pointer;
+    transition: transform 0.4s ease;
+  }
+
+  .artwork-item:hover { transform: translateY(-4px) scale(1.02); }
+  .artwork-item:hover .frame-shadow { opacity: 0.8; }
+
+  /* Artwork number badge */
+  .artwork-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  /* Picture frame */
+  .frame-outer {
+    position: relative;
+    padding: 12px;
+    background:
+      linear-gradient(135deg, #6b5020, #c9a84c 20%, #8b6a28 40%, #e8c96a 50%, #8b6a28 60%, #c9a84c 80%, #6b5020);
+    box-shadow:
+      0 0 0 1px #3d2c10,
+      0 4px 20px rgba(0,0,0,0.8),
+      0 8px 40px rgba(0,0,0,0.5),
+      inset 0 0 8px rgba(201,168,76,0.3);
+    transition: box-shadow 0.4s ease;
+  }
+  .frame-outer:hover {
+    box-shadow:
+      0 0 0 1px #6b5020,
+      0 4px 30px rgba(0,0,0,0.9),
+      0 8px 60px rgba(0,0,0,0.6),
+      0 0 40px rgba(201,168,76,0.2),
+      inset 0 0 8px rgba(201,168,76,0.4);
+  }
+
+  .frame-inner {
+    border: 1px solid rgba(255,220,100,0.2);
+    overflow: hidden;
+    display: block;
+    background: #1a1208;
+  }
+
+  .frame-inner img {
+    display: block;
+    object-fit: cover;
+    transition: transform 0.6s ease, filter 0.4s ease;
+    filter: brightness(0.9) contrast(1.1) saturate(1.1);
+  }
+
+  .artwork-item:hover .frame-inner img {
+    transform: scale(1.05);
+    filter: brightness(1.0) contrast(1.1) saturate(1.2);
+  }
+
+  /* Spotlight cone per artwork */
+  .artwork-spotlight {
+    position: absolute;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 3px;
+    height: 120px;
+    background: linear-gradient(to bottom, rgba(255,240,180,0.0), rgba(255,240,180,0.15));
+    pointer-events: none;
+  }
+
+  .artwork-spotlight::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 40px;
+    background: radial-gradient(ellipse, rgba(255,240,180,0.12) 0%, transparent 70%);
+  }
+
+  /* Frame shadow on wall */
+  .frame-shadow {
+    position: absolute;
+    top: 8px; left: 8px; right: -8px; bottom: -8px;
+    background: rgba(0,0,0,0.6);
+    filter: blur(8px);
+    z-index: -1;
+    opacity: 0.5;
+    transition: opacity 0.4s ease;
+  }
+
+  /* Caption under frame */
+  .artwork-caption {
+    margin-top: 10px;
+    text-align: center;
+    font-style: italic;
+    font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+    max-width: 200px;
+  }
+
+  /* ── NAVIGATION ── */
+  .nav-btn {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 50;
+    background: rgba(10,8,6,0.7);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold);
+    font-size: 1.5rem;
+    width: 48px; height: 80px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+  }
+  .nav-btn:hover {
+    background: rgba(201,168,76,0.15);
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(201,168,76,0.3);
+  }
+  .nav-btn:active { transform: translateY(-50%) scale(0.95); }
+  #btn-left { left: 0; border-radius: 0 6px 6px 0; }
+  #btn-right { right: 0; border-radius: 6px 0 0 6px; }
+  .nav-btn.disabled { opacity: 0.2; pointer-events: none; }
+
+  /* ── HEADER / INFO BAR ── */
+  #header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 1rem 2rem;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .header-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.65rem, 2vw, 0.9rem);
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(201,168,76,0.4);
+  }
+
+  .header-subtitle {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
+  .header-counter {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    text-align: right;
+  }
+
+  .counter-current {
+    font-size: 1.2rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* ── FOOTER ── */
+  #footer {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    padding: 1rem 2rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .footer-hint {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: #3d2c10;
+    text-transform: uppercase;
+  }
+
+  /* Ornamental divider */
+  .ornament {
+    font-size: 0.9rem;
+    color: rgba(201,168,76,0.4);
+    letter-spacing: 0.3em;
+  }
+
+  /* ── PROGRESS BAR ── */
+  #progress-bar {
+    position: fixed;
+    bottom: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), var(--gold), var(--gold-light));
+    transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 60;
+    box-shadow: 0 0 8px rgba(201,168,76,0.5);
+  }
+
+  /* ── LIGHTBOX ── */
+  #lightbox {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.97);
+    display: none;
+    align-items: center; justify-content: center;
+    flex-direction: column;
+    cursor: zoom-out;
+    backdrop-filter: blur(10px);
+  }
+  #lightbox.active { display: flex; animation: lb-in 0.3s ease; }
+  @keyframes lb-in {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  #lb-frame {
+    position: relative;
+    padding: 16px;
+    background: linear-gradient(135deg, #6b5020, #c9a84c 20%, #8b6a28 40%, #e8c96a 50%, #8b6a28 60%, #c9a84c 80%, #6b5020);
+    box-shadow: 0 0 60px rgba(201,168,76,0.3), 0 20px 80px rgba(0,0,0,0.9);
+    cursor: default;
+    max-width: 90vw;
+    max-height: 80vh;
+  }
+
+  #lb-img {
+    display: block;
+    max-width: 80vw;
+    max-height: 72vh;
+    object-fit: contain;
+  }
+
+  #lb-info {
+    margin-top: 1.2rem;
+    text-align: center;
+  }
+  #lb-num {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--text-muted);
+  }
+  #lb-close {
+    position: fixed;
+    top: 1.5rem; right: 1.5rem;
+    background: none; border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold); font-size: 1.2rem;
+    width: 36px; height: 36px;
+    cursor: pointer; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s;
+  }
+  #lb-close:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+
+  #lb-nav {
+    position: fixed;
+    bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 1rem;
+  }
+  .lb-nav-btn {
+    background: rgba(10,8,6,0.8); border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold); padding: 0.5rem 1.5rem;
+    cursor: pointer; font-family: 'Cinzel', serif; font-size: 0.75rem;
+    letter-spacing: 0.1em; transition: all 0.3s;
+    border-radius: 2px;
+  }
+  .lb-nav-btn:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+
+  /* ── AMBIENT PARTICLES ── */
+  #particles {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    overflow: hidden;
+  }
+  .particle {
+    position: absolute;
+    width: 1px; height: 1px;
+    background: rgba(201,168,76,0.4);
+    border-radius: 50%;
+    animation: float-up linear infinite;
+  }
+  @keyframes float-up {
+    0% { opacity: 0; transform: translateY(0) translateX(0); }
+    10% { opacity: 1; }
+    90% { opacity: 0.5; }
+    100% { opacity: 0; transform: translateY(-100vh) translateX(20px); }
+  }
+
+  /* ── TOOLTIP ── */
+  #tooltip {
+    position: fixed;
+    bottom: 3rem; left: 50%; transform: translateX(-50%);
+    background: rgba(10,8,6,0.9);
+    border: 1px solid rgba(201,168,76,0.2);
+    padding: 0.4rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+    backdrop-filter: blur(4px);
+    z-index: 51;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── MINIMAP ── */
+  #minimap {
+    position: fixed;
+    bottom: 2.5rem; right: 2rem;
+    z-index: 51;
+    display: flex; gap: 2px;
+    align-items: center;
+  }
+  .minimap-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: #2a1f10;
+    transition: all 0.3s ease;
+  }
+  .minimap-dot.active {
+    background: var(--gold);
+    box-shadow: 0 0 6px rgba(201,168,76,0.6);
+    width: 6px; height: 6px;
+  }
+
+  /* Keyboard hint */
+  .key-hint {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px;
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 3px;
+    font-size: 0.65rem;
+    color: rgba(201,168,76,0.5);
+    margin: 0 2px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" onclick="startGallery()">
+  <div class="intro-star">✦</div>
+  <div class="intro-ornament"></div>
+  <h1>18 Mart Çanakkale Zaferi<br>Yapay Zeka Resimleri</h1>
+  <h2>Ülkem Yanımda</h2>
+  <div class="intro-ornament"></div>
+  <div style="margin-top:1.5rem; font-size:0.8rem; letter-spacing:0.15em; color:#5a4030; font-style:italic;">
+    185 Eser &nbsp;·&nbsp; Sanal Sergi
+  </div>
+  <div class="intro-sub">Sergiye Girmek İçin Tıklayın</div>
+</div>
+
+<!-- AMBIENT PARTICLES -->
+<div id="particles"></div>
+
+<!-- MAIN SCENE -->
+<div id="scene" style="display:none;">
+
+  <div id="gallery-world">
+    <div id="room">
+      <div class="ceiling"></div>
+      <div class="wall-back"></div>
+      <div class="wall-left"></div>
+      <div class="wall-right"></div>
+      <div class="floor"></div>
+      <div class="spotlight"></div>
+    </div>
+  </div>
+
+  <!-- ARTWORK RAIL -->
+  <div class="artwork-rail" id="rail"></div>
+
+  <!-- HEADER -->
+  <div id="header">
+    <div>
+      <div class="header-title">18 Mart Çanakkale Zaferi</div>
+      <div class="header-subtitle">Yapay Zeka Resimleri &nbsp;·&nbsp; Ülkem Yanımda</div>
+    </div>
+    <div class="header-counter">
+      <span class="counter-current" id="cur-num">1</span>
+      <span style="color:#3d2c10;"> / 185</span>
+      <div style="font-size:0.6rem; letter-spacing:0.2em; color:#2a1a08; margin-top:2px;">ESER</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div id="footer">
+    <div class="footer-hint">
+      <span class="key-hint">←</span><span class="key-hint">→</span> Gezin &nbsp;
+      <span class="key-hint" style="width:auto;padding:0 4px;">tıkla</span> Büyüt
+    </div>
+    <div class="ornament">✦ ✦ ✦</div>
+    <div class="footer-hint">Çanakkale'nin 110. Yılı</div>
+  </div>
+
+  <!-- NAV BUTTONS -->
+  <button class="nav-btn" id="btn-left" onclick="navigate(-1)">&#8592;</button>
+  <button class="nav-btn" id="btn-right" onclick="navigate(1)">&#8594;</button>
+
+  <!-- PROGRESS -->
+  <div id="progress-bar"></div>
+
+  <!-- MINIMAP -->
+  <div id="minimap"></div>
+
+  <!-- TOOLTIP -->
+  <div id="tooltip" id="tooltip"></div>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <div id="lb-frame" onclick="event.stopPropagation()">
+    <img id="lb-img" src="" alt="">
+  </div>
+  <div id="lb-info">
+    <div id="lb-num"></div>
+  </div>
+  <button id="lb-close" onclick="closeLightbox()">✕</button>
+  <div id="lb-nav">
+    <button class="lb-nav-btn" onclick="lbNav(-1)">← Önceki</button>
+    <button class="lb-nav-btn" onclick="lbNav(1)">Sonraki →</button>
+  </div>
+</div>
+
+<script>
+const TOTAL = 185;
+const VISIBLE = 5; // how many visible at once in center
+const STEP = 280; // px per artwork
+
+let currentIndex = 0;
+let lbIndex = 0;
+
+// Pad number to 3 digits
+function pad(n) { return String(n).padStart(3, '0'); }
+
+// Image src
+function imgSrc(n) { return `images/${pad(n)}.jpg`; }
+
+// ── BUILD RAIL ──
+function buildRail() {
+  const rail = document.getElementById('rail');
+  rail.innerHTML = '';
+
+  // Sizes for 3D perspective feel: center = biggest
+  const sizes = [
+    {w:130, h:110},
+    {w:160, h:135},
+    {w:195, h:160},
+    {w:220, h:185},
+    {w:250, h:210}, // center (will be index 2 from window)
+    {w:220, h:185},
+    {w:195, h:160},
+    {w:160, h:135},
+    {w:130, h:110},
+  ];
+
+  for (let i = 1; i <= TOTAL; i++) {
+    const sIdx = Math.min(i - 1, sizes.length - 1);
+    const sz = sizes[Math.floor(sizes.length / 2)]; // all same size, perspective handled by CSS
+
+    const item = document.createElement('div');
+    item.className = 'artwork-item';
+    item.dataset.index = i;
+    item.onclick = () => openLightbox(i);
+
+    // Dynamic size based on distance from center
+    const w = 220, h = 180;
+
+    item.innerHTML = `
+      <div class="artwork-num">${pad(i)}</div>
+      <div style="position:relative;">
+        <div class="frame-shadow"></div>
+        <div class="artwork-spotlight"></div>
+        <div class="frame-outer">
+          <div class="frame-inner" style="width:${w}px; height:${h}px;">
+            <img src="${imgSrc(i)}" width="${w}" height="${h}"
+              alt="Eser ${i}"
+              loading="lazy"
+              onerror="this.style.background='#1a1208'; this.src=''; this.alt='${pad(i)}'">
+          </div>
+        </div>
+      </div>
+      <div class="artwork-caption">Çanakkale Zaferi</div>
+    `;
+    rail.appendChild(item);
+  }
+}
+
+// ── BUILD MINIMAP ──
+function buildMinimap() {
+  const mm = document.getElementById('minimap');
+  mm.innerHTML = '';
+  // Show up to 30 dots representing ranges of images
+  const groups = 30;
+  for (let i = 0; i < groups; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'minimap-dot';
+    dot.dataset.group = i;
+    mm.appendChild(dot);
+  }
+}
+
+function updateMinimap() {
+  const groups = 30;
+  const groupIdx = Math.floor((currentIndex / TOTAL) * groups);
+  document.querySelectorAll('.minimap-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === groupIdx);
+  });
+}
+
+// ── NAVIGATE ──
+function navigate(dir) {
+  const newIdx = currentIndex + dir;
+  if (newIdx < 0 || newIdx >= TOTAL) return;
+  currentIndex = newIdx;
+  updateView();
+}
+
+function updateView() {
+  const rail = document.getElementById('rail');
+  const items = rail.querySelectorAll('.artwork-item');
+  const vw = window.innerWidth;
+  const itemW = 280; // approx item width including margin
+
+  // Offset so current item is roughly centered
+  const centerOffset = (vw / 2) - (itemW / 2);
+  const offset = centerOffset - (currentIndex * itemW);
+  rail.style.transform = `translateX(${offset}px)`;
+
+  // Scale items by distance from center
+  items.forEach((item, i) => {
+    const dist = Math.abs(i - currentIndex);
+    const scale = Math.max(0.65, 1 - dist * 0.08);
+    const opacity = Math.max(0.25, 1 - dist * 0.18);
+    const translateZ = -dist * 40;
+    item.style.transform = `scale(${scale})`;
+    item.style.opacity = opacity;
+    item.style.filter = dist === 0 ? 'none' : `blur(${Math.min(dist * 0.5, 2)}px)`;
+    item.style.zIndex = 100 - dist;
+  });
+
+  // Counter
+  document.getElementById('cur-num').textContent = currentIndex + 1;
+
+  // Progress
+  const pct = ((currentIndex + 1) / TOTAL) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Nav buttons
+  document.getElementById('btn-left').classList.toggle('disabled', currentIndex === 0);
+  document.getElementById('btn-right').classList.toggle('disabled', currentIndex === TOTAL - 1);
+
+  // Minimap
+  updateMinimap();
+}
+
+// ── LIGHTBOX ──
+function openLightbox(n) {
+  lbIndex = n;
+  document.getElementById('lb-img').src = imgSrc(n);
+  document.getElementById('lb-num').textContent = `Eser ${pad(n)}  ·  Çanakkale Zaferi Yapay Zeka Resimleri`;
+  document.getElementById('lightbox').classList.add('active');
+  document.getElementById('lightbox').onclick = closeLightbox;
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+
+function lbNav(dir) {
+  lbIndex = Math.max(1, Math.min(TOTAL, lbIndex + dir));
+  openLightbox(lbIndex);
+  currentIndex = lbIndex - 1;
+  updateView();
+}
+
+// ── PARTICLES ──
+function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 25; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.bottom = '-10px';
+    p.style.animationDuration = (8 + Math.random() * 15) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.width = p.style.height = (Math.random() < 0.3 ? 2 : 1) + 'px';
+    p.style.opacity = 0.2 + Math.random() * 0.4;
+    container.appendChild(p);
+  }
+}
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (document.getElementById('lightbox').classList.contains('active')) {
+    if (e.key === 'ArrowLeft') lbNav(-1);
+    else if (e.key === 'ArrowRight') lbNav(1);
+    else if (e.key === 'Escape') closeLightbox();
+    return;
+  }
+  if (e.key === 'ArrowLeft') navigate(-1);
+  else if (e.key === 'ArrowRight') navigate(1);
+});
+
+// ── TOUCH SWIPE ──
+let touchStartX = 0;
+document.getElementById('scene') && document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+});
+document.addEventListener('touchend', e => {
+  const dx = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(dx) > 50) navigate(dx > 0 ? 1 : -1);
+});
+
+// ── MOUSE DRAG ──
+let isDragging = false, dragStartX = 0, dragStartIdx = 0;
+document.addEventListener('mousedown', e => {
+  if (e.target.closest('.artwork-item')) return;
+  isDragging = true;
+  dragStartX = e.clientX;
+  dragStartIdx = currentIndex;
+});
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  const dx = dragStartX - e.clientX;
+  const steps = Math.round(dx / 150);
+  const newIdx = Math.max(0, Math.min(TOTAL - 1, dragStartIdx + steps));
+  if (newIdx !== currentIndex) {
+    currentIndex = newIdx;
+    updateView();
+  }
+});
+document.addEventListener('mouseup', () => { isDragging = false; });
+
+// ── SCROLL WHEEL ──
+document.addEventListener('wheel', e => {
+  if (document.getElementById('lightbox').classList.contains('active')) return;
+  if (e.deltaY > 0) navigate(1);
+  else if (e.deltaY < 0) navigate(-1);
+}, { passive: true });
+
+// ── PARALLAX ROOM ──
+document.addEventListener('mousemove', e => {
+  if (!document.getElementById('scene').style.display || document.getElementById('scene').style.display === 'none') return;
+  const cx = (e.clientX / window.innerWidth - 0.5) * 4;
+  const cy = (e.clientY / window.innerHeight - 0.5) * 2;
+  document.getElementById('room').style.transform = `rotateY(${cx}deg) rotateX(${-cy}deg)`;
+});
+
+// ── TOOLTIP ──
+const tips = [
+  'Bir esere tıklayarak büyütebilirsiniz',
+  'Fare tekerleği ile de gezinebilirsiniz',
+  '← → tuşları ile ilerlein',
+  'Sürükleyerek hızlıca gezinin',
+];
+let tipIdx = 0;
+function rotateTip() {
+  const el = document.getElementById('tooltip');
+  el.style.opacity = 0;
+  setTimeout(() => {
+    el.textContent = tips[tipIdx++ % tips.length];
+    el.style.opacity = 1;
+  }, 500);
+}
+
+// ── START ──
+function startGallery() {
+  const intro = document.getElementById('intro');
+  intro.classList.add('fade-out');
+  setTimeout(() => {
+    intro.style.display = 'none';
+    document.getElementById('scene').style.display = 'block';
+    buildRail();
+    buildMinimap();
+    updateView();
+    createParticles();
+    rotateTip();
+    setInterval(rotateTip, 5000);
+  }, 1200);
+}
+
+// Preload intro
+createParticles();
+</script>
+</body>
+</html>
