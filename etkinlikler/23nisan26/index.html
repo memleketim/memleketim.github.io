@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="tr" class="h-full" style="scroll-behavior:smooth;">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>23 Nisan Yarışma Sonuçları</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #dceff1;
+  color: #2d3748;
+  overflow-x: hidden;
+}
+
+/* Doodle background pattern */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255,152,0,0.07) 0%, transparent 50%),
+    radial-gradient(circle at 85% 60%, rgba(244,67,54,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 50% 90%, rgba(33,150,243,0.06) 0%, transparent 50%);
+}
+
+.site-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100%;
+}
+
+/* Navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  padding: 0 24px;
+}
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+.nav-logo {
+  font-weight: 900;
+  font-size: 1.25rem;
+  color: #e65100;
+}
+.nav-links { display: flex; gap: 8px; list-style: none; }
+.nav-links a {
+  text-decoration: none;
+  color: #37474f;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 8px 14px;
+  border-radius: 24px;
+  transition: all 0.25s;
+}
+.nav-links a:hover, .nav-links a:focus {
+  background: #ff9800;
+  color: #fff;
+}
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+}
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: #e65100;
+  border-radius: 3px;
+  transition: all 0.3s;
+}
+
+@media (max-width: 640px) {
+  .hamburger { display: flex; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.97);
+    flex-direction: column;
+    padding: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 12px 16px; }
+}
+
+/* Sections */
+.section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Hero */
+.hero-title {
+  text-align: center;
+  font-size: clamp(1.5rem, 4.5vw, 2.6rem);
+  font-weight: 900;
+  color: #bf360c;
+  margin-bottom: 24px;
+  line-height: 1.3;
+}
+.hero-title .emoji { font-size: 1.1em; }
+
+.poster-wrap {
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  margin-bottom: 40px;
+}
+.poster-wrap img {
+  width: 100%;
+  display: block;
+}
+
+/* Results */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+}
+.result-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  border-top: 5px solid #ff9800;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.result-card:nth-child(2) { border-top-color: #e53935; }
+.result-card:nth-child(3) { border-top-color: #1e88e5; }
+.result-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+}
+.result-card h3 {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.result-card ol {
+  list-style: none;
+  counter-reset: place;
+}
+.result-card ol li {
+  counter-increment: place;
+  padding: 8px 0;
+  border-bottom: 1px dashed #e0e0e0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.result-card ol li:last-child { border-bottom: none; }
+.result-card ol li::before {
+  content: counter(place);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  font-weight: 900;
+  color: #fff;
+  flex-shrink: 0;
+}
+.result-card:nth-child(1) ol li::before { background: #ff9800; }
+.result-card:nth-child(2) ol li::before { background: #e53935; }
+.result-card:nth-child(3) ol li::before { background: #1e88e5; }
+
+/* Section titles */
+.section-title {
+  text-align: center;
+  font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+  font-weight: 900;
+  margin-bottom: 32px;
+  color: #bf360c;
+}
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+@media (min-width: 768px) {
+  .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+}
+.gallery-item {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  transition: transform 0.3s, box-shadow 0.3s;
+  background: #e0e0e0;
+}
+.gallery-item:hover {
+  transform: scale(1.04);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+}
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s;
+}
+.gallery-item:hover img { transform: scale(1.08); }
+
+/* Lightbox */
+.lightbox {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.85);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.lightbox.active { display: flex; }
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 12px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.5);
+}
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2.5rem;
+  cursor: pointer;
+  font-weight: 700;
+  line-height: 1;
+}
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.15);
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.lightbox-nav:hover { background: rgba(255,255,255,0.3); }
+.lightbox-prev { left: 16px; }
+.lightbox-next { right: 16px; }
+
+/* Video grid */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 24px;
+}
+.video-card {
+  background: #fff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.video-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+}
+.video-card video {
+  width: 100%;
+  display: block;
+  background: #000;
+}
+.video-card-title {
+  padding: 14px 20px;
+  font-weight: 800;
+  font-size: 1rem;
+  text-align: center;
+  color: #e65100;
+}
+
+/* Footer */
+.site-footer {
+  text-align: center;
+  padding: 32px 20px;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: #fff;
+  background: linear-gradient(135deg, #e53935, #ff9800);
+  margin-top: 40px;
+}
+
+/* Fade-in animation */
+.fade-in {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Floating doodle decorations */
+.doodle {
+  position: absolute;
+  pointer-events: none;
+  font-size: 2rem;
+  opacity: 0.15;
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(8deg); }
+}
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div class="site-wrapper"><!-- Navbar -->
+   <nav class="navbar" role="navigation" aria-label="Ana navigasyon">
+    <div class="nav-inner">
+     <div class="nav-logo">
+      🎉 23 Nisan
+     </div><button class="hamburger" id="hamburger" aria-label="Menü"> <span></span><span></span><span></span> </button>
+     <ul class="nav-links" id="navLinks" role="menubar">
+      <li role="none"><a href="#anasayfa" role="menuitem">Ana Sayfa</a></li>
+      <li role="none"><a href="#sergi" role="menuitem">Resim Sergisi</a></li>
+      <li role="none"><a href="#videolar" role="menuitem">Şiir Videoları</a></li>
+     </ul>
+    </div>
+   </nav><!-- Hero / Ana Sayfa -->
+   <section id="anasayfa" class="section">
+    <h1 class="hero-title fade-in" id="mainTitle"><span class="emoji">🎨</span> 23 Nisan Resim ve Şiir Yarışması Sonuçları <span class="emoji">🎤</span></h1>
+    <div class="poster-wrap fade-in"><img src="afis.jpg" alt="23 Nisan Yarışma Afişi" loading="lazy" onerror="this.style.background='linear-gradient(135deg,#ff9800,#e53935)';this.alt='Afiş yüklenemedi';this.style.height='300px';">
+    </div><!-- Sonuçlar -->
+    <div class="results-grid">
+     <div class="result-card fade-in">
+      <h3>🎨 Resim Yarışması (5-10 Yaş)</h3>
+      <ol>
+       <li>Hüma Khan</li>
+       <li>Ali Asaf Kolancı &amp; Emir Ürün</li>
+       <li>Ela Öner &amp; Amine Sara Efetekin</li>
+      </ol>
+     </div>
+     <div class="result-card fade-in">
+      <h3>🎤 Şiir Yarışması</h3>
+      <ol>
+       <li>İpek Değirmencioğlu</li>
+       <li>Ebrar Orçun &amp; Erva Tan</li>
+       <li>Asya Yılmaz, Rüzgar Elmalı &amp; Yusuf Karaca</li>
+      </ol>
+     </div>
+     <div class="result-card fade-in">
+      <h3>🖌️ Resim Yarışması (11-16 Yaş)</h3>
+      <ol>
+       <li>Elif Nas Şahin</li>
+       <li>Burak Alp Kayalar &amp; Halid Sayıcı</li>
+       <li>Asya Nabieva &amp; Yakub Topçu</li>
+      </ol>
+     </div>
+    </div>
+   </section><!-- Resim Sergisi -->
+   <section id="sergi" class="section">
+    <h2 class="section-title fade-in">🎨 Resim Sergisi</h2>
+    <div class="gallery-grid" id="galleryGrid"></div>
+   </section><!-- Lightbox -->
+   <div class="lightbox" id="lightbox" role="dialog" aria-label="Resim görüntüleyici"><button class="lightbox-close" id="lbClose" aria-label="Kapat">×</button> <button class="lightbox-nav lightbox-prev" id="lbPrev" aria-label="Önceki">‹</button> <img id="lbImg" src="" alt="Büyütülmüş resim"> <button class="lightbox-nav lightbox-next" id="lbNext" aria-label="Sonraki">›</button>
+   </div><!-- Şiir Videoları -->
+   <section id="videolar" class="section">
+    <h2 class="section-title fade-in">🎤 Şiir Yarışması Videoları</h2>
+    <div class="video-grid" id="videoGrid"></div>
+   </section><!-- Footer -->
+   <footer class="site-footer" role="contentinfo"><span id="footerText">23 Nisan Kutlu Olsun 🇹🇷</span>
+   </footer>
+  </div>
+  <script>
+// === Config & SDK ===
+const defaultConfig = {
+  main_title: '23 Nisan Resim ve Şiir Yarışması Sonuçları',
+  footer_text: '23 Nisan Kutlu Olsun 🇹🇷',
+  background_color: '#dceff1',
+  surface_color: '#ffffff',
+  text_color: '#2d3748',
+  primary_action_color: '#e65100',
+  secondary_action_color: '#ff9800',
+  font_family: 'Nunito',
+  font_size: 16
+};
+
+function applyConfig(cfg) {
+  const c = { ...defaultConfig, ...cfg };
+  const font = c.font_family || defaultConfig.font_family;
+  const fs = c.font_size || defaultConfig.font_size;
+
+  document.getElementById('mainTitle').innerHTML =
+    '<span class="emoji">🎨</span> ' + (c.main_title || defaultConfig.main_title) + ' <span class="emoji">🎤</span>';
+  document.getElementById('footerText').textContent = c.footer_text || defaultConfig.footer_text;
+
+  document.body.style.background = c.background_color;
+  document.body.style.color = c.text_color;
+  document.body.style.fontFamily = font + ', sans-serif';
+  document.body.style.fontSize = fs + 'px';
+
+  document.querySelectorAll('.result-card, .video-card').forEach(el => {
+    el.style.background = c.surface_color;
+  });
+  document.querySelectorAll('.hero-title, .section-title').forEach(el => {
+    el.style.color = c.primary_action_color;
+  });
+  document.querySelectorAll('.nav-logo, .video-card-title').forEach(el => {
+    el.style.color = c.primary_action_color;
+  });
+  document.querySelector('.site-footer').style.background =
+    'linear-gradient(135deg, ' + c.primary_action_color + ', ' + c.secondary_action_color + ')';
+}
+
+if (window.elementSdk) {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (cfg) => applyConfig(cfg),
+    mapToCapabilities: (cfg) => ({
+      recolorables: [
+        { get: () => cfg.background_color || defaultConfig.background_color, set: v => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+        { get: () => cfg.surface_color || defaultConfig.surface_color, set: v => { cfg.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+        { get: () => cfg.text_color || defaultConfig.text_color, set: v => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+        { get: () => cfg.primary_action_color || defaultConfig.primary_action_color, set: v => { cfg.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+        { get: () => cfg.secondary_action_color || defaultConfig.secondary_action_color, set: v => { cfg.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
+      ],
+      borderables: [],
+      fontEditable: {
+        get: () => cfg.font_family || defaultConfig.font_family,
+        set: v => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+      },
+      fontSizeable: {
+        get: () => cfg.font_size || defaultConfig.font_size,
+        set: v => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+      }
+    }),
+    mapToEditPanelValues: (cfg) => new Map([
+      ['main_title', cfg.main_title || defaultConfig.main_title],
+      ['footer_text', cfg.footer_text || defaultConfig.footer_text]
+    ])
+  });
+}
+
+// === Gallery (1.jpg - 80.jpg) ===
+const galleryGrid = document.getElementById('galleryGrid');
+let currentLbIndex = 0;
+const totalImages = 80;
+
+for (let i = 1; i <= totalImages; i++) {
+  const div = document.createElement('div');
+  div.className = 'gallery-item fade-in';
+  div.dataset.index = i;
+  div.innerHTML = '<img src="' + i + '.jpg" alt="Resim ' + i + '" loading="lazy" onerror="this.parentElement.style.background=\'linear-gradient(135deg,#ffcc80,#ef9a9a)\';this.style.display=\'none\';">';
+  div.addEventListener('click', () => openLightbox(i));
+  galleryGrid.appendChild(div);
+}
+
+// === Lightbox ===
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+
+function openLightbox(index) {
+  currentLbIndex = index;
+  lbImg.src = index + '.jpg';
+  lbImg.alt = 'Resim ' + index;
+  lightbox.classList.add('active');
+}
+function closeLightbox() { lightbox.classList.remove('active'); }
+
+document.getElementById('lbClose').addEventListener('click', closeLightbox);
+lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
+document.getElementById('lbPrev').addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentLbIndex = currentLbIndex <= 1 ? totalImages : currentLbIndex - 1;
+  lbImg.src = currentLbIndex + '.jpg';
+});
+document.getElementById('lbNext').addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentLbIndex = currentLbIndex >= totalImages ? 1 : currentLbIndex + 1;
+  lbImg.src = currentLbIndex + '.jpg';
+});
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') document.getElementById('lbPrev').click();
+  if (e.key === 'ArrowRight') document.getElementById('lbNext').click();
+});
+
+// === Videos (1.mp4 - 6.mp4) ===
+const videoGrid = document.getElementById('videoGrid');
+for (let i = 1; i <= 6; i++) {
+  const card = document.createElement('div');
+  card.className = 'video-card fade-in';
+  card.innerHTML =
+    '<video controls preload="metadata" playsinline>' +
+    '<source src="' + i + '.mp4" type="video/mp4">' +
+    'Tarayıcınız video oynatmayı desteklemiyor.' +
+    '</video>' +
+    '<div class="video-card-title">🎤 Video ' + i + '</div>';
+  videoGrid.appendChild(card);
+}
+
+// === Hamburger Menu ===
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+  });
+});
+
+// === Fade-in Observer ===
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f0b749645e3576b',t:'MTc3NjkzMjQ5NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
