@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adana Mutfağı - Dennis Emirler'in Projesi</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #fcf9f2;
+            --text-color: #2A1B18;
+            --primary: #D8332A;
+            --secondary: #F5B041;
+            --dark-card: rgba(255, 255, 255, 0.95);
+            --ui-bg: rgba(255, 255, 255, 0.85);
+            --success: #27AE60;
+            --danger: #C0392B;
+        }
+
+        body.dark-mode {
+            --bg-color: #1a1210;
+            --text-color: #f5f5f5;
+            --dark-card: rgba(30, 20, 15, 0.9);
+            --ui-bg: rgba(20, 10, 10, 0.8);
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+        
+        body, html {
+            margin: 0; padding: 0; width: 100vw; height: 100vh;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color); color: var(--text-color);
+            overflow: hidden; transition: background-color 0.4s ease;
+            cursor: none;
+        }
+
+        /* Medya Arka Planları */
+        .bg-img {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('arkaplan.png') center/cover no-repeat;
+            opacity: 0.15; z-index: 1; pointer-events: none;
+        }
+        body.dark-mode .bg-img { opacity: 0.05; }
+        #bg-video {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.2; z-index: 2; display: none; pointer-events: none;
+        }
+
+        /* Sabit UI Elemanları */
+        .logo {
+            position: absolute; top: 20px; left: 20px; z-index: 10000;
+            height: 60px; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.5));
+            pointer-events: none;
+        }
+
+        .controls {
+            position: absolute; top: 20px; right: 20px; z-index: 9999;
+            display: flex; gap: 10px; background: var(--ui-bg);
+            padding: 10px 15px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); backdrop-filter: blur(5px);
+        }
+        .ctrl-btn {
+            background: transparent; border: none; font-size: 22px; cursor: pointer;
+            transition: transform 0.2s; color: var(--text-color);
+        }
+        .ctrl-btn:hover { transform: scale(1.15); }
+
+        .hud {
+            position: absolute; top: 90px; left: 50%; transform: translateX(-50%);
+            display: none; gap: 20px; z-index: 9990;
+            background: var(--ui-bg); padding: 10px 25px; border-radius: 30px;
+            font-weight: 800; font-size: 1.2rem; border: 2px solid var(--secondary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        /* Özel İmleç */
+        #cursor {
+            position: fixed; width: 40px; height: 40px; font-size: 30px;
+            pointer-events: none; z-index: 999999;
+            transform: translate(-50%, -50%); transition: transform 0.05s linear;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+        }
+
+        /* Ekran ve Kart Yapısı */
+        .screen {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 10; padding: 20px;
+        }
+        .screen.active { display: flex; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .card {
+            background: var(--dark-card); padding: 30px; border-radius: 20px;
+            text-align: center; max-width: 800px; width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 2px solid var(--secondary);
+            backdrop-filter: blur(10px); z-index: 100;
+        }
+
+        h1, h2 { font-family: 'Playfair Display', serif; color: var(--primary); margin-top: 0; }
+        h1 { font-size: clamp(2rem, 5vw, 3.5rem); text-shadow: 2px 2px 4px rgba(0,0,0,0.1); margin-bottom: 15px; }
+        h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
+        p { font-size: clamp(1rem, 2vw, 1.2rem); line-height: 1.6; margin-bottom: 20px; }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary), #900C3F); color: white;
+            border: none; padding: 15px 30px; font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem; font-weight: 800; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 6px 0 #5C0B29, 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.15s; display: inline-block; text-decoration: none; margin: 8px;
+        }
+        .btn:active { transform: translateY(6px); box-shadow: none; }
+        .btn.blue { background: linear-gradient(135deg, #2980B9, #1A5276); box-shadow: 0 6px 0 #154360; }
+        .btn.green { background: linear-gradient(135deg, #27AE60, #1E8449); box-shadow: 0 6px 0 #145A32; }
+
+        .ucuyor { position: fixed; font-size: 2.5rem; pointer-events: none; z-index: 8000; }
+
+        /* Oyun Alanları */
+        .game-title { text-align: center; color: white; text-shadow: 2px 2px 5px black; z-index: 100; margin-bottom: 20px; }
+        
+        #ak-area { width: 100%; height: 50vh; position: relative; overflow: hidden; max-width: 800px; }
+        .kofte { position: absolute; border-radius: 50%; background: radial-gradient(circle, #8A3E26, #4A1C10); cursor: pointer; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold; box-shadow: inset -3px -3px 8px rgba(0,0,0,0.6); }
+        .ana { width: 80px; height: 80px; font-size: 1.2rem; } .kiz { width: 45px; height: 45px; font-size: 0.8rem; }
+        #tencere { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); font-size: 5rem; z-index: 50; }
+
+        #ciger-area { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; z-index: 100; }
+        .sis { width: 40px; height: 260px; background: #bdc3c7; border-radius: 10px; position: relative; cursor: pointer; box-shadow: 2px 2px 10px rgba(0,0,0,0.5); }
+        .ciger-et { position: absolute; bottom: 30px; left: 5px; width: 30px; height: 180px; background: #E74C3C; border-radius: 5px; transition: background 0.3s; }
+
+        #zirh-tahta { width: 90%; max-width: 600px; height: 250px; background: url('https://www.transparenttextures.com/patterns/wood-pattern.png'), #8B5A2B; border-radius: 20px; position: relative; box-shadow: inset 0 0 40px rgba(0,0,0,0.8); overflow: hidden; touch-action: none; z-index: 100; }
+        #et-kutlesi { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; height: 140px; background: #C0392B; border-radius: 40px; transition: transform 0.1s; }
+        #kombo-txt { position: absolute; top: 20%; font-size: 2.5rem; color: var(--secondary); text-shadow: 2px 2px 5px black; opacity: 0; transition: opacity 0.2s; z-index: 101; pointer-events: none;}
+
+        #salgam-ficisi { width: 220px; height: 300px; background: linear-gradient(to right, #4A235A, #15001a); border-radius: 20px 20px 10px 10px; position: relative; border: 6px solid #2C3E50; display: flex; justify-content: center; align-items: center; color: white; font-size: 4rem; cursor: grab; touch-action: none; z-index: 100;}
+
+        #kadayif-area { width: 90%; max-width: 600px; height: 350px; background: rgba(0,0,0,0.2); position: relative; border: 3px dashed var(--secondary); border-radius: 20px; overflow: hidden; z-index: 100; cursor: crosshair;}
+        #hedef-ceviz { position: absolute; font-size: 3rem; cursor: pointer; transition: left 0.3s linear, top 0.3s linear; }
+
+        .lang-card { background: var(--ui-bg); border: 2px solid var(--primary); padding: 20px; border-radius: 15px; margin-bottom: 20px; width: 100%; max-width: 500px; }
+        .lang-options { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
+        .lang-btn { flex: 1; padding: 15px; font-size: 1.1rem; border: none; border-radius: 10px; background: #2C3E50; color: white; cursor: pointer; font-family: 'Poppins'; font-weight: bold; transition: 0.2s; }
+        .lang-btn:hover { background: #34495E; }
+        #bici-kase { font-size: 5rem; margin-top: 10px; height: 100px; display: flex; align-items: center; justify-content: center;}
+
+        .popup-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display:none; justify-content:center; align-items:center; z-index: 20000; backdrop-filter: blur(8px); }
+    </style>
+</head>
+<body>
+
+<div class="bg-img"></div>
+<video id="bg-video" loop muted playsinline><source src="tanitim.mp4" type="video/mp4"></video>
+
+<audio id="v_1" src="sesler/yonerge_1.mp3"></audio>
+<audio id="v_2" src="sesler/yonerge_2.mp3"></audio>
+<audio id="v_3" src="sesler/yonerge_3.mp3"></audio>
+<audio id="v_4" src="sesler/yonerge_4.mp3"></audio>
+<audio id="v_5" src="sesler/yonerge_5.mp3"></audio>
+<audio id="v_6" src="sesler/yonerge_6.mp3"></audio>
+<audio id="bg-music" src="sesler/fon.mp3" loop></audio>
+
+<img src="orjinal.svg" class="logo" alt="Ülkem Yanımda Logo" onerror="this.style.display='none'">
+
+<div class="controls">
+    <button class="ctrl-btn" onclick="toggleTheme()" title="Tema Değiştir">🌗</button>
+    <button class="ctrl-btn" onclick="toggleAudio()" title="Ses Aç/Kapat" id="btn-ses">🔊</button>
+    <button class="ctrl-btn" onclick="toggleVideo()" title="Video Arka Plan" id="btn-vid">🎬</button>
+</div>
+
+<div id="cursor">👨‍🍳</div>
+
+<div class="hud" id="hud">
+    <span id="hud-can" style="color:var(--danger)">Can: ❤️❤️❤️</span>
+    <span id="hud-sure" style="color:var(--primary)">Süre: ⏱️ 0</span>
+</div>
+
+<div class="screen active" id="screen-0">
+    <div class="card">
+        <h1>Adana Mutfağı Serüveni</h1>
+        <h2>Dennis Emirler'in Çalışması</h2>
+        <p>Adana'nın muhteşem lezzetlerini hazırlamaya hazır mısın? Yalnız dikkat et, hem el becerini hem de Türkçe dil bilgini test edeceğiz!</p>
+        <button class="btn" onclick="ilkBaslatma()">🔥 Mutfak Önlüğünü Giy ve Başla</button>
+        <br>
+        <a href="https://drive.google.com/file/d/1mc7oqK9kUHxMmwrsuCME-maxHZEMx9uD/view?usp=drive_link" target="_blank" class="btn blue">📄 Dennis Emirler'in Çalışmasının Tamamına Ulaşmak İçin Tıklayınız</a>
+    </div>
+</div>
+
+<div class="screen" id="screen-1"><h2 class="game-title">1. Aşama: Analı Kızlı Çorbası</h2><div id="ak-area"></div><div id="tencere">🍲</div></div>
+<div class="screen" id="screen-2"><h2 class="game-title">2. Aşama: Adana Ciğeri</h2><div id="ciger-area"><div class="sis" onclick="cigerAl(0)"><div class="ciger-et" id="ciger-0"></div></div><div class="sis" onclick="cigerAl(1)"><div class="ciger-et" id="ciger-1"></div></div><div class="sis" onclick="cigerAl(2)"><div class="ciger-et" id="ciger-2"></div></div></div></div>
+<div class="screen" id="screen-3"><h2 class="game-title">3. Aşama: Zırh Çekme (Kebap)</h2><div id="kombo-txt">⚡ x1</div><div id="zirh-tahta"><div id="et-kutlesi"></div></div></div>
+<div class="screen" id="screen-4"><h2 class="game-title">4. Aşama: Şalgam Mayalama</h2><div id="salgam-ficisi">🟣</div></div>
+<div class="screen" id="screen-5"><h2 class="game-title">5. Aşama: Taş Kadayıf (Kaçan Ceviz)</h2><div id="kadayif-area"><div id="hedef-ceviz">🥟</div></div></div>
+
+<div class="screen" id="screen-6">
+    <h2 class="game-title">6. Aşama: Bici Bici ve Türkçe Testi</h2>
+    <div class="card" style="padding: 20px;">
+        <p>Bici Bici malzemelerini eklemek için Türkçe sorularını doğru cevaplamalısın!</p>
+        <div class="lang-card">
+            <div id="lang-soru" style="font-weight:bold; font-size:1.2rem;">Soru Yükleniyor...</div>
+            <div class="lang-options" id="lang-secenekler"></div>
+        </div>
+        <div id="bici-kase">🥣</div>
+    </div>
+</div>
+
+<div class="screen" id="screen-7">
+    <div class="card">
+        <h1 style="font-size: clamp(2rem, 5vw, 4rem);">🏆 Usta Şef!</h1>
+        <p>Tebrikler! Adana Mutfağının tüm zorluklarını aştın ve Türkçeni konuşturdun. Dennis seninle gurur duyuyor.</p>
+        <button class="btn green" onclick="window.location.href='https://memleketim.github.io/01/index.html'">🗺️ Haritaya Dön</button>
+    </div>
+</div>
+
+<div class="popup-overlay" id="popup">
+    <div class="card" style="border-width: 4px;">
+        <h2 id="pop-baslik">Görev!</h2>
+        <p id="pop-metin" style="font-size: 1.3rem;">Açıklama</p>
+        <button class="btn" onclick="popupKapat()" id="pop-btn">Anladım, Başla!</button>
+    </div>
+</div>
+
+<script>
+// --- SES VE KONTROL SİSTEMİ ---
+let currentStage = 0; let can = 3; let sure = 0; let gameInterval;
+let isAudioOn = true; 
+let isVideoOn = false; let currentVoice = null;
+const bgMusic = document.getElementById('bg-music');
+
+const cursor = document.getElementById('cursor');
+document.addEventListener('mousemove', (e) => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
+
+function toggleTheme() { document.body.classList.toggle('dark-mode'); playSfx('click'); }
+function toggleVideo() { 
+    const vid = document.getElementById('bg-video'); isVideoOn = !isVideoOn;
+    document.getElementById('btn-vid').innerText = isVideoOn ? '🎬' : '❌';
+    if(isVideoOn) { vid.style.display = 'block'; vid.play().catch(e=>{}); } else { vid.style.display = 'none'; vid.pause(); } 
+}
+
+function toggleAudio() { 
+    isAudioOn = !isAudioOn; document.getElementById('btn-ses').innerText = isAudioOn ? '🔊' : '🔇';
+    if(isAudioOn) {
+        if(bgMusic) { bgMusic.volume = 0.3; bgMusic.play().catch(e=>{}); }
+        playSfx('click');
+    } else {
+        if(currentVoice) currentVoice.pause();
+        if(bgMusic) bgMusic.pause();
+    }
+}
+
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+function playVoice(idStr) {
+    if(!isAudioOn) return;
+    if(currentVoice) currentVoice.pause();
+    const au = document.getElementById(idStr);
+    if(au) {
+        currentVoice = au;
+        au.currentTime = 0;
+        
+        if(bgMusic) bgMusic.volume = 0.05; 
+        
+        let playPromise = au.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => { console.log("Ses dosyası bulunamadı, metinle devam ediliyor."); });
+        }
+        
+        au.onended = () => { if(bgMusic && isAudioOn) bgMusic.volume = 0.3; };
+    }
+}
+
+function playSfx(type) {
+    if(!isAudioOn) return;
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    if(type === 'click') { osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+    else if(type === 'fail') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.3); gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.start(); osc.stop(audioCtx.currentTime + 0.3); }
+    else if(type === 'success') { osc.type = 'triangle'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1); osc.frequency.setValueAtTime(1000, audioCtx.currentTime + 0.2); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.4); osc.start(); osc.stop(audioCtx.currentTime + 0.4); }
+    else if(type === 'chop') { osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05); osc.start(); osc.stop(audioCtx.currentTime + 0.05); }
+}
+
+function ilkBaslatma() {
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    if(isAudioOn && bgMusic) {
+        bgMusic.volume = 0.3;
+        bgMusic.play().catch(e => console.log("Otomatik oynatma engellendi."));
+    }
+    basla(1);
+}
+
+function basla(stage) { document.getElementById('hud').style.display = 'flex'; window['oyunAsema'+stage](); }
+
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-'+id).classList.add('active'); }
+function updateHUD() {
+    let kalpler = ""; for(let i=0; i<can; i++) kalpler += "❤️";
+    document.getElementById('hud-can').innerText = `Can: ${kalpler}`; document.getElementById('hud-sure').innerText = `Süre: ⏱️ ${sure}`;
+    if(can <= 0) { popupAc("Oyun Bitti!", "Tüm canların tükendi. Baştan başlamalısın.", () => location.reload(), null); }
+}
+
+function popupAc(baslik, metin, cb, voiceId) {
+    document.getElementById('pop-baslik').innerText = baslik; document.getElementById('pop-metin').innerText = metin; 
+    document.getElementById('popup').style.display = 'flex';
+    if(voiceId) playVoice(voiceId);
+    
+    document.getElementById('pop-btn').onclick = () => { 
+        document.getElementById('popup').style.display = 'none'; playSfx('click'); 
+        if(currentVoice) { currentVoice.pause(); currentVoice.currentTime=0; }
+        if(bgMusic && isAudioOn) bgMusic.volume = 0.3; 
+        if(cb) cb(); 
+    };
+}
+
+function konfetiPatlat() {
+    playSfx('success'); var end = Date.now() + 1500;
+    (function frame() { confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#D8332A', '#F5B041'] }); confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#D8332A', '#F5B041'] }); if (Date.now() < end) requestAnimationFrame(frame); }());
+}
+
+function sepeteUc(sx, sy, emoji, targetId, callback) {
+    const el = document.createElement('div'); el.className = 'ucuyor'; el.textContent = emoji;
+    el.style.left=sx+'px'; el.style.top=sy+'px'; document.body.appendChild(el);
+    const sep = document.getElementById(targetId); const br = sep.getBoundingClientRect();
+    const ex=br.left+br.width/2, ey=br.top+br.height/2; const cx=sx+(ex-sx)*0.3+(Math.random()-.5)*120, cy=sy-90-Math.random()*60; 
+    let start=null;
+    function adim(ts){
+        if(!start) start=ts; const t=Math.min((ts-start)/500,1), mt=1-t;
+        const x=mt*mt*sx+2*mt*t*cx+t*t*ex; const y=mt*mt*sy+2*mt*t*cy+t*t*ey;
+        el.style.left=x+'px'; el.style.top=y+'px'; el.style.transform=`translate(-50%,-50%) scale(${1-t*.5}) rotate(${t*360}deg)`; el.style.opacity=String(1-t*.5);
+        if(t<1) requestAnimationFrame(adim); else { el.remove(); if(callback) callback(); }
+    }
+    requestAnimationFrame(adim);
+}
+
+const aciHesapla = (x, y, container) => { const r = container.getBoundingClientRect(); return Math.atan2(y - (r.top+r.height/2), x - (r.left+r.width/2)) * (180/Math.PI); };
+
+let ak_toplanan = 0; let ak_dropInt;
+function oyunAsema1() {
+    cursor.innerText = '🥄'; showScreen(1);
+    popupAc("Analı Kızlı", "Analı Kızlı çorbası dikkat ister! Sadece KÜÇÜK olan 'kızlı' köfteleri yakala! Büyük 'analı' olanlara tıklarsan canın gider. Süren 15 saniye!", () => {
+        sure = 15; ak_toplanan = 0; updateHUD(); const alan = document.getElementById('ak-area'); alan.innerHTML = '';
+        ak_dropInt = setInterval(() => {
+            if(sure <= 0) return;
+            let el = document.createElement('div'); let isAna = Math.random() > 0.6;
+            el.className = `kofte ${isAna ? 'ana' : 'kiz'}`; el.innerText = isAna ? 'Ana' : 'Kız';
+            el.style.left = (10 + Math.random()*80) + '%'; el.style.top = '-50px'; alan.appendChild(el);
+            let pos = -50;
+            let fallInt = setInterval(() => { pos += isAna ? 3 : 4; el.style.top = pos + 'px'; if(pos > window.innerHeight) { clearInterval(fallInt); el.remove(); } }, 30);
+            el.onclick = () => {
+                clearInterval(fallInt);
+                if(isAna) { playSfx('fail'); can--; updateHUD(); el.style.background = 'red'; setTimeout(()=>el.remove(),200); }
+                else { playSfx('click'); ak_toplanan++; const r = el.getBoundingClientRect(); sepeteUc(r.left, r.top, '🥟', 'tencere'); el.remove(); }
+            };
+        }, 700);
+        gameInterval = setInterval(() => {
+            sure--; updateHUD();
+            if(sure <= 0) { clearInterval(gameInterval); clearInterval(ak_dropInt); if(ak_toplanan >= 5) { konfetiPatlat(); setTimeout(()=>basla(2), 2000); } else { popupAc("Süre Bitti", "Yeterince toplayamadın.", ()=>oyunAsema1()); } }
+        }, 1000);
+    }, 'v_1');
+}
+
+let cigerDurum = []; let cigerInt;
+function oyunAsema2() {
+    cursor.innerText = '🍡'; showScreen(2);
+    popupAc("Ciğer Şiş", "Ciğer çabuk pişer, çabuk yanar! Renkleri kahverengi olunca tıkla ve ateşten al. Kırmızıysa çiğ, siyahsa yanmıştır!", () => {
+        cigerDurum = [10, 0, 20]; updateHUD();
+        cigerInt = setInterval(() => {
+            for(let i=0; i<3; i++) {
+                if(cigerDurum[i] < 0) continue;
+                cigerDurum[i] += Math.random() * 5; let et = document.getElementById('ciger-'+i); let v = cigerDurum[i];
+                if(v < 50) et.style.background = '#E74C3C'; else if(v < 90) et.style.background = '#5D4037'; else et.style.background = '#1C1C1C';
+                if(v > 110) { cigerDurum[i] = -1; can--; playSfx('fail'); updateHUD(); et.innerText = 'Yandı'; kontrolCiger(); }
+            }
+        }, 200);
+    }, 'v_2');
+}
+function cigerAl(idx) {
+    if(cigerDurum[idx] < 0) return;
+    let v = cigerDurum[idx]; cigerDurum[idx] = -1; let et = document.getElementById('ciger-'+idx);
+    if(v > 50 && v < 90) { playSfx('success'); et.style.background='#27AE60'; } else { playSfx('fail'); can--; et.innerText = 'Çiğ!'; updateHUD(); }
+    kontrolCiger();
+}
+function kontrolCiger() { if(cigerDurum[0]<0 && cigerDurum[1]<0 && cigerDurum[2]<0) { clearInterval(cigerInt); if(can>0) { konfetiPatlat(); setTimeout(()=>basla(3), 2000); } } }
+
+let zirhSayac = 0; let lastMove = 0;
+function oyunAsema3() {
+    cursor.innerText = '🔪'; showScreen(3);
+    popupAc("Zırh Çekme", "Gerçek Adana makineyle kıyılmaz, elde kıyılır! Etin üzerinde parmağını veya fareyi hızlıca sağa sola sürterek zırhı çek!", () => {
+        zirhSayac = 0; let et = document.getElementById('et-kutlesi'); let txt = document.getElementById('kombo-txt'); let tahta = document.getElementById('zirh-tahta');
+        et.style.transform = 'translate(-50%, -50%) scale(1)';
+        function moveHnd(e) {
+            let now = Date.now();
+            if(now - lastMove > 50) {
+                lastMove = now; zirhSayac++; playSfx('chop');
+                et.style.transform = `translate(-50%, -50%) scale(${1 - zirhSayac*0.005})`;
+                txt.innerText = `⚡ x${zirhSayac}`; txt.style.opacity = 1;
+                if(zirhSayac > 80) { tahta.removeEventListener('mousemove', moveHnd); tahta.removeEventListener('touchmove', moveHnd); konfetiPatlat(); setTimeout(()=>basla(4), 2000); }
+            }
+        }
+        tahta.addEventListener('mousemove', moveHnd); tahta.addEventListener('touchmove', moveHnd, {passive: true});
+    }, 'v_3');
+}
+
+function oyunAsema4() {
+    cursor.innerText = '🖐️'; showScreen(4);
+    popupAc("Şalgam Mayalama", "Şalgamın mayalanması için fıçıyı karıştırman lazım. Fıçıya tıkla ve basılı tutarak etrafında 3 tam tur döndür!", () => {
+        const fici = document.getElementById('salgam-ficisi'); let isDragging = false; let tAngle = 0; let pAngle = null;
+        const start = (e) => { isDragging=true; let c = e.touches?e.touches[0]:e; pAngle=aciHesapla(c.clientX, c.clientY, fici); };
+        const end = () => { isDragging=false; };
+        const move = (e) => {
+            if(!isDragging) return; e.preventDefault();
+            let c = e.touches?e.touches[0]:e; let curr = aciHesapla(c.clientX, c.clientY, fici); let delta = curr - pAngle;
+            if(delta>180) delta-=360; if(delta<-180) delta+=360; tAngle += Math.abs(delta);
+            fici.style.transform = `rotate(${tAngle}deg)`; pAngle = curr;
+            if(tAngle > 1080) { isDragging=false; document.removeEventListener('mousemove', move); konfetiPatlat(); setTimeout(()=>basla(5), 2000); }
+        };
+        fici.addEventListener('mousedown', start); document.addEventListener('mouseup', end); document.addEventListener('mousemove', move);
+        fici.addEventListener('touchstart', start); document.addEventListener('touchend', end); document.addEventListener('touchmove', move, {passive:false});
+    }, 'v_4');
+}
+
+let tk_Int;
+function oyunAsema5() {
+    cursor.innerText = '🥟'; showScreen(5);
+    popupAc("Taş Kadayıf", "Cevizler kaçıyor! Taş kadayıfı tam cevizin üzerine getirip tıklayarak onu kapat. 5 ceviz yakalamalısın!", () => {
+        let hedef = document.getElementById('hedef-ceviz'); let alan = document.getElementById('kadayif-area'); let catchC = 0;
+        tk_Int = setInterval(() => {
+            let mx = alan.offsetWidth - 60; let my = alan.offsetHeight - 60;
+            hedef.style.left = Math.random() * mx + 'px'; hedef.style.top = Math.random() * my + 'px';
+        }, 600);
+        hedef.onclick = () => {
+            playSfx('success'); catchC++; hedef.innerText = '✅'; setTimeout(()=>hedef.innerText='🥟', 200);
+            if(catchC >= 5) { clearInterval(tk_Int); konfetiPatlat(); setTimeout(()=>basla(6), 2000); }
+        };
+    }, 'v_5');
+}
+
+const langQuestions = [
+    { q: "Hangi kelimenin yazımı doğrudur?", opts: ["Sarımsak", "Sarmısak"], ans: 0, reward: "🧊" },
+    { q: "Hangi kelimenin yazımı doğrudur?", opts: ["Ahçı", "Aşçı"], ans: 1, reward: "🍮" },
+    { q: "Hangi kelimenin yazımı doğrudur?", opts: ["Menemen", "Melemen"], ans: 0, reward: "🌹" },
+    { q: "'Lezzet' kelimesinin eş anlamlısı nedir?", opts: ["Tat", "Acı"], ans: 0, reward: "❄️" }
+];
+let langStep = 0;
+
+function oyunAsema6() {
+    cursor.innerText = '🍧'; showScreen(6); langStep = 0; document.getElementById('bici-kase').innerText = '🥣';
+    popupAc("Bici Bici & Türkçe Testi", "Adana sıcağının serinliği Bici Bici! Malzemeleri almak için Türkçeni konuşturmalısın. Soruları doğru cevapla, malzemeyi kap!", () => {
+        soruGoster();
+    }, 'v_6');
+}
+
+function soruGoster() {
+    if(langStep >= langQuestions.length) {
+        document.getElementById('hud').style.display = 'none';
+        konfetiPatlat(); setTimeout(() => showScreen(7), 2000); return;
+    }
+    let qObj = langQuestions[langStep];
+    document.getElementById('lang-soru').innerText = qObj.q;
+    let optsDiv = document.getElementById('lang-secenekler'); optsDiv.innerHTML = '';
+    
+    qObj.opts.forEach((opt, index) => {
+        let btn = document.createElement('button'); btn.className = 'lang-btn'; btn.innerText = opt;
+        btn.onclick = () => cevapKontrol(index, qObj.ans, qObj.reward);
+        optsDiv.appendChild(btn);
+    });
+}
+
+function cevapKontrol(secilen, dogru, odul) {
+    if(secilen === dogru) {
+        playSfx('success');
+        document.getElementById('bici-kase').innerText += odul;
+        langStep++; soruGoster();
+    } else {
+        playSfx('fail'); can--; updateHUD();
+        let kase = document.getElementById('bici-kase');
+        let old = kase.innerText; kase.innerText = '❌ Yanlış!';
+        setTimeout(() => { kase.innerText = old; }, 1000);
+    }
+}
+</script>
+</body>
+</html>
