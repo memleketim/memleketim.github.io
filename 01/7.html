@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Adana - Festivaller Şehri</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&family=Lora:ital,wght@0,500;0,700;1,500&family=Montserrat:wght@500;700;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --orange-main: #f97316;
+            --orange-light: #fdba74;
+            --gold: #fbbf24;
+            --cinema-red: #dc2626;
+            --cinema-dark: #0f172a;
+            --text-light: #f8fafc;
+            /* Font Variables */
+            --font-montserrat: 'Montserrat', sans-serif;
+            --font-playfair: 'Playfair Display', serif;
+            --font-cinzel: 'Cinzel', serif;
+            --font-lora: 'Lora', serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; cursor: none !important; }
+
+        body {
+            font-family: var(--font-montserrat);
+            overflow: hidden; width: 100vw; height: 100vh;
+            background: var(--cinema-dark); color: var(--text-light);
+            transition: background 0.5s, color 0.5s;
+        }
+        body.light-mode { background: #f1f5f9; color: #1e293b; }
+
+        /* Arkaplan */
+        #bg-layer { position: fixed; inset: 0; background-image: url('arkaplan2.png'); background-size: cover; background-position: center; opacity: 0.15; z-index: -2; transition: filter 1s; }
+        .light-mode #bg-layer { opacity: 0.1; filter: grayscale(0%); }
+        .cinema-mode #bg-layer { opacity: 0.2; filter: grayscale(50%) sepia(50%) hue-rotate(-50deg); }
+
+        /* Özel İmleç */
+        #custom-cursor { position: fixed; width: 32px; height: 32px; font-size: 28px; pointer-events: none !important; z-index: 999999 !important; transform: translate(-50%, -50%); transition: transform 0.05s linear; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+
+        /* Sahneler ve Paneller */
+        .stage { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .stage.active { display: flex; animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 1.5rem; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+            padding: 30px; width: 100%; max-width: 900px; display: flex; flex-direction: column; align-items: center;
+        }
+        .light-mode .glass-panel { background: rgba(255, 255, 255, 0.9); border-color: rgba(0,0,0,0.1); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2); }
+
+        /* Bilgi ve Yönerge Kutuları (Dolu Dolu Görünüm İçin) */
+        .info-box { background: linear-gradient(135deg, rgba(30,58,138,0.4), rgba(30,58,138,0.1)); border-left: 5px solid #3b82f6; padding: 15px 20px; border-radius: 0 12px 12px 0; margin-bottom: 15px; width: 100%; font-family: var(--font-lora); font-size: 1.05rem; line-height: 1.6; text-align: left; }
+        .light-mode .info-box { background: linear-gradient(135deg, rgba(219,234,254,0.8), rgba(239,246,255,0.8)); color: #1e3a8a; }
+        
+        .inst-box { background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(249,115,22,0.05)); border: 2px dashed #f97316; padding: 15px; border-radius: 12px; margin-bottom: 25px; width: 100%; font-family: var(--font-montserrat); font-weight: 700; color: #fdba74; display: flex; align-items: center; gap: 15px; }
+        .light-mode .inst-box { background: rgba(255,237,213,0.8); color: #c2410c; }
+
+        /* M1: Kortej & Kelime Oyunu */
+        .cortege-track { width: 100%; height: 60px; background: rgba(255,255,255,0.05); border-radius: 30px; position: relative; margin-bottom: 1.5rem; border: 3px solid var(--orange-main); box-shadow: inset 0 4px 6px rgba(0,0,0,0.3); }
+        .light-mode .cortege-track { background: #e2e8f0; }
+        .cortege-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #f59e0b, #f97316); transition: width 0.6s ease-in-out; border-radius: 25px; }
+        .cortege-char { position: absolute; top: 50%; transform: translateY(-50%); font-size: 3rem; left: 0%; transition: left 0.6s ease-in-out; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.4)); }
+        
+        .word-btn { background: rgba(255,255,255,0.1); border: 2px solid var(--orange-light); color: white; padding: 12px 24px; border-radius: 12px; font-family: var(--font-montserrat); font-weight: 900; font-size: 1.2rem; cursor: pointer; transition: all 0.2s; pointer-events: auto; }
+        .light-mode .word-btn { background: white; color: var(--orange-main); border-color: var(--orange-main); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .word-btn:active { transform: scale(0.9); }
+        .word-btn.solved { background: #22c55e; border-color: #16a34a; color: white; opacity: 0.5; pointer-events: none; }
+
+        /* Kelime Oyunu Özel CSS */
+        .letter-tile {
+            display: inline-flex; justify-content: center; align-items: center;
+            width: 50px; height: 50px; margin: 5px;
+            background: var(--orange-main); color: white;
+            font-size: 1.5rem; font-weight: bold; border-radius: 8px;
+            transition: 0.2s; pointer-events: auto;
+        }
+        .letter-tile:hover { transform: scale(1.1); }
+        .letter-tile.selected { background: var(--gold); transform: scale(0.9); }
+        .letter-tile.used { visibility: hidden; }
+        .letter-tile.correct { background: #22c55e; }
+        .drop-zone {
+            min-height: 70px; border: 3px dashed var(--orange-light);
+            border-radius: 12px; display: flex; justify-content: center;
+            align-items: center; gap: 10px; margin: 20px 0; padding: 10px;
+            color: var(--orange-light); font-weight: bold; transition: 0.3s;
+            pointer-events: auto;
+        }
+        .drop-zone.hovered { background: rgba(253, 186, 116, 0.2); }
+
+        /* M2: Eşleştirme (Sol-Sağ Sütun) */
+        .match-container { display: flex; gap: 40px; width: 100%; justify-content: center; pointer-events: auto; }
+        .match-col { display: flex; flex-direction: column; gap: 15px; width: 220px; }
+        .match-card { height: 80px; border: 3px solid rgba(255,255,255,0.2); border-radius: 1rem; display: flex; align-items: center; justify-content: center; transition: 0.3s; background: rgba(0,0,0,0.3); font-size: 3rem; overflow: hidden; pointer-events: auto; }
+        .light-mode .match-card { background: white; border-color: #cbd5e1; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .match-card:hover { border-color: var(--gold); transform: translateY(-2px); }
+        .match-card.selected { border-color: var(--gold); background: rgba(251,191,36,0.2); transform: scale(1.05); box-shadow: 0 0 20px rgba(251,191,36,0.4); }
+        .match-card.matched { opacity: 0; pointer-events: none; transform: scale(0.8); }
+
+        /* M3: Türkçe Şifre */
+        .lock-wheel { display: flex; flex-direction: column; align-items: center; background: rgba(0,0,0,0.4); border-radius: 16px; padding: 10px; border: 2px solid #3b82f6; width: 80px; }
+        .light-mode .lock-wheel { background: white; border-color: #93c5fd; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .lock-btn { color: #93c5fd; font-size: 1.5rem; pointer-events: auto; padding: 5px; }
+        .lock-btn:active { transform: scale(0.8); color: var(--gold); }
+        .lock-char { font-family: var(--font-cinzel); font-size: 3.5rem; font-weight: 900; color: var(--gold); margin: 10px 0; }
+
+        /* M4: Motor */
+        .focus-ring { position: relative; width: 140px; height: 140px; border-radius: 50%; border: 6px solid var(--cinema-red); display: flex; align-items: center; justify-content: center; font-size: 3rem; pointer-events: auto; background: #1a1a1a; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); transition: 0.3s; }
+        .focus-ring::before { content: ''; position: absolute; inset: -12px; border-radius: 50%; border: 6px solid transparent; border-top-color: #ef4444; border-bottom-color: #ef4444; opacity: 0; transition: opacity 0.2s; }
+        .focus-ring.recording { background: #7f1d1d; transform: scale(0.95); }
+        .focus-ring.recording::before { opacity: 1; animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* M5: Klaket */
+        .klaket-container { position: relative; width: 300px; height: 240px; margin: 0 auto; pointer-events: auto; }
+        .klaket-bottom { position: absolute; bottom: 0; width: 100%; height: 160px; background: #111; border: 6px solid white; border-radius: 12px; display: flex; flex-direction: column; padding: 15px; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .klaket-stripe { width: 100%; height: 25px; background: repeating-linear-gradient(45deg, white, white 20px, black 20px, black 40px); border-bottom: 4px solid white; }
+        .klaket-top { position: absolute; top: 30px; left: 0; width: 100%; height: 50px; background: #111; border: 6px solid white; border-radius: 12px; transform-origin: bottom left; transform: rotate(-35deg); transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 10; }
+        .klaket-top .klaket-stripe { height: 100%; border-bottom: none; }
+        .klaket-container.snapped .klaket-top { transform: rotate(0deg); }
+        #klaket-cue { font-family: var(--font-cinzel); font-size: 3rem; color: var(--gold); font-weight: 900; position: absolute; top: -100px; left: 50%; transform: translateX(-50%); text-shadow: 0 0 20px rgba(255,215,0,0.8); opacity: 0; transition: 0.3s; width: 100%; text-align: center; z-index: 50; }
+
+        /* M6: Kırmızı Halı Hafıza (12 Kare) */
+        .carpet-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; max-width: 450px; width: 100%; pointer-events: auto; }
+        .carpet-box { aspect-ratio: 1; background: var(--cinema-red); border-radius: 16px; border: 4px solid #7f1d1d; transition: all 0.2s; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; box-shadow: inset 0 0 15px rgba(0,0,0,0.5); pointer-events: auto; }
+        .carpet-box:active { transform: scale(0.9); }
+        .carpet-box.flash { background: var(--gold) !important; color: white; box-shadow: 0 0 30px var(--gold); transform: scale(1.1); border-color: white; }
+
+        /* M7: Geri Sayım */
+        .red-curtain { background: radial-gradient(circle, #b91c1c 0%, #450a0a 100%); }
+        #auto-countdown { font-family: var(--font-cinzel); font-size: 16rem; font-weight: 900; color: var(--gold); text-shadow: 0 10px 40px rgba(0,0,0,0.8); line-height: 1; }
+
+        /* Progress */
+        #progress-bar { position: fixed; bottom: 0; left: 0; height: 8px; background: linear-gradient(90deg, var(--orange-main), var(--gold)); width: 0%; transition: width 0.5s; z-index: 1000; box-shadow: 0 -2px 10px rgba(255,140,0,0.5); }
+    </style>
+</head>
+<body>
+
+    <div id="bg-layer"></div>
+    <div id="custom-cursor">📍</div>
+    <div id="progress-bar"></div>
+
+    <div class="fixed top-4 right-4 flex gap-3 z-[1000] pointer-events-auto">
+        <button onclick="toggleMusic()" id="music-btn" class="w-12 h-12 rounded-full bg-slate-800/80 text-white flex items-center justify-center text-xl shadow-lg border border-slate-600 hover:bg-slate-700 transition">🔇</button>
+        <button onclick="toggleTheme()" class="w-12 h-12 rounded-full bg-slate-800/80 text-white flex items-center justify-center text-xl shadow-lg border border-slate-600 hover:bg-slate-700 transition">🌓</button>
+    </div>
+    <img src="orjinal.svg" alt="Logo" class="fixed top-4 left-4 h-14 w-auto z-50 bg-white/90 p-2 rounded-xl shadow-xl pointer-events-none">
+
+    <main class="w-full h-full relative z-10">
+
+        <section id="stage-0" class="stage active">
+            <div class="glass-panel">
+                <div class="mb-4">
+                    <span class="bg-orange-600 text-white px-4 py-1 rounded-full text-sm font-bold tracking-widest font-montserrat shadow-lg">ADANA</span>
+                </div>
+                <h1 style="font-family: var(--font-playfair);" class="text-6xl md:text-7xl text-orange-400 mb-4 drop-shadow-lg font-black">Festivaller Şehri</h1>
+                <p style="font-family: var(--font-lora);" class="text-2xl text-gray-300 mb-8 italic">Baharın, Neşenin ve Sanatın Buluşma Noktası</p>
+                
+                <a href="https://drive.google.com/file/d/1rnedEFXsQD4r0DNQRJ_lJx99NKjUZP1Z/view?usp=drive_link" target="_blank" class="inline-block bg-white/10 text-orange-200 px-6 py-3 rounded-full font-bold hover:bg-white/20 transition border border-white/20 shadow-sm mb-10 pointer-events-auto">
+                    📄 Can Yıldırım'ın çalışmasının tamamına ulaşmak için tıklayınız.
+                </a>
+
+                <div class="info-box">
+                    Portakal Çiçeği Karnavalı ve Altın Koza Film Festivali, Adana'nın sanat ve neşe dolu yüzüdür. Şehir sokaklarının portakal çiçeği koktuğu nisan aylarında başlayan karnaval insanları bir araya getirirken; Altın Koza, Türk sinemasının kalbinin attığı en prestijli film festivallerinden biridir.
+                </div>
+
+                <button onclick="nextStage(1)" style="font-family: var(--font-cinzel);" class="mt-4 bg-gradient-to-r from-orange-500 to-red-600 text-white px-16 py-5 rounded-full text-3xl font-black shadow-[0_8px_0_#7f1d1d] hover:translate-y-2 hover:shadow-[0_2px_0_#7f1d1d] transition-all pointer-events-auto">
+                    MACERAYA BAŞLA
+                </button>
+            </div>
+        </section>
+
+        <section id="stage-1" class="stage">
+            <div class="glass-panel">
+                <h2 style="font-family: var(--font-playfair);" class="text-4xl text-orange-400 mb-6 font-black">🍊 Karnaval Korteji</h2>
+                
+                <div class="info-box">
+                    Nisan ayında Adana sokakları mis gibi portakal çiçeği kokar. Türkiye'nin ilk ve tek sokak karnavalı olan bu etkinlikte herkes renkli kostümlerle yürüyüşe katılır.
+                </div>
+                <div class="inst-box">
+                    <i class="fa-solid fa-headphones-simple text-3xl"></i>
+                    <span>Yönerge: Önce ipuçlarına göre kelimeleri bul, sonra karnavalın ruhunu yansıtan kelimeleri doğru sırayla seçerek korteji bitişe ulaştır!</span>
+                </div>
+
+                <div id="word-game-container" class="w-full text-center pointer-events-auto">
+                    <p id="target-word" class="text-2xl font-bold text-white tracking-widest mb-2"></p>
+                    <p id="hint-text" class="text-lg text-gold mb-4"></p>
+                    <div id="drop-zone" class="drop-zone" 
+                         ondragover="event.preventDefault(); this.classList.add('hovered');"
+                         ondragleave="this.classList.remove('hovered');"
+                         ondrop="handleDrop(event)">Harfleri buraya sürükle veya tıkla</div>
+                    <div id="scramble-letters" class="flex flex-wrap justify-center mt-4"></div>
+                    <button id="reset-word-btn" onclick="resetTurkceWord()" class="mt-6 bg-red-600/80 text-white px-6 py-2 rounded-full font-bold shadow-lg hover:bg-red-600 transition pointer-events-auto hidden mx-auto block">HARFLERİ SIFIRLA</button>
+                </div>
+
+                <div id="sentence-game-container" class="w-full hidden">
+                    <div class="cortege-track">
+                        <div class="cortege-fill" id="cortege-bar"></div>
+                        <div class="cortege-char" id="cortege-char">🧑‍🎤</div>
+                    </div>
+
+                    <div class="bg-black/30 p-6 rounded-2xl w-full">
+                        <p class="text-gold font-bold mb-4 uppercase tracking-widest" id="word-hint">Kelimeleri Doğru Sırala</p>
+                        <div id="letter-slots" class="flex flex-wrap justify-center mb-6"></div>
+                        <div id="letter-options" class="flex flex-wrap justify-center gap-4 pointer-events-auto"></div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="stage-2" class="stage">
+            <div class="glass-panel">
+                <h2 style="font-family: var(--font-playfair);" class="text-4xl text-orange-400 mb-6 font-black">🎧 Festivalin Sesleri</h2>
+                
+                <div class="info-box border-l-orange-500">
+                    Festivaller sadece görsel değil, aynı zamanda işitsel bir şölendir. Kortej davulları, klaket sesleri ve kalabalığın coşkusu şehri sarar.
+                </div>
+                <div class="inst-box">
+                    <i class="fa-solid fa-volume-high text-3xl"></i>
+                    <span>Yönerge: Sağ sütundaki hoparlörlere tıklayarak sesi dinle. Sonra o sese ait olduğunu düşündüğün resmi sol sütundan seçerek eşleştir!</span>
+                </div>
+
+                <div class="match-container">
+                    <div class="match-col" id="match-imgs"></div>
+                    <div class="match-col" id="match-auds"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stage-3" class="stage">
+            <div class="glass-panel">
+                <h2 style="font-family: var(--font-playfair);" class="text-4xl text-blue-400 mb-6 font-black">🇹🇷 Karnavalın Şifresi</h2>
+                
+                <div class="info-box border-l-blue-500">
+                    Portakal Çiçeği Karnavalı'nın sloganı "Nisanda Adana'da"dır. Ancak bu karnavalın insanlara yaşattığı en büyük duygu Türkçe'mizin o güzel kelimesinde saklıdır.
+                </div>
+                <div class="inst-box" style="border-color:#3b82f6; color:#93c5fd; background:rgba(59,130,246,0.1);">
+                    <i class="fa-solid fa-unlock-keyhole text-3xl"></i>
+                    <span>Yönerge: Ok butonlarına tıklayıp harfleri çevirerek "NEŞE" kelimesini oluştur ve kilidi aç!</span>
+                </div>
+
+                <div class="flex justify-center gap-6 mb-8 pointer-events-auto" id="lock-container"></div>
+                <button onclick="checkLock()" style="font-family: var(--font-cinzel);" class="bg-blue-600 text-white px-16 py-4 rounded-full text-2xl font-black shadow-[0_6px_0_#1e3a8a] active:translate-y-1 active:shadow-none pointer-events-auto">KİLİDİ AÇ</button>
+            </div>
+        </section>
+
+        <section id="stage-4" class="stage">
+            <div class="glass-panel">
+                <div class="w-full max-w-lg mx-auto mb-6 border-4 border-red-600 rounded-2xl shadow-xl aspect-video overflow-hidden bg-black">
+                    <video id="stage-vid" src="filmfestivali.mp4" class="w-full h-full object-cover" loop muted playsinline></video>
+                </div>
+                <h2 style="font-family: var(--font-cinzel);" class="text-5xl text-red-500 mb-4 font-black">ALTIN KOZA</h2>
+                
+                <div class="info-box border-l-red-600">
+                    1969 yılından beri düzenlenen Altın Koza Film Festivali, Türk sinemasının ustalarını ve yeni yeteneklerini Adana'da buluşturur.
+                </div>
+                <div class="inst-box" style="border-color:#ef4444; color:#fca5a5; background:rgba(239,68,68,0.1);">
+                    <i class="fa-solid fa-video text-3xl"></i>
+                    <span>Yönerge: Kamera kaydını tamamlamak için kırmızı butona BASILI TUT ve barın dolmasını bekle!</span>
+                </div>
+
+                <div class="flex flex-col items-center gap-6 mt-4">
+                    <button id="focus-btn" class="focus-ring">🎥</button>
+                    <div class="w-full max-w-sm bg-gray-800 h-6 rounded-full overflow-hidden border-2 border-red-900 shadow-inner">
+                        <div id="focus-bar" class="h-full bg-red-600 w-0 transition-all"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stage-5" class="stage">
+            <div class="glass-panel">
+                <h2 style="font-family: var(--font-cinzel);" class="text-5xl text-red-500 mb-6 font-black">SAHNE 1: KESTİK!</h2>
+                
+                <div class="info-box border-l-red-600">
+                    Film setlerinde görüntü ve sesin eşzamanlı (senkron) olmasını sağlamak için üzerinde sahne bilgilerinin yazdığı 'Klaket' kullanılır.
+                </div>
+                <div class="inst-box" style="border-color:#ef4444; color:#fca5a5; background:rgba(239,68,68,0.1);">
+                    <i class="fa-solid fa-clapperboard text-3xl"></i>
+                    <span>Yönerge: Yönetmen 3-2-1 MOTOR dediğinde aktif olan klaketin üzerine tıklayarak sahneyi kapat!</span>
+                </div>
+
+                <div class="klaket-container mt-20" id="klaket" onclick="snapKlaket()">
+                    <div id="klaket-cue">BEKLE...</div>
+                    <div class="klaket-bottom">
+                        <div class="klaket-stripe"></div>
+                        <div class="mt-4 opacity-80 text-xl tracking-widest">
+                            PROD: ADANA<br>SCENE: 01<br>TAKE: 07
+                        </div>
+                    </div>
+                    <div class="klaket-top"><div class="klaket-stripe"></div></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="stage-6" class="stage">
+            <div class="glass-panel">
+                <h2 style="font-family: var(--font-playfair);" class="text-4xl text-yellow-400 mb-4 font-black">⭐ Kırmızı Halı Geçişi</h2>
+                
+                <div class="info-box border-l-yellow-500">
+                    Ödül töreni gecesi sanatçılar şık kıyafetleriyle kırmızı halıda yürürken fotoğrafçılar anı ölümsüzleştirmek için flaş patlatırlar.
+                </div>
+                <div class="inst-box" style="border-color:#eab308; color:#fde047; background:rgba(234,179,8,0.1);">
+                    <i class="fa-solid fa-camera-retro text-3xl"></i>
+                    <span>Yönerge: Halıdaki 12 kareden 5'inde sırayla flaş patlayacak. Sırayı hafızanda tut ve aynı sırayla karelere tıkla!</span>
+                </div>
+
+                <div class="carpet-grid" id="carpet-grid"></div>
+                <p id="carpet-hint" class="mt-6 text-yellow-500 font-black text-xl animate-pulse">DİKKATLE İZLE...</p>
+            </div>
+        </section>
+
+        <section id="stage-7" class="stage red-curtain">
+            <div id="countdown-layer" class="flex flex-col items-center">
+                <p style="font-family: var(--font-cinzel);" class="text-5xl text-gray-200 mb-8 font-black drop-shadow-lg">ÖDÜL AÇIKLANIYOR</p>
+                <div id="auto-countdown">3</div>
+            </div>
+            <div id="final-award" class="hidden flex-col items-center">
+                <div class="text-9xl mb-8" style="filter: drop-shadow(0 0 50px var(--gold));">🏆</div>
+                <h1 style="font-family: var(--font-cinzel);" class="text-6xl text-white mb-4 font-black">TEBRİKLER!</h1>
+                <p style="font-family: var(--font-lora);" class="text-3xl text-yellow-300 mb-12 font-bold italic">Adana Sanat ve Kültür Elçisi Seçildin!</p>
+                <button onclick="window.location.href='https://memleketim.github.io/01/index.html'" style="font-family: var(--font-montserrat);" class="bg-white text-red-900 px-16 py-5 rounded-full text-3xl font-black shadow-[0_8px_0_#991b1b] hover:translate-y-2 hover:shadow-none transition-all pointer-events-auto">
+                    HARİTAYA DÖN 🗺️
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <audio id="sarki-audio" src="sesler/sarki.mp3" loop></audio>
+
+    <script>
+        // Müzik sesini %25 düşürme (%75 seviyesine çekme)
+        document.getElementById('sarki-audio').volume = 0.75;
+
+        // ==========================================
+        // DAHİLİ SES SENTEZLEYİCİ
+        // ==========================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, dur, vol=0.1) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
+        }
+        const sfx = {
+            tik: () => playTone(600, 'sine', 0.1),
+            dogru: () => { playTone(800, 'sine', 0.1); setTimeout(()=>playTone(1200,'sine',0.2), 100); },
+            hata: () => playTone(150, 'sawtooth', 0.4, 0.2),
+            flas: () => playTone(1500, 'square', 0.05, 0.05),
+            klaket: () => { playTone(100, 'square', 0.1, 0.3); setTimeout(()=>playTone(50, 'square', 0.1, 0.3), 50); },
+            alkis: () => {
+                const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 2.5, audioCtx.sampleRate);
+                const d = b.getChannelData(0); for(let i=0; i<b.length; i++) d[i] = Math.random() * 2 - 1;
+                const n = audioCtx.createBufferSource(); n.buffer = b;
+                const g = audioCtx.createGain(); g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 2.5);
+                n.connect(g); g.connect(audioCtx.destination); n.start();
+            }
+        };
+
+        function playYonerge(id) {
+            const audio = new Audio(`sesler/yonerge${id}.mp3`);
+            audio.play().catch(() => {
+                // TTS Fallback
+                const txt = {
+                    1: "Önce ipuçlarına göre kelimeleri bul, sonra karnavalın ruhunu yansıtan cümleyi doğru sırayla oluşturarak korteji bitişe ulaştır!",
+                    2: "Sağ sütundaki hoparlörlere tıklayarak sesi dinle. Sonra o sese ait olduğunu düşündüğün resmi sol sütundan seçerek eşleştir!",
+                    3: "Ok butonlarına tıklayıp harfleri çevirerek NEŞE kelimesini oluştur ve kilidi aç!",
+                    4: "Kamera kaydını tamamlamak için kırmızı butona basılı tut ve barın dolmasını bekle!",
+                    5: "Yönetmen 3-2-1 MOTOR dediğinde aktif olan klaketin üzerine tıklayarak sahneyi kapat!",
+                    6: "Halıdaki 12 kareden 5'inde sırayla flaş patlayacak. Sırayı hafızanda tut ve aynı sırayla karelere tıkla!"
+                };
+                if(txt[id]) { let u = new SpeechSynthesisUtterance(txt[id]); u.lang = 'tr-TR'; window.speechSynthesis.speak(u); }
+            });
+        }
+
+        // ==========================================
+        // İMLEÇ & GLOBAL UI
+        // ==========================================
+        document.addEventListener('mousemove', e => {
+            const cursor = document.getElementById('custom-cursor');
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+        });
+
+        function toggleTheme() { 
+            sfx.tik(); 
+            document.body.classList.toggle('light-mode'); 
+            if(currentStage >= 4) document.body.classList.toggle('cinema-mode');
+        }
+
+        function toggleMusic() {
+            sfx.tik();
+            const a = document.getElementById('sarki-audio');
+            if(a.paused) { a.play().catch(()=>{}); document.getElementById('music-btn').innerText = "🔊"; }
+            else { a.pause(); document.getElementById('music-btn').innerText = "🔇"; }
+        }
+
+        let currentStage = 0;
+        function nextStage(n) {
+            document.getElementById(`stage-${currentStage}`).classList.remove('active');
+            currentStage = n;
+            document.getElementById(`stage-${currentStage}`).classList.add('active');
+            document.getElementById('progress-bar').style.width = (n / 7 * 100) + '%';
+            
+            if(n >= 4 && n !== 7) document.body.classList.add('cinema-mode');
+            else document.body.classList.remove('cinema-mode');
+
+            if(n === 1) { const a=document.getElementById('sarki-audio'); if(a.paused){a.play().catch(()=>{}); document.getElementById('music-btn').innerText="🔊";} }
+
+            sfx.tik();
+            if(n > 0 && n < 7) playYonerge(n);
+
+            if(n === 1) initStage1();
+            if(n === 2) initStage2();
+            if(n === 3) initStage3();
+            if(n === 4) initStage4();
+            if(n === 5) initStage5();
+            if(n === 6) initStage6();
+            if(n === 7) initStage7();
+        }
+
+        // ==========================================
+        // M1: KELİME BULMA VE CÜMLE KURMA KORTEJİ
+        // ==========================================
+        
+        // --- 1. Aşama: Kelime Bulma (Harf Sıralama) ---
+        const turkceWords = [
+            {word:'KARNAVAL', hint:'Adana\'da Nisan ayında düzenlenen neşeli etkinlik', scrambled:'KALANRAV'},
+            {word:'PORTAKAL', hint:'Adana\'nın meşhur turuncu meyvesi', scrambled:'KALATROP'},
+            {word:'SİNEMA', hint:'Filmlerin gösterildiği yer', scrambled:'ANESİM'},
+            {word:'ÖDÜL', hint:'Kazananlara verilen altın koza', scrambled:'LÜÖD'},
+            {word:'ADANA', hint:'Festivallerin düzenlendiği şehir', scrambled:'ANADA'}
+        ];
+        
+        let currentWordIndex = 0;
+        let selectedLetters = [];
+
+        function initStage1() {
+            // Kelime oyununu göster, cümle oyununu gizle
+            document.getElementById('word-game-container').classList.remove('hidden');
+            document.getElementById('sentence-game-container').classList.add('hidden');
+            currentWordIndex = 0;
+            selectedLetters = [];
+            loadTurkceWord();
+        }
+
+        function loadTurkceWord() {
+            const wordData = turkceWords[currentWordIndex];
+            document.getElementById('target-word').textContent = 'HEDEF: ' + '_'.repeat(wordData.word.length);
+            document.getElementById('hint-text').textContent = 'İpucu: ' + wordData.hint;
+            document.getElementById('drop-zone').textContent = 'Harfleri buraya sürükle veya tıkla';
+            document.getElementById('drop-zone').classList.remove('hovered');
+            document.getElementById('reset-word-btn').classList.add('hidden');
+            
+            const scrambleContainer = document.getElementById('scramble-letters');
+            scrambleContainer.innerHTML = '';
+            selectedLetters = [];
+            
+            const letters = wordData.scrambled.split('');
+            letters.forEach((letter, i) => {
+                const tile = document.createElement('div');
+                tile.className = 'letter-tile';
+                tile.textContent = letter;
+                tile.draggable = true;
+                tile.dataset.letter = letter;
+                tile.dataset.index = i;
+                
+                // Tıklama ile seçim
+                tile.addEventListener('click', () => {
+                    if (tile.classList.contains('selected')) {
+                        tile.classList.remove('selected');
+                        selectedLetters = selectedLetters.filter(l => l !== tile);
+                        updateDropZone();
+                    } else {
+                        tile.classList.add('selected');
+                        selectedLetters.push(tile);
+                        sfx.tik();
+                        updateDropZone();
+                        
+                        // Otomatik kontrol
+                        const currentWord = selectedLetters.map(t => t.dataset.letter).join('');
+                        if (currentWord.length === wordData.word.length) {
+                            checkTurkceWord(currentWord, wordData);
+                        }
+                    }
+                });
+                
+                // Sürükle bırak
+                tile.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', letter);
+                    e.dataTransfer.setData('index', i);
+                    tile.style.opacity = '0.5';
+                });
+                
+                tile.addEventListener('dragend', () => {
+                    tile.style.opacity = '1';
+                });
+                
+                scrambleContainer.appendChild(tile);
+            });
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const dropZone = document.getElementById('drop-zone');
+            dropZone.classList.remove('hovered');
+            const index = parseInt(e.dataTransfer.getData('index'));
+            
+            const scrambleContainer = document.getElementById('scramble-letters');
+            const tile = scrambleContainer.children[index];
+            if (tile && !tile.classList.contains('used') && !tile.classList.contains('selected')) {
+                tile.classList.add('used', 'selected');
+                tile.style.visibility = 'hidden';
+                selectedLetters.push(tile);
+                
+                updateDropZone();
+                sfx.tik();
+
+                const wordData = turkceWords[currentWordIndex];
+                const currentWord = selectedLetters.map(t => t.dataset.letter).join('');
+                if (currentWord.length === wordData.word.length) {
+                    checkTurkceWord(currentWord, wordData);
+                }
+            }
+        }
+
+        function updateDropZone() {
+            const dropZone = document.getElementById('drop-zone');
+            const resetBtn = document.getElementById('reset-word-btn');
+            dropZone.innerHTML = '';
+            
+            if(selectedLetters.length === 0) {
+                dropZone.textContent = 'Harfleri buraya sürükle veya tıkla';
+                if(resetBtn) resetBtn.classList.add('hidden');
+                return;
+            }
+            
+            if(resetBtn) resetBtn.classList.remove('hidden');
+            
+            selectedLetters.forEach(tile => {
+                const span = document.createElement('span');
+                span.textContent = tile.dataset.letter;
+                span.style.fontSize = '1.8rem';
+                span.style.fontWeight = '900';
+                span.style.color = 'var(--orange-main)';
+                dropZone.appendChild(span);
+            });
+        }
+
+        function resetTurkceWord() {
+            sfx.tik();
+            selectedLetters.forEach(t => {
+                t.classList.remove('selected', 'used');
+                t.style.visibility = 'visible';
+            });
+            selectedLetters = [];
+            updateDropZone();
+        }
+
+        function checkTurkceWord(currentWord, wordData) {
+            if (currentWord === wordData.word) {
+                sfx.dogru();
+                document.getElementById('target-word').textContent = 'HEDEF: ' + wordData.word;
+                document.getElementById('reset-word-btn').classList.add('hidden');
+                
+                // Tüm harfleri yeşil yap
+                selectedLetters.forEach(t => {
+                    t.classList.add('correct');
+                    t.style.visibility = 'visible';
+                });
+                
+                setTimeout(() => {
+                    currentWordIndex++;
+                    if (currentWordIndex < turkceWords.length) {
+                        loadTurkceWord();
+                    } else {
+                        // Kelime oyunu bitti, Cümle sıralamaya geçiş
+                        document.getElementById('word-game-container').classList.add('hidden');
+                        document.getElementById('sentence-game-container').classList.remove('hidden');
+                        initSentenceGame();
+                    }
+                }, 1000);
+            } else {
+                sfx.hata();
+                const dropZone = document.getElementById('drop-zone');
+                dropZone.style.borderColor = 'var(--cinema-red)';
+                setTimeout(() => {
+                    dropZone.style.borderColor = '';
+                    resetTurkceWord();
+                }, 500);
+            }
+        }
+
+        // --- 2. Aşama: Cümle Sıralama ---
+        const targetSentence = ["Adana", "sanatın", "ve", "neşenin", "şehridir"];
+        let cIdx = 0;
+
+        function initSentenceGame() {
+            cIdx = 0;
+            document.getElementById('cortege-bar').style.width = '0%';
+            document.getElementById('cortege-char').style.left = '0%';
+            
+            const slots = document.getElementById('letter-slots');
+            const opts = document.getElementById('letter-options');
+            slots.innerHTML = ''; opts.innerHTML = '';
+
+            targetSentence.forEach((_, i) => {
+                slots.innerHTML += `<div class="letter-slot" style="width:auto; border:none; color:gray;" id="snt-${i}">[...]</div>`;
+            });
+
+            [...targetSentence].sort(() => Math.random() - 0.5).forEach(w => {
+                const b = document.createElement('div'); b.className = 'word-btn'; b.innerText = w;
+                b.onclick = () => handleSentClick(b, w);
+                opts.appendChild(b);
+            });
+        }
+
+        function handleSentClick(btn, word) {
+            if(word === targetSentence[cIdx]) {
+                sfx.dogru(); btn.classList.add('solved');
+                document.getElementById(`snt-${cIdx}`).innerText = word;
+                document.getElementById(`snt-${cIdx}`).style.color = 'var(--gold)';
+                cIdx++;
+                
+                let p = (cIdx / targetSentence.length) * 100;
+                document.getElementById('cortege-bar').style.width = p + '%';
+                document.getElementById('cortege-char').style.left = `calc(${p}% - 40px)`;
+
+                if(cIdx === targetSentence.length) {
+                    confetti({particleCount: 100, origin: {y: 0.6}});
+                    setTimeout(() => nextStage(2), 1500);
+                }
+            } else {
+                sfx.hata();
+            }
+        }
+
+        // ==========================================
+        // M2: RESİM-SES EŞLEŞTİRME (Görseller Eklendi)
+        // ==========================================
+        const matchData = [
+            { id: 1, name: "Portakal Çiçeği", image: "resim_cicek.jpg", audio: "ses_cicek.mp3" },
+            { id: 2, name: "Altın Koza", image: "resim_koza.jpg", audio: "ses_koza.mp3" },
+            { id: 3, name: "Klaket", image: "resim_klaket.jpg", audio: "ses_klaket.mp3" },
+            { id: 4, name: "Kortej", image: "resim_kortej.jpg", audio: "ses_kortej.mp3" },
+            { id: 5, name: "Sinema", image: "resim_sinema.jpg", audio: "ses_sinema.mp3" }
+        ];
+        let selAud = null, matched = 0;
+
+        function initStage2() {
+            matched = 0; selAud = null;
+            const imgCol = document.getElementById('match-imgs');
+            const audCol = document.getElementById('match-auds');
+            imgCol.innerHTML = ''; audCol.innerHTML = '';
+
+            // Resimler ve sesler asla aynı sırada olmasın kontrolü
+            let imgs = [...matchData].sort(()=>Math.random()-0.5);
+            let auds = [...matchData].sort(()=>Math.random()-0.5);
+            while(imgs.some((img, i) => img.id === auds[i].id)) {
+                auds = [...matchData].sort(()=>Math.random()-0.5);
+            }
+
+            imgs.forEach(d => {
+                imgCol.innerHTML += `<div class="match-card" id="img-${d.id}" onclick="checkMatch(${d.id})" style="background-image: url('${d.image}'); background-size: cover; background-position: center;"></div>`;
+            });
+            auds.forEach(d => {
+                audCol.innerHTML += `<div class="match-card text-3xl" id="aud-${d.id}" onclick="playMatchAudio(${d.id})">🔊</div>`;
+            });
+        }
+
+        function playMatchAudio(id) {
+            sfx.tik(); selAud = id;
+            document.querySelectorAll('#match-auds .match-card').forEach(c => c.classList.remove('selected'));
+            document.getElementById(`aud-${id}`).classList.add('selected');
+            
+            const audio = new Audio(`sesler/${matchData.find(x=>x.id===id).audio}`);
+            audio.play().catch(() => {
+                let u = new SpeechSynthesisUtterance(matchData.find(x=>x.id===id).name); u.lang='tr-TR'; window.speechSynthesis.speak(u);
+            });
+        }
+
+        function checkMatch(id) {
+            if(!selAud) { sfx.hata(); return; }
+            if(id === selAud) {
+                sfx.dogru();
+                document.getElementById(`img-${id}`).classList.add('matched');
+                document.getElementById(`aud-${id}`).classList.add('matched');
+                matched++; selAud = null;
+                if(matched === 5) { confetti(); setTimeout(() => nextStage(3), 1000); }
+            } else {
+                sfx.hata();
+            }
+        }
+
+        // ==========================================
+        // M3: TR ŞİFRE (DÖNDÜRMELİ)
+        // ==========================================
+        const alphabet = "ABCÇDEFGĞHIİJKLMNOÖPRSŞTUÜVYZ";
+        const lockTarget = "NEŞE";
+        let lockCurrent = ["K", "M", "P", "S"];
+
+        function initStage3() {
+            const c = document.getElementById('lock-container'); c.innerHTML = '';
+            lockCurrent.forEach((char, i) => {
+                const div = document.createElement('div'); div.className = "lock-wheel";
+                div.innerHTML = `
+                    <div class="lock-btn" onclick="spinLock(${i}, 1)">▲</div>
+                    <div id="lc-${i}" class="lock-char">${char}</div>
+                    <div class="lock-btn" onclick="spinLock(${i}, -1)">▼</div>
+                `;
+                c.appendChild(div);
+            });
+        }
+
+        function spinLock(idx, dir) {
+            sfx.tik();
+            let i = alphabet.indexOf(lockCurrent[idx]);
+            i = (i + dir + alphabet.length) % alphabet.length;
+            lockCurrent[idx] = alphabet[i];
+            document.getElementById(`lc-${idx}`).innerText = lockCurrent[idx];
+        }
+
+        function checkLock() {
+            if(lockCurrent.join('') === lockTarget) {
+                sfx.dogru(); confetti(); setTimeout(() => nextStage(4), 1000);
+            } else { sfx.hata(); }
+        }
+
+        // ==========================================
+        // M4: MOTOR (BASILI TUT)
+        // ==========================================
+        let focusTimer, focusProgress = 0;
+        function initStage4() {
+            focusProgress = 0; document.getElementById('focus-bar').style.width = '0%';
+            const btn = document.getElementById('focus-btn');
+            const start = (e) => { e.preventDefault(); sfx.tik(); btn.classList.add('recording'); document.getElementById('stage-vid').play(); focusTimer = setInterval(() => { focusProgress += 2; document.getElementById('focus-bar').style.width = focusProgress + '%'; if(focusProgress >= 100) { clearInterval(focusTimer); btn.classList.remove('recording'); btn.style.pointerEvents = 'none'; sfx.dogru(); nextStage(5); } }, 50); };
+            const stop = () => { clearInterval(focusTimer); document.getElementById('stage-vid').pause(); btn.classList.remove('recording'); if(focusProgress < 100) { focusProgress = 0; document.getElementById('focus-bar').style.width = '0%'; } };
+            btn.onmousedown = start; btn.ontouchstart = start; window.onmouseup = stop; window.ontouchend = stop;
+        }
+
+        // ==========================================
+        // M5: KLAKET
+        // ==========================================
+        function initStage5() {
+            const cue = document.getElementById('klaket-cue');
+            const klaket = document.getElementById('klaket');
+            klaket.classList.remove('snapped');
+            klaket.style.pointerEvents = 'none';
+            cue.style.opacity = '1';
+            
+            let count = 3;
+            cue.innerText = count + "...";
+            sfx.tik();
+            
+            const timer = setInterval(() => {
+                count--;
+                if(count > 0) { cue.innerText = count + "..."; sfx.tik(); }
+                else if(count === 0) { 
+                    cue.innerText = "MOTOR!"; sfx.dogru(); 
+                    clearInterval(timer);
+                    klaket.style.pointerEvents = 'auto'; // Artık tıklanabilir
+                }
+            }, 1000);
+        }
+
+        function snapKlaket() {
+            const k = document.getElementById('klaket');
+            if(k.classList.contains('snapped')) return;
+            sfx.klaket(); k.classList.add('snapped');
+            document.getElementById('klaket-cue').style.opacity = '0';
+            setTimeout(() => nextStage(6), 1200);
+        }
+
+        // ==========================================
+        // M6: KIRMIZI HALI (12 KARE / 5 ADIM)
+        // ==========================================
+        let carpetSeq = [], userSteps = 0;
+        function initStage6() {
+            const grid = document.getElementById('carpet-grid');
+            grid.innerHTML = ''; carpetSeq = []; userSteps = 0;
+            for(let i=0; i<12; i++) {
+                const b = document.createElement('div'); b.className = 'carpet-box';
+                b.onclick = () => handleCarpet(i, b);
+                grid.appendChild(b);
+            }
+            for(let i=0; i<5; i++) carpetSeq.push(Math.floor(Math.random()*12));
+            grid.style.pointerEvents = 'none';
+            document.getElementById('carpet-hint').innerText = "DİKKATLE İZLE...";
+            setTimeout(playCarpetSeq, 1500);
+        }
+
+        function playCarpetSeq() {
+            carpetSeq.forEach((idx, i) => {
+                setTimeout(() => {
+                    const b = document.getElementById('carpet-grid').children[idx];
+                    sfx.flas(); b.classList.add('flash');
+                    setTimeout(() => b.classList.remove('flash'), 300);
+                }, i * 700);
+            });
+            setTimeout(() => { 
+                document.getElementById('carpet-grid').style.pointerEvents = 'auto'; 
+                document.getElementById('carpet-hint').innerText = "SIRA SENDE!"; 
+            }, carpetSeq.length * 700 + 500);
+        }
+
+        function handleCarpet(idx, btn) {
+            if(idx === carpetSeq[userSteps]) {
+                sfx.tik(); btn.style.background = 'var(--gold)';
+                userSteps++;
+                if(userSteps === 5) { sfx.dogru(); setTimeout(() => nextStage(7), 1000); }
+            } else {
+                sfx.hata(); userSteps = 0;
+                document.querySelectorAll('.carpet-box').forEach(b => b.style.background = '');
+                document.getElementById('carpet-grid').style.pointerEvents = 'none';
+                document.getElementById('carpet-hint').innerText = "HATALI! YENİDEN İZLE...";
+                setTimeout(playCarpetSeq, 1500);
+            }
+        }
+
+        // ==========================================
+        // M7: OTOMATİK GERİ SAYIM & ÖDÜL
+        // ==========================================
+        function initStage7() {
+            document.getElementById('sarki-audio').pause();
+            let c = 3; const txt = document.getElementById('auto-countdown');
+            txt.innerText = c;
+            const timer = setInterval(() => {
+                c--;
+                if(c > 0) { txt.innerText = c; sfx.tik(); }
+                else if(c === 0) {
+                    clearInterval(timer);
+                    document.getElementById('countdown-layer').style.display = 'none';
+                    document.getElementById('final-award').classList.remove('hidden');
+                    document.getElementById('final-award').classList.add('flex');
+                    sfx.alkis(); confetti({particleCount: 300, spread: 100});
+                }
+            }, 1000);
+        }
+
+    </script>
+</body>
+</html>
