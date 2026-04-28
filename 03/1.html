@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kocatepe: Zaferin Şifresi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* --- RENK PALETİ VE TEMEL AYARLAR --- */
+        :root {
+            --primary-blue: #1e88e5;
+            --dark-blue: #1565c0;
+            --accent-orange: #ff9800;
+            --accent-hover: #f57c00;
+            --success-green: #43a047;
+            --danger-red: #e53935;
+            --bg-color: #f0f4f8;
+            /* YENİ: Panel arka planı şeffaflaştırıldı */
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --text-dark: #2c3e50;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Montserrat', sans-serif; background: #000; color: var(--text-dark); }
+
+        /* Arka Plan Videosu */
+        #bg-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none; object-fit: cover; opacity: 0.4; }
+
+        /* UI Sabitleri */
+        #logo { position: absolute; top: 20px; left: 20px; width: 85px; z-index: 1000; pointer-events: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); }
+        .controls { position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 1000; pointer-events: auto; }
+        .icon-btn { background: #fff; border: 2px solid var(--primary-blue); color: var(--primary-blue); border-radius: 50%; width: 50px; height: 50px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.3s; }
+        .icon-btn:hover { background: var(--primary-blue); color: #fff; transform: scale(1.1); }
+
+        /* Aşamalar */
+        .stage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.6s ease-in-out; z-index: 10; padding: 20px; }
+        .stage.active { opacity: 1; pointer-events: auto; }
+
+        /* Panel Tasarımı */
+        .panel { background: var(--panel-bg); padding: 40px; border-radius: 24px; max-width: 900px; width: 95%; text-align: center; box-shadow: 0 15px 50px rgba(0,0,0,0.3); position: relative; border-top: 8px solid var(--primary-blue); z-index: 20; backdrop-filter: blur(5px); /* Hafif bulanıklık efekti */ }
+        h1, h2 { font-family: 'Playfair Display', serif; color: var(--dark-blue); margin-top: 0; font-size: 2.2rem; }
+        
+        /* YENİ: Yönerge Banner'ı şeffaflaştırıldı */
+        .yonerge { background: rgba(227, 242, 253, 0.7); border-left: 6px solid var(--accent-orange); padding: 18px; margin-bottom: 25px; text-align: left; font-weight: 500; color: #1565c0; border-radius: 0 12px 12px 0; font-size: 1.05rem; line-height: 1.5; }
+
+        /* Butonlar */
+        .btn { background: var(--accent-orange); color: #fff; font-weight: 700; padding: 16px 36px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; font-size: 1.2rem; box-shadow: 0 6px 15px rgba(255, 152, 0, 0.4); text-transform: uppercase; letter-spacing: 1px; }
+        .btn:hover { background: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(255, 152, 0, 0.6); }
+        .btn:active { transform: translateY(1px); box-shadow: 0 3px 10px rgba(255, 152, 0, 0.4); }
+        .btn-external { background: var(--primary-blue); color: #fff; margin-top: 15px; text-decoration: none; display: inline-block; font-size: 1rem; padding: 12px 24px; box-shadow: 0 4px 10px rgba(30, 136, 229, 0.3); }
+
+        /* --- MEKANİK 1: İşaret Fişeği --- */
+        #flare-sky { width: 100%; height: 400px; border-radius: 16px; position: relative; background: linear-gradient(to bottom, #000428, #004e92); overflow: hidden; cursor: crosshair; box-shadow: inset 0 0 20px rgba(0,0,0,0.5); border: 4px solid var(--dark-blue); }
+        #flare-target { position: absolute; top: 40px; right: 60px; width: 80px; height: 80px; border: 4px dashed #ffeb3b; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffeb3b; font-weight: bold; font-size: 1.2rem; background: rgba(255,235,59,0.1); }
+        #launcher-base { position: absolute; bottom: 20px; left: 80px; width: 40px; height: 60px; background: #546e7a; border-radius: 10px 10px 0 0; }
+        #trajectory-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+        .flare-projectile { position: absolute; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 0 15px 5px #ffeb3b; z-index: 3; }
+
+        /* --- MEKANİK 2: Çark --- */
+        .wheel-container { position: relative; width: 320px; height: 320px; margin: 20px auto; }
+        #wheel-canvas { width: 100%; height: 100%; border-radius: 50%; border: 8px solid #eceff1; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        /* YENİ: Çark oku emoji ile değiştirildi ve görünür kılındı */
+        #wheel-arrow { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); font-size: 3rem; z-index: 100; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); color: var(--accent-orange); }
+
+        /* --- MEKANİK 3: Kilitler --- */
+        .lock-area { display: flex; justify-content: center; gap: 40px; margin-bottom: 25px; }
+        .lock-item { width: 90px; height: 90px; background: #cfd8dc; border: 4px solid #b0bec5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; transition: all 0.5s; position: relative; box-shadow: inset 0 4px 8px rgba(0,0,0,0.1); }
+        .lock-item.active { border-color: var(--accent-orange); background: #fff3e0; box-shadow: 0 0 20px rgba(255,152,0,0.5), inset 0 4px 8px rgba(0,0,0,0.05); transform: scale(1.1); }
+        .lock-item.opened { background: #e8f5e9; border-color: var(--success-green); color: var(--success-green); transform: rotate(360deg); }
+        .sentence-slots { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; min-height: 80px; padding: 20px; background: rgba(248, 249, 250, 0.7); border: 3px dashed var(--primary-blue); border-radius: 16px; margin-bottom: 25px; }
+        .word-bank { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; }
+        .word { padding: 12px 24px; background: var(--primary-blue); color: #fff; border-radius: 8px; cursor: grab; font-weight: 700; font-size: 1.1rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: 0.2s; }
+        .word.in-slot { background: var(--dark-blue); }
+
+        /* --- MEKANİK 4: Bilgi Avcısı (ÖZEL HEDEF İMLECİ) --- */
+        #hunt-sky { width: 100%; height: 500px; background: linear-gradient(135deg, #2c3e50, #bdc3c7); border-radius: 16px; position: relative; overflow: hidden; border: 4px solid var(--dark-blue); box-shadow: inset 0 0 20px rgba(0,0,0,0.3);
+            /* Özel Silah Hedefi İmleci */
+            cursor: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' stroke='%23ff9800' stroke-width='2' fill='none'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23ff9800' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff9800' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23ff9800'/%3E%3C/svg%3E") 16 16, crosshair;
+        }
+        .info-bubble { position: absolute; padding: 20px; background: #fff; color: var(--dark-blue); border-radius: 16px; font-size: 1rem; font-weight: 600; width: 190px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.25); pointer-events: auto; border-bottom: 4px solid var(--accent-orange); animation: float 4s ease-in-out infinite;
+            /* Balon üzerinde de hedef imleci kalsın */
+            cursor: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' stroke='%23ff9800' stroke-width='2' fill='none'/%3E%3Cline x1='16' y1='2' x2='16' y2='30' stroke='%23ff9800' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff9800' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23ff9800'/%3E%3C/svg%3E") 16 16, crosshair;
+        }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        .explode { animation: pop 0.4s forwards; }
+        @keyframes pop { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); background: var(--danger-red); color: #fff; } 100% { transform: scale(0); opacity: 0; } }
+        .shake-correct { animation: shake 0.4s forwards; background: var(--success-green) !important; color: white !important; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+        /* --- MEKANİK 5: Yapboz --- */
+        #puzzle-board { display: grid; grid-template-columns: repeat(3, 110px); grid-template-rows: repeat(3, 110px); gap: 4px; margin: 25px auto; width: 340px; background: rgba(238, 238, 238, 0.7); padding: 4px; border-radius: 8px; border: 4px solid var(--dark-blue); }
+        .puzzle-piece { width: 110px; height: 110px; cursor: pointer; background-size: 330px 330px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .puzzle-piece.active { border: 3px solid var(--accent-orange); transform: scale(0.95); }
+
+        iframe { border-radius: 16px; border: 4px solid var(--dark-blue); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+    <video id="bg-video" src="mustafakemal.mp4" autoplay loop muted playsinline></video>
+
+    <div id="ui-layer">
+        <img id="logo" src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+        <div class="controls">
+            <button class="icon-btn" id="btn-sound" title="Sesi Aç/Kapat">🔇</button>
+        </div>
+    </div>
+
+    <div id="stage-0" class="stage active">
+        <div class="panel">
+            <h1>Kocatepe'ye Yolculuk</h1>
+            <div class="yonerge">
+                📌 <b>Önemli Bilgi:</b> Oyuna başlamadan önce Büyük Taarruz sürecini anlatan bu 3 dakikalık videoyu izlemek, şifreleri çözmende sana büyük bir avantaj sağlayacaktır.
+            </div>
+            <iframe width="100%" height="315" src="https://www.youtube.com/embed/iz58MfEd4G0" frameborder="0" allowfullscreen></iframe>
+            <br><br>
+            <button class="btn" onclick="showStage(1)">Anladım, Oyunu Başlat!</button>
+            <br>
+            <a href="https://drive.google.com/file/d/1p5bPf2sugOD_BZNFy5asFnRHLBdOQ-_k/view?usp=drive_link" target="_blank" class="btn-external">Demirhan Yılmaz'nın çalışmasının tamamına ulaşmak için tıklayınız.</a>
+        </div>
+    </div>
+
+    <div id="stage-1" class="stage">
+        <div class="panel">
+            <h2>1. Aşama: Taarruz Ateşi!</h2>
+            <div class="yonerge">
+                <b>Hedefi Vur!</b> Önce farenle ekranda hedeflediğin noktaya <b>tıklayarak</b> gidiş yolunu sabitle. Ardından beliren <b>"ATEŞLE"</b> butonuna basarak işaret fişeğini fırlat!
+            </div>
+            <div id="flare-sky">
+                <canvas id="trajectory-canvas"></canvas>
+                <div id="flare-target">HEDEF</div>
+                <div id="launcher-base"></div>
+                <button id="fire-btn" class="btn" style="display:none; position:absolute; bottom: 20px; right: 20px; z-index: 10;">ATEŞLE</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-2" class="stage">
+        <div class="panel">
+            <h2>2. Aşama: Strateji Çarkı</h2>
+            <div class="yonerge">
+                Çarkı çevir ve gelen bölmedeki tarihi bilginin <b>DOĞRU</b> mu yoksa <b>YANLIŞ</b> mı olduğuna karar ver.
+            </div>
+            <div class="wheel-container">
+                <span id="wheel-arrow">👇</span>
+                <canvas id="wheel-canvas" width="320" height="320"></canvas>
+            </div>
+            <button class="btn" id="spin-btn">ÇARK'I ÇEVİR</button>
+            
+            <div id="q-panel" style="display:none; margin-top:25px;">
+                <p id="q-text" style="font-size:1.2rem; font-weight:700; color:var(--dark-blue);"></p>
+                <div style="display:flex; justify-content:center; gap:20px; margin-top:15px;">
+                    <button class="btn" style="background:var(--success-green); width:150px;" onclick="checkWheelQ(true)">DOĞRU</button>
+                    <button class="btn" style="background:var(--danger-red); width:150px;" onclick="checkWheelQ(false)">YANLIŞ</button>
+                </div>
+            </div>
+            <div id="feedback" class="feedback-box"></div>
+        </div>
+    </div>
+
+    <div id="stage-3" class="stage">
+        <div class="panel">
+            <h2>3. Aşama: Şifreli Telgraflar</h2>
+            <div class="yonerge">
+                Karargahtan gelen şifreli mesajlar parçalanmış. Aşağıdaki kelimeleri sürükleyerek üstteki boşluğa <b>anlamlı ve kurallı bir cümle</b> olacak şekilde sırayla bırak.
+            </div>
+            <div class="lock-area">
+                <div class="lock-item" id="lock-0">🔒</div>
+                <div class="lock-item" id="lock-1">🔒</div>
+                <div class="lock-item" id="lock-2">🔒</div>
+            </div>
+            <div class="sentence-slots" id="slots"></div>
+            <div class="word-bank" id="bank"></div>
+        </div>
+    </div>
+
+    <div id="stage-4" class="stage">
+        <div class="panel">
+            <h2>4. Aşama: Bilgi Avcısı</h2>
+            <div class="yonerge">
+                Ekranda uçuşan bilgilerden <b>SADECE YANLIŞ OLANLARA</b> farenle doğrudan tıklayarak (ateş ederek) patlat! Doğru bilgileri vurmaya çalışma.
+            </div>
+            <div id="hunt-sky">
+                </div>
+        </div>
+    </div>
+
+    <div id="stage-5" class="stage">
+        <div class="panel">
+            <h2>5. Aşama: Anıtı İnşa Et</h2>
+            <div class="yonerge">
+                Kocatepe Anıtı'nın parçalarını yer değiştirmek için önce bir parçaya, sonra diğerine tıkla. Görseli tamamla!
+            </div>
+            <div id="puzzle-board"></div>
+        </div>
+    </div>
+
+    <div id="stage-6" class="stage">
+        <div class="panel">
+            <h1 style="color:var(--accent-orange); font-size: 2.8rem;">Görev Tamamlandı!</h1>
+            <div class="yonerge">
+                Tebrikler! Büyük Taarruz'un şifrelerini başarıyla çözdün. Şimdi Kocatepe'nin bu görkemli tarihinin günümüzdeki anlatımını dinleyelim.
+            </div>
+            <iframe width="100%" height="315" src="https://www.youtube.com/embed/ynMVU5VwAiM?start=43" frameborder="0" allowfullscreen></iframe>
+            <br><br>
+            <button class="btn" style="background:var(--primary-blue);" onclick="window.location.href='https://memleketim.github.io/03/index.html'">Haritaya Dön</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- SES & KONTROL --- */
+        let audioCtx = null;
+        let bgm = new Audio('sesler/kocatepe.mp3'); bgm.loop = true;
+        let isMuted = true;
+        let currentVoiceAudio = null; // Stüdyo MP3 kaydı için
+
+        // Yapay Zeka (Tarayıcı) için Yönerge Metinleri Havuzu
+        const yonergeMetinleri = [
+            "Kocatepe'ye hoş geldin! Oyuna başlamadan önce Büyük Taarruz sürecini anlatan bu videoyu izlemen, ilerideki görevleri kolayca geçmeni sağlayacak.",
+            "1. Aşama: Taarruz Ateşi! Önce farenle ekranda hedeflediğin noktaya tıkla ve rotayı sabitle. Ardından beliren 'ATEŞLE' butonuna basarak fişeği fırlat!",
+            "2. Aşama: Strateji Çarkı. Çarkı çevir, karşına çıkan tarihi bilginin Doğru mu yoksa Yanlış mı olduğuna karar ver.",
+            "3. Aşama: Şifreli Telgraflar. Karargahtan gelen mesajlar karışmış. Kelimeleri sırayla tıklayarak veya sürükleyerek üstteki kutuya taşı ve anlamlı cümleyi kur.",
+            "4. Aşama: Bilgi Avcısı. Ekranda uçuşan bilgilerden sadece asılsız ve YANLIŞ olanlara tıkla! Doğru bilgilere ateş edersen hedefini şaşırırsın.",
+            "5. Aşama: Anıtı İnşa Et. Zaferin simgesi Kocatepe Anıtı'nın parçalarını yer değiştirerek görseli tamamla.",
+            "Görev Tamamlandı! Büyük Taarruz'un şifrelerini çözdün. Şimdi Kocatepe'nin günümüzdeki yansımasını izleme vakti. Tebrikler!"
+        ];
+
+        function playSound(type) {
+            if(isMuted || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if(type === 'shoot') { osc.type = 'square'; osc.frequency.setValueAtTime(150, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2); osc.start(); osc.stop(audioCtx.currentTime + 0.2); }
+            else if(type === 'success') { osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+            else if(type === 'error') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.start(); osc.stop(audioCtx.currentTime + 0.3); }
+        }
+
+        // Otomatik Seslendirme (TTS) Fonksiyonu
+        function playVoiceover(stageIdx) {
+            if(isMuted) return;
+
+            // Önceki sesleri sustur (Hem MP3 hem de Tarayıcı TTS)
+            if(currentVoiceAudio) { currentVoiceAudio.pause(); currentVoiceAudio.currentTime = 0; }
+            if('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            const audioPath = `sesler/yonerge_${stageIdx}.mp3`;
+            currentVoiceAudio = new Audio(audioPath);
+            
+            // 1. İhtimal: MP3 Dosyası yüklüyse onu çal.
+            let playPromise = currentVoiceAudio.play();
+            if(playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // 2. İhtimal: MP3 bulunamazsa tarayıcının yerleşik Türkçe sesini devreye sok!
+                    if('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(yonergeMetinleri[stageIdx]);
+                        utterance.lang = 'tr-TR';
+                        utterance.rate = 1.0; // Normal hız
+                        window.speechSynthesis.speak(utterance);
+                    }
+                });
+            }
+        }
+
+        document.getElementById('btn-sound').onclick = function() {
+            isMuted = !isMuted;
+            this.innerText = isMuted ? '🔇' : '🔊';
+            
+            if(!isMuted) { 
+                if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+                // Eğer mekaniklerdeysek BGM başlasın
+                if(currentStage > 0 && currentStage < 6) bgm.play().catch(e=>{});
+                // Sesi açar açmaz o anki sayfanın yönergesini okusun
+                playVoiceover(currentStage);
+            } else {
+                bgm.pause();
+                // MP3 ve Tarayıcı TTS'yi anında durdur
+                if(currentVoiceAudio) currentVoiceAudio.pause();
+                if('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        };
+
+        function showStage(n) {
+            currentStage = n;
+            document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+            document.getElementById('stage-'+n).classList.add('active');
+            
+            if(n === 0 || n === 6) {
+                // Videoların olduğu ekranlarda oyun müziğini tamamen durdur
+                bgm.pause();
+            } else {
+                // Oyun mekaniklerinin olduğu yerlerde (Sessiz değilse) çal
+                if(!isMuted) bgm.play().catch(e=>{});
+                if(n > 1) playSound('success'); 
+            }
+
+            // Yeni sayfaya geçince metni oku (Yapay Zeka TTS veya MP3)
+            playVoiceover(n);
+
+            if(n===1) initS1(); if(n===2) initS2(); if(n===3) initS3(); if(n===4) initS4(); if(n===5) initS5();
+        }
+
+        /* --- S1: İŞARET FİŞEĞİ (Tıkla Sabitle ve Ateşle) --- */
+        function initS1() {
+            const sky = document.getElementById('flare-sky');
+            const canvas = document.getElementById('trajectory-canvas');
+            const ctx = canvas.getContext('2d');
+            const target = document.getElementById('flare-target');
+            const fireBtn = document.getElementById('fire-btn');
+            
+            canvas.width = sky.clientWidth;
+            canvas.height = sky.clientHeight;
+            
+            const baseX = 100, baseY = canvas.height - 20; // Fırlatıcı noktası
+            let lockedX = null, lockedY = null;
+            let isAiming = true; // Yön belirleme açık
+
+            sky.onmousemove = (e) => { 
+                if(isAiming && e.target !== fireBtn) {
+                    const rect = sky.getBoundingClientRect();
+                    drawLine(e.clientX - rect.left, e.clientY - rect.top); 
+                }
+            };
+            
+            sky.onclick = (e) => {
+                if(e.target !== fireBtn) {
+                    const rect = sky.getBoundingClientRect();
+                    lockedX = e.clientX - rect.left;
+                    lockedY = e.clientY - rect.top;
+                    isAiming = false; 
+                    drawLine(lockedX, lockedY); 
+                    fireBtn.style.display = 'block';
+                }
+            };
+
+            fireBtn.onclick = () => {
+                fireBtn.style.display = 'none';
+                launchFlare(lockedX, lockedY);
+            };
+
+            function drawLine(endX, endY) {
+                ctx.clearRect(0,0,canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(baseX, baseY);
+                const cpX = baseX + (endX - baseX) / 2;
+                const cpY = Math.min(baseY, endY) - 100; 
+                ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+                ctx.strokeStyle = "rgba(255, 255, 255, 0.6)";
+                ctx.lineWidth = 4;
+                ctx.setLineDash([10, 10]);
+                ctx.stroke();
+            }
+
+            function launchFlare(targetX, targetY) {
+                playSound('shoot');
+                const flare = document.createElement('div');
+                flare.className = 'flare-projectile';
+                sky.appendChild(flare);
+                
+                let progress = 0;
+                const cpX = baseX + (targetX - baseX) / 2;
+                const cpY = Math.min(baseY, targetY) - 100;
+
+                function anim() {
+                    progress += 0.015; 
+                    if(progress > 1) progress = 1;
+
+                    const mt = 1 - progress;
+                    const x = mt * mt * baseX + 2 * mt * progress * cpX + progress * progress * targetX;
+                    const y = mt * mt * baseY + 2 * mt * progress * cpY + progress * progress * targetY;
+
+                    flare.style.left = (x - 8) + 'px'; 
+                    flare.style.top = (y - 8) + 'px';
+                    
+                    const tr = target.getBoundingClientRect();
+                    const fr = flare.getBoundingClientRect();
+                    
+                    if(fr.right > tr.left && fr.left < tr.right && fr.bottom > tr.top && fr.top < tr.bottom) {
+                        target.style.background = "rgba(255,235,59,0.8)";
+                        target.style.color = "#000";
+                        flare.remove();
+                        playSound('success');
+                        setTimeout(() => showStage(2), 1500);
+                        return;
+                    }
+                    
+                    if(progress < 1) {
+                        requestAnimationFrame(anim);
+                    } else {
+                        flare.remove(); 
+                        playSound('error');
+                        isAiming = true;
+                        ctx.clearRect(0,0,canvas.width, canvas.height);
+                    }
+                }
+                anim();
+            }
+        }
+
+        /* --- S2: ÇARK --- */
+        let wheelCategories = [
+            {t: "HAZIRLIK", q: "Büyük Taarruz hazırlıkları gizlilik içinde yapılmıştır.", a: true, d: "Evet! Atatürk ordunun yerini gizli tutarak baskın etkisi yarattı."},
+            {t: "COĞRAFYA", q: "Kocatepe, Afyonkarahisar ilimizin sınırları içerisindedir.", a: true, d: "Doğru. Bu zirve stratejik olarak tüm bölgeyi görür."},
+            {t: "STRATEJİ", q: "Taarruz emri gece saat 12:00'de verilmiştir.", a: false, d: "Yanlış. Taarruz sabaha karşı 05:30 sularında topçu atışıyla başladı."}
+        ];
+        let currentQ = null;
+
+        function initS2() {
+            const canvas = document.getElementById('wheel-canvas');
+            const ctx = canvas.getContext('2d');
+            const colors = ['#1e88e5', '#ff9800', '#00acc1', '#8e24aa'];
+            
+            function drawWheel() {
+                let slice = (Math.PI * 2) / wheelCategories.length;
+                ctx.clearRect(0,0,320,320);
+                wheelCategories.forEach((cat, i) => {
+                    ctx.beginPath(); ctx.moveTo(160,160);
+                    ctx.arc(160,160, 160, slice*i, slice*(i+1));
+                    ctx.fillStyle = colors[i % colors.length]; ctx.fill();
+                    ctx.save(); ctx.translate(160,160); ctx.rotate(slice*i + slice/2);
+                    ctx.fillStyle = "#fff"; ctx.font = "bold 14px Montserrat";
+                    ctx.fillText(cat.t, 50, 5); ctx.restore();
+                });
+            }
+            drawWheel();
+
+            document.getElementById('spin-btn').onclick = function() {
+                if(wheelCategories.length === 0) return;
+                this.style.display = 'none';
+                playSound('shoot');
+                let deg = 1440 + Math.random()*1000;
+                canvas.style.transition = 'transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+                canvas.style.transform = `rotate(${deg}deg)`;
+                setTimeout(() => {
+                    let index = Math.floor(wheelCategories.length * (1 - (deg % 360) / 360));
+                    currentQ = wheelCategories.splice(index, 1)[0];
+                    document.getElementById('q-panel').style.display = 'block';
+                    document.getElementById('q-text').innerText = currentQ.q;
+                }, 3100);
+            };
+        }
+
+        function checkWheelQ(val) {
+            const fb = document.getElementById('feedback');
+            fb.style.display = 'block';
+            if(val === currentQ.a) {
+                fb.style.background = '#e8f5e9'; fb.style.color = '#2e7d32'; fb.border = '2px solid #43a047'; fb.innerText = "DOĞRU! " + currentQ.d;
+                playSound('success');
+            } else {
+                fb.style.background = '#ffebee'; fb.style.color = '#c62828'; fb.border = '2px solid #e53935'; fb.innerText = "YANLIŞ! " + currentQ.d;
+                playSound('error');
+            }
+            setTimeout(() => {
+                fb.style.display = 'none'; document.getElementById('q-panel').style.display = 'none';
+                const btn = document.getElementById('spin-btn');
+                if(wheelCategories.length > 0) {
+                    btn.style.display = 'inline-block';
+                    document.getElementById('wheel-canvas').style.transition = 'none';
+                    document.getElementById('wheel-canvas').style.transform = 'rotate(0deg)';
+                    initS2();
+                } else showStage(3);
+            }, 4000);
+        }
+
+        /* --- S3: KİLİTLER --- */
+        let lockData = [
+            "Ordular ilk hedefiniz Akdeniz'dir ileri",
+            "Kocatepe Milli Mücadelenin kalbi sayılır",
+            "Büyük Taarruz yirmi altı ağustosta başladı"
+        ];
+        let currentLock = 0;
+
+        function initS3() {
+            const slots = document.getElementById('slots');
+            const bank = document.getElementById('bank');
+            slots.innerHTML = ''; bank.innerHTML = '';
+            
+            document.querySelectorAll('.lock-item').forEach((l, i) => {
+                l.classList.toggle('active', i === currentLock);
+                if(i < currentLock) { l.classList.add('opened'); l.innerText = "✓"; }
+            });
+
+            let words = lockData[currentLock].split(' ');
+            let shuffled = [...words].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach(w => {
+                const div = document.createElement('div'); div.className = 'word'; div.innerText = w;
+                div.draggable = true;
+                div.onclick = () => {
+                    if(div.parentElement === bank) { slots.appendChild(div); div.classList.add('in-slot'); playSound('shoot'); }
+                    else { bank.appendChild(div); div.classList.remove('in-slot'); }
+                    checkSentence();
+                };
+                bank.appendChild(div);
+            });
+        }
+
+        function checkSentence() {
+            const currentWords = Array.from(document.getElementById('slots').children).map(c => c.innerText).join(' ');
+            if(currentWords === lockData[currentLock]) {
+                playSound('success');
+                document.getElementById('lock-'+currentLock).classList.add('opened');
+                currentLock++;
+                if(currentLock < 3) setTimeout(initS3, 1200); else setTimeout(() => showStage(4), 1500);
+            }
+        }
+
+        /* --- S4: NİŞANGAH --- */
+        let huntData = [
+            {t: "Taarruz Ankara'da başladı", w: true, p: {l: '5%', t: '10%'}},
+            {t: "Taarruz sabaha karşı başladı", w: false, p: {l: '55%', t: '15%'}},
+            {t: "Atatürk cepheden ayrıldı", w: true, p: {l: '35%', t: '45%'}},
+            {t: "Kocatepe Afyon'dadır", w: false, p: {l: '10%', t: '70%'}},
+            {t: "Savaş uçaklarla kazanıldı", w: true, p: {l: '60%', t: '75%'}}
+        ];
+
+        function initS4() {
+            const sky = document.getElementById('hunt-sky');
+            sky.innerHTML = ''; 
+            let targetCount = huntData.filter(d => d.w).length; 
+
+            huntData.forEach((d) => {
+                const el = document.createElement('div'); 
+                el.className = 'info-bubble';
+                el.innerText = d.t; 
+                el.style.left = d.p.l; el.style.top = d.p.t;
+                el.style.animationDelay = (Math.random() * 2) + 's';
+
+                el.onclick = function() {
+                    if(d.w) {
+                        playSound('shoot');
+                        el.classList.add('explode');
+                        targetCount--;
+                        setTimeout(() => { 
+                            el.remove(); 
+                            if(targetCount === 0) {
+                                playSound('success');
+                                setTimeout(() => showStage(5), 1000);
+                            }
+                        }, 400);
+                    } else {
+                        playSound('error');
+                        el.classList.remove('shake-correct'); 
+                        void el.offsetWidth; 
+                        el.classList.add('shake-correct');
+                        el.innerText = "Bu DOĞRU bir bilgi!";
+                        setTimeout(() => { el.innerText = d.t; el.classList.remove('shake-correct'); }, 1500);
+                    }
+                };
+                sky.appendChild(el);
+            });
+        }
+
+        /* --- S5: YAPBOZ --- */
+        function initS5() {
+            const board = document.getElementById('puzzle-board');
+            let pieces = [0,1,2,3,4,5,6,7,8].sort(() => Math.random() - 0.5);
+            board.innerHTML = '';
+            pieces.forEach((p, i) => {
+                const div = document.createElement('div'); div.className = 'puzzle-piece';
+                div.style.backgroundImage = "url('anit.png')";
+                div.style.backgroundPosition = `-${(p%3)*110}px -${Math.floor(p/3)*110}px`;
+                div.dataset.idx = p;
+                div.onclick = () => swap(div);
+                board.appendChild(div);
+            });
+        }
+
+        function swap(el) {
+            let active = document.querySelector('.puzzle-piece.active');
+            if(!active) { el.classList.add('active'); playSound('shoot'); }
+            else {
+                let tempBg = el.style.backgroundPosition;
+                let tempIdx = el.dataset.idx;
+                el.style.backgroundPosition = active.style.backgroundPosition;
+                el.dataset.idx = active.dataset.idx;
+                active.style.backgroundPosition = tempBg;
+                active.dataset.idx = tempIdx;
+                active.classList.remove('active');
+                playSound('shoot');
+                checkPuzzle();
+            }
+        }
+
+        function checkPuzzle() {
+            const items = Array.from(document.querySelectorAll('.puzzle-piece'));
+            if(items.every((el, i) => parseInt(el.dataset.idx) === i)) {
+                playSound('success');
+                setTimeout(() => showStage(6), 1500);
+            }
+        }
+    </script>
+</body>
+</html>
