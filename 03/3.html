@@ -105,6 +105,7 @@
 <header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-4 md:px-6 py-3 border-b-4 bg-[#FFFDF5] hidden shadow-lg" id="main-header">
     <div class="flex items-center gap-2 md:gap-4">
         <img src="orjinal.svg" alt="Logo" class="w-10 h-10 md:w-12 md:h-12 pointer-events-none drop-shadow-md">
+        <img src="unesco.png" alt="UNESCO" class="w-10 h-10 md:w-12 md:h-12 pointer-events-none drop-shadow-md">
         <button onclick="goHome()" class="w-10 h-10 flex items-center justify-center bg-[#ffb702] rounded-lg border-2 border-[#8B4513] shadow-[0_2px_0_0_#8B4513]">
             <span class="material-symbols-outlined text-[#8B4513]">home</span>
         </button>
@@ -183,7 +184,7 @@
         <div class="glass-panel">
             <div id="sentence-target" class="min-h-[120px] w-full border-4 border-dashed border-[#8B4513] bg-[#fffaf0] rounded-xl p-4 flex flex-wrap justify-center content-start gap-2 mb-6"></div>
             <div id="sentence-words" class="flex flex-wrap justify-center gap-3"></div>
-            <button id="btn-check-sentence" onclick="checkSentence()" class="btn-main w-full opacity-50" disabled>KONTROL ET</button>
+            <button id="btn-check-sentence" onclick="checkSentence()" class="btn-main w-full opacity-50 mt-4" disabled>KONTROL ET</button>
         </div>
     </div>
 
@@ -329,7 +330,7 @@
         'ayse-1': { title: "Ayşe Şef'e Hoş Geldin", text: "Harikasın! Şimdi Ayşe Şef ile Afyon'un derin mutfak kültürünü ve UNESCO detaylarını öğreneceğiz.", voice: 'ayse1_intro.mp3', start: () => { playSound('oyun_basla'); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById('screen-ayse-1').classList.add('active-screen'); } },
         'ayse-2': { title: "Lezzet Turu Videosu", text: "Gastronomi kültürümüzü öğrendiğine göre, videoyu dikkatlice izle!", voice: 'ayse2_intro.mp3', start: () => { playSound('oyun_basla'); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById('screen-ayse-2').classList.add('active-screen'); } },
         'ayse-3': { title: "Büyük Eşleştirme Oyunu", text: "Sol taraftaki resimlere tıkla, ardından sağdaki listeden doğru açıklamayı bul. Sesleri dinlemek için hoparlöre basabilirsin.", voice: 'ayse3_intro.mp3', start: () => { playSound('oyun_basla'); initAyseMatching(); } },
-        'ahmet-1': { title: "Ahmet Şef ile Yemek Vakti", text: "Tebrikler! Son aşmaya geldin. Şimdi Ahmet Şef ile birlikte meşhur Afyon Kebabı'nı adım adım hazırlayacağız.", voice: 'ahmet1_intro.mp3', start: () => { playSound('oyun_basla'); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById('screen-ahmet-1').classList.add('active-screen'); } }
+        'ahmet-1': { title: "Ahmet Şef ile Yemek Vakti", text: "Tebrikler! Son aşamaya geldin. Şimdi Ahmet Şef ile birlikte meşhur Afyon Kebabı'nı adım adım hazırlayacağız.", voice: 'ahmet1_intro.mp3', start: () => { playSound('oyun_basla'); document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen')); document.getElementById('screen-ahmet-1').classList.add('active-screen'); } }
     };
 
     function goHome() {
