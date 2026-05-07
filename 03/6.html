@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="tr" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Afyonkarahisar: Termal Macerası</title>
+    
+    <!-- Google Fonts: Playfair Display (Başlıklar) & Montserrat (Metinler) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        termal: {
+                            light: '#e0f2f1', // Açık su
+                            DEFAULT: '#0d9488', // Teal-600
+                            dark: '#115e59', // Teal-800
+                            night: '#0f172a', // Slate-900 (Karanlık Mod Arkaplan)
+                            nightPanel: '#1e293b' // Slate-800
+                        },
+                        camur: {
+                            light: '#d7ccc8',
+                            DEFAULT: '#8d6e63',
+                            dark: '#4e342e'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tone.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling */
+            touch-action: none; /* Prevent default touch gestures */
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Steam Overlay - Pointer Events None is CRITICAL here */
+        .steam-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+        }
+        .steam {
+            position: absolute;
+            bottom: -50px;
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+            border-radius: 50%;
+            filter: blur(12px);
+            animation: rise infinite ease-in;
+            opacity: 0;
+        }
+        .dark .steam {
+            background: radial-gradient(circle, rgba(200,220,255,0.3) 0%, rgba(255,255,255,0) 70%);
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1) translateX(0); opacity: 0; }
+            20% { opacity: 0.4; transform: translateX(10px); }
+            80% { opacity: 0.2; transform: translateX(-10px); }
+            100% { transform: translateY(-100vh) scale(3) translateX(20px); opacity: 0; }
+        }
+
+        /* Glassmorphism Panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .dark .glass-panel {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #0d9488, #0f766e);
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(13, 148, 136, 0.3);
+        }
+        .btn-primary:active { transform: scale(0.95); }
+        .btn-primary:hover { box-shadow: 0 6px 20px rgba(13, 148, 136, 0.5); transform: translateY(-2px); }
+
+        /* Bubbles */
+        .bubble {
+            position: absolute;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(200, 240, 255, 0.4));
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #0f766e;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+            cursor: pointer;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.1s;
+        }
+        .dark .bubble { color: #0f172a; }
+        .bubble:active { transform: scale(0.85); }
+
+        /* Water Surface */
+        .water-surface {
+            background: linear-gradient(180deg, rgba(64,224,208,0.6) 0%, rgba(13,148,136,0.9) 100%);
+            box-shadow: 0 -10px 40px rgba(13,148,136,0.4);
+            transition: all 1s ease;
+        }
+        .dark .water-surface { background: linear-gradient(180deg, rgba(13,148,136,0.6) 0%, rgba(17,94,89,0.9) 100%); }
+        .water-ripple { animation: ripple 4s infinite alternate ease-in-out; }
+        @keyframes ripple { 0% { transform: translateY(0); } 100% { transform: translateY(15px); } }
+
+        /* Canvas Borders */
+        canvas { outline: none; -webkit-tap-highlight-color: transparent; }
+        
+        .hide { display: none !important; }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Grammar Highlight */
+        .grammar-hl { color: #f59e0b; font-weight: 800; border-bottom: 2px dashed #f59e0b; }
+    </style>
+</head>
+
+<body class="bg-termal-light dark:bg-termal-night text-slate-800 dark:text-slate-100 transition-colors duration-500 w-screen h-screen flex flex-col font-sans">
+
+    <!-- Havuz Arkaplan (Sabit ve Şeffaf) -->
+    <div class="fixed inset-0 z-0 opacity-20 pointer-events-none" style="background-image: url('havuz.png'); background-size: cover; background-position: center; mix-blend-mode: multiply;"></div>
+
+    <!-- Buhar Efekti (Arkaplan) -->
+    <div class="steam-container" id="steam-layer"></div>
+
+    <!-- HEADER / NAVIGATION (Fixed Top) -->
+    <header class="relative z-30 h-16 w-full flex justify-between items-center px-4 md:px-8 py-2 glass-panel rounded-none border-t-0 border-l-0 border-r-0">
+        <!-- Logo Alanı -->
+        <div class="flex items-center gap-3">
+            <img src="orjinal.svg" alt="Logo" class="h-10 w-10 object-contain z-50 relative pointer-events-none bg-white/30 dark:bg-white/10 backdrop-blur-sm border border-white/50 dark:border-white/20 rounded-xl shadow-sm p-1">
+            <div class="hidden md:block">
+                <h1 class="font-serif font-bold text-lg leading-tight text-termal-dark dark:text-teal-300">Termal Macerası</h1>
+                <p class="text-[10px] tracking-wider uppercase opacity-70">Afyonkarahisar</p>
+            </div>
+        </div>
+
+        <!-- Aşama Başlığı (Merkez) -->
+        <div class="absolute left-1/2 transform -translate-x-1/2 text-center pointer-events-none w-1/2">
+            <h2 id="stage-title" class="font-serif font-bold text-lg md:text-xl text-termal-dark dark:text-teal-400 truncate">
+                Hoş Geldin!
+            </h2>
+        </div>
+
+        <!-- Kontroller (Sağ) -->
+        <div class="flex items-center gap-2">
+            <div class="hidden sm:flex items-center mr-4 bg-teal-100 dark:bg-slate-700 px-3 py-1 rounded-full shadow-inner">
+                <i class="fa-solid fa-star text-yellow-500 text-sm mr-2"></i>
+                <span id="score-display" class="font-bold font-mono">0</span>
+            </div>
+            
+            <button id="btn-theme" class="w-10 h-10 rounded-full flex justify-center items-center bg-white dark:bg-slate-800 shadow hover:scale-105 transition-transform text-slate-600 dark:text-yellow-400 relative z-50">
+                <i class="fa-solid fa-moon dark:hidden pointer-events-none"></i>
+                <i class="fa-solid fa-sun hidden dark:block pointer-events-none"></i>
+            </button>
+            <button id="btn-sound" class="w-10 h-10 rounded-full flex justify-center items-center bg-white dark:bg-slate-800 shadow hover:scale-105 transition-transform text-termal-dark dark:text-teal-400 relative z-50">
+                <i class="fa-solid fa-volume-high pointer-events-none"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN GAME CONTAINER -->
+    <main class="relative flex-1 w-full flex flex-col overflow-hidden z-20">
+        
+        <!-- ================= EKRAN: INTRO ================= -->
+        <div id="screen-intro" class="absolute inset-0 flex flex-col justify-center items-center p-4 text-center z-20 pb-20">
+            <div class="glass-panel p-6 md:p-8 max-w-2xl w-full flex flex-col items-center rounded-3xl max-h-[85vh] overflow-y-auto">
+                <div class="w-16 h-16 md:w-20 md:h-20 bg-teal-100 dark:bg-teal-900 rounded-full flex items-center justify-center mb-4 shadow-inner border-4 border-white dark:border-slate-700 shrink-0">
+                    <i class="fa-solid fa-spa text-3xl md:text-4xl text-termal dark:text-teal-300"></i>
+                </div>
+                
+                <h1 class="font-serif text-3xl md:text-5xl font-black text-termal-dark dark:text-white mb-2">Şifanın Başkenti</h1>
+                <h2 class="text-lg md:text-xl font-bold text-teal-600 dark:text-teal-400 mb-4 font-serif">Afyonkarahisar</h2>
+                
+                <!-- Video Alanı -->
+                <div class="w-full max-w-sm mb-4 flex flex-col items-center shrink-0">
+                    <span class="text-xs font-bold text-termal dark:text-teal-300 mb-2 uppercase tracking-wider animate-pulse"><i class="fa-solid fa-circle-play"></i> Önce Bu Videoyu İzle</span>
+                    <video src="termal.mp4" controls class="w-full rounded-xl border-4 border-white/50 dark:border-slate-700/50 shadow-md" preload="metadata"></video>
+                </div>
+
+                <p class="mb-6 text-sm md:text-base leading-relaxed text-slate-700 dark:text-slate-300 font-medium">
+                    Afyon'da lapa lapa kar yağarken, 40 derecelik sıcak havuzlarda yüzebilirsin! 
+                    Bu macerada <b>sıfatları</b> kullanarak havuzu dolduracak, <b>fiilleri</b> öğrenerek çamur banyosu yapacak ve okuduğunu anlayarak prensesi kurtaracaksın.
+                </p>
+                
+                <button id="btn-start" class="btn-primary text-lg md:text-xl px-8 py-3 rounded-full font-bold flex items-center gap-3 animate-bounce shrink-0">
+                    <i class="fa-solid fa-play"></i> Oyuna Başla
+                </button>
+            </div>
+
+            <!-- Banner Yönlendirmesi -->
+            <a href="https://drive.google.com/file/d/1p5bPf2sugOD_BZNFy5asFnRHLBdOQ-_k/view" target="_blank" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-[90%] max-w-xl glass-panel px-4 py-3 rounded-2xl text-center shadow-2xl hover:scale-105 transition-transform z-50 text-termal-dark dark:text-teal-300 font-bold border-b-4 border-amber-400 text-xs sm:text-sm flex flex-col sm:flex-row items-center justify-center gap-2 pointer-events-auto">
+                <i class="fa-solid fa-star text-amber-400 animate-spin-slow"></i> 
+                <span>🌟 Demirhan Yılmaz'ın çalışmasının tamamına ulaşmak için tıklayınız.</span>
+            </a>
+        </div>
+
+        <!-- ================= EKRAN: AŞAMA 1 (Sıfatlar) ================= -->
+        <div id="screen-stage1" class="absolute inset-0 hide flex flex-col z-10">
+            
+            <div class="absolute top-6 left-0 w-full flex justify-center pointer-events-none z-30">
+                <div class="glass-panel px-6 py-3 rounded-2xl text-center pointer-events-auto">
+                    <p class="font-bold font-serif text-lg text-termal-dark dark:text-teal-300">Sihirli Mineralleri Karıştır</p>
+                    <p class="text-sm">Havuzu doldurmak için <span class="grammar-hl">olumlu sıfatları</span> yakala!</p>
+                </div>
+            </div>
+
+            <div class="flex-1 relative" id="bubble-container">
+                <!-- Bubbles generated by JS -->
+                
+                <!-- Grammar Popup Info -->
+                <div id="grammar-popup" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 border-2 border-amber-400 p-4 rounded-2xl shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-40 text-center scale-90">
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-bold mb-1" id="grammar-formula">Sıfat + İsim</p>
+                    <p class="text-3xl font-black text-termal dark:text-teal-400 font-serif" id="grammar-tamlama">Şifalı Su</p>
+                </div>
+            </div>
+
+            <!-- Pool Water -->
+            <div id="pool-water" class="water-surface h-1/4 w-full water-ripple relative border-t-4 border-teal-300 dark:border-teal-700">
+                <div class="absolute inset-0 flex justify-center items-center opacity-40 pointer-events-none">
+                    <i class="fa-solid fa-water text-6xl text-white"></i>
+                </div>
+                <div class="absolute bottom-4 right-4 text-white font-bold opacity-70 flex items-center gap-2 pointer-events-none">
+                    <i class="fa-solid fa-droplet"></i> Doluluk: <span id="pool-level-text">0%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= EKRAN: AŞAMA 2 (Fiiller / Çamur Banyosu) ================= -->
+        <div id="screen-stage2" class="absolute inset-0 hide flex flex-col justify-center items-center p-4 z-20">
+            <div class="glass-panel p-6 w-full max-w-lg rounded-3xl flex flex-col items-center">
+                
+                <h2 class="font-serif text-2xl font-bold text-camur-dark dark:text-amber-500 mb-2">Sandıklı Çamur Banyosu</h2>
+                <p class="text-sm text-center mb-4">Şifalı su ile özel toprak karıştı. Şimdi emir kiplerini takip et.</p>
+
+                <!-- Instruction Banner -->
+                <div id="mud-instruction-box" class="w-full bg-amber-100 dark:bg-amber-900 border-l-4 border-amber-500 text-amber-800 dark:text-amber-200 p-3 rounded-r-lg mb-6 shadow-md flex items-center justify-between pointer-events-none">
+                    <div>
+                        <span class="text-xs uppercase font-bold opacity-70 block mb-1">Şu Anki Görev (Emir Kipi)</span>
+                        <span id="mud-instruction" class="text-xl font-black font-serif">1. Çamuru SÜR!</span>
+                    </div>
+                    <i id="mud-icon" class="fa-solid fa-hand-pointer text-3xl animate-bounce"></i>
+                </div>
+
+                <!-- Canvas Area -->
+                <div class="relative w-full aspect-square max-w-[300px] bg-[#fdf5e6] dark:bg-[#ffe4b5] rounded-full overflow-hidden border-8 border-camur-light dark:border-slate-700 shadow-inner">
+                    <!-- Base Image/Skin -->
+                    <div class="absolute inset-0 flex justify-center items-center text-[#ffdead] dark:text-[#f5deb3] pointer-events-none">
+                        <i class="fa-solid fa-hands-bubbles text-[8rem]"></i>
+                    </div>
+                    
+                    <!-- Drawing Canvas -->
+                    <canvas id="mud-canvas" class="absolute inset-0 w-full h-full cursor-crosshair touch-none"></canvas>
+                    
+                    <!-- Timer Overlay -->
+                    <div id="mud-timer-overlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col justify-center items-center hide z-10 rounded-full pointer-events-none">
+                        <i class="fa-regular fa-clock text-4xl text-white mb-2"></i>
+                        <span id="mud-timer-text" class="text-7xl font-black text-amber-400 font-serif drop-shadow-lg">3</span>
+                        <span class="text-white font-bold mt-2">Kuruması BEKLENİYOR...</span>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 mt-6 overflow-hidden shadow-inner pointer-events-none">
+                    <div id="mud-progress-bar" class="bg-gradient-to-r from-amber-500 to-amber-700 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= EKRAN: AŞAMA 3 (Okuduğunu Anlama / Labirent) ================= -->
+        <div id="screen-stage3" class="absolute inset-0 hide flex flex-col justify-center items-center p-2 md:p-6 z-20">
+            <div class="glass-panel w-full max-w-2xl p-4 md:p-6 rounded-3xl flex flex-col items-center">
+                
+                <h2 class="font-serif text-2xl font-bold text-termal-dark dark:text-teal-400 mb-1">Gazlıgöl Efsanesi</h2>
+                <p class="text-sm mb-4 text-center">Frig Prensesi Suna'yı şifalı suya ulaştır. Tüm soruları doğru yanıtlayarak kapıları aç!</p>
+                
+                <div class="flex flex-col md:flex-row gap-6 w-full items-center justify-center">
+                    <!-- Maze Canvas -->
+                    <div class="relative bg-teal-50 dark:bg-slate-800 p-2 rounded-xl border-2 border-teal-200 dark:border-teal-700 shadow-inner">
+                        <canvas id="maze-canvas" width="300" height="300" class="touch-none rounded block"></canvas>
+                    </div>
+
+                    <!-- Controls for Mobile & PC Instruction -->
+                    <div class="flex flex-col items-center">
+                        <div class="grid grid-cols-3 gap-2 w-48 mb-4">
+                            <div></div>
+                            <button id="btn-up" class="bg-termal hover:bg-termal-dark text-white rounded-xl p-4 shadow-md active:scale-90 transition-transform"><i class="fa-solid fa-arrow-up text-xl pointer-events-none"></i></button>
+                            <div></div>
+                            <button id="btn-left" class="bg-termal hover:bg-termal-dark text-white rounded-xl p-4 shadow-md active:scale-90 transition-transform"><i class="fa-solid fa-arrow-left text-xl pointer-events-none"></i></button>
+                            <button id="btn-down" class="bg-termal hover:bg-termal-dark text-white rounded-xl p-4 shadow-md active:scale-90 transition-transform"><i class="fa-solid fa-arrow-down text-xl pointer-events-none"></i></button>
+                            <button id="btn-right" class="bg-termal hover:bg-termal-dark text-white rounded-xl p-4 shadow-md active:scale-90 transition-transform"><i class="fa-solid fa-arrow-right text-xl pointer-events-none"></i></button>
+                        </div>
+                        <div class="text-xs text-center text-slate-500 dark:text-slate-400 glass-panel p-2 rounded-lg pointer-events-none">
+                            <i class="fa-regular fa-keyboard mr-1"></i> Klavyedeki yön tuşlarını veya butonları kullanabilirsin.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= EKRAN: OUTRO ================= -->
+        <div id="screen-outro" class="absolute inset-0 hide flex flex-col justify-center items-center p-6 text-center z-30 bg-teal-900/90 backdrop-blur-md">
+            <div class="glass-panel p-8 max-w-xl w-full flex flex-col items-center rounded-3xl dark:bg-slate-800">
+                <div class="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center mb-6 shadow-lg border-4 border-white animate-bounce shrink-0 pointer-events-none">
+                    <i class="fa-solid fa-trophy text-5xl text-white"></i>
+                </div>
+                
+                <h1 class="font-serif text-3xl font-black text-termal-dark dark:text-white mb-2">Harika İş Çıkardın!</h1>
+                <p class="mb-6 text-lg font-bold text-teal-700 dark:text-teal-300">Afyonkarahisar'ın Şifa Uzmanı Oldun.</p>
+                
+                <div class="bg-white/80 dark:bg-slate-700/80 p-5 rounded-2xl border-l-4 border-yellow-500 mb-8 w-full text-left shadow-inner pointer-events-none">
+                    <h3 class="font-bold text-lg mb-2 text-slate-800 dark:text-white"><i class="fa-solid fa-plane-departure text-termal"></i> Şimdi Sıra Sende!</h3>
+                    <p class="text-sm text-slate-700 dark:text-slate-300 mb-3">Sıfatları, fiilleri ve Afyon'un sırlarını öğrendin. Şimdi ailene gidip şunu söyleme vakti:</p>
+                    <p class="text-xl font-black text-termal dark:text-amber-400 italic font-serif text-center">"Hadi bu kış Afyon'a gidip lapa lapa kar yağarken sıcak havuzda yüzelim!"</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 w-full">
+                    <button onclick="location.reload()" class="btn-primary flex-1 text-lg px-6 py-3 rounded-full font-bold">
+                        <i class="fa-solid fa-rotate-right mr-2 pointer-events-none"></i> Tekrar Oyna
+                    </button>
+                    <!-- Link to Main Map App -->
+                    <a href="https://memleketim.github.io/03/index.html" class="flex-1 text-center bg-slate-800 hover:bg-slate-900 dark:bg-teal-600 dark:hover:bg-teal-500 text-white text-lg px-6 py-3 rounded-full font-bold shadow-lg transition-colors">
+                        <i class="fa-solid fa-map-location-dot mr-2 pointer-events-none"></i> Haritaya Dön
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= MODALS ================= -->
+    
+    <!-- Fact/Story Modal -->
+    <div id="modal-fact" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hide flex justify-center items-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-8 max-w-md w-full text-center border-t-8 border-yellow-400 shadow-2xl transform scale-95 transition-transform duration-300" id="fact-content-box">
+            <div class="w-16 h-16 bg-yellow-400 text-white rounded-full flex items-center justify-center text-3xl mx-auto -mt-16 mb-4 shadow-lg border-4 border-white dark:border-slate-800 shrink-0 pointer-events-none">
+                <i class="fa-solid fa-book-open-reader"></i>
+            </div>
+            <h2 class="font-serif text-2xl font-black text-slate-800 dark:text-white mb-4 pointer-events-none">Biliyor muydun?</h2>
+            <p id="fact-text" class="text-lg font-medium text-slate-600 dark:text-slate-300 mb-8 leading-relaxed pointer-events-none"></p>
+            <button id="btn-fact-continue" class="btn-primary w-full text-lg py-3 rounded-xl font-bold">Devam Et <i class="fa-solid fa-arrow-right ml-2 pointer-events-none"></i></button>
+        </div>
+    </div>
+
+    <!-- Quiz Modal (Stage 3) -->
+    <div id="modal-quiz" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hide flex justify-center items-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-md w-full border-2 border-termal shadow-2xl">
+            <div class="flex items-center gap-3 mb-4 pb-4 border-b dark:border-slate-700 pointer-events-none">
+                <div class="bg-termal text-white w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-question"></i>
+                </div>
+                <h2 class="font-serif text-xl font-bold text-slate-800 dark:text-white">Soruyu Cevapla</h2>
+            </div>
+            
+            <div class="bg-slate-100 dark:bg-slate-700 p-4 rounded-xl mb-6 pointer-events-none">
+                <p id="quiz-question" class="text-lg font-bold text-slate-800 dark:text-white leading-snug">Soru metni</p>
+            </div>
+            
+            <div id="quiz-options" class="flex flex-col gap-3">
+                <!-- Options generated via JS -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GLOBAL STATE ---
+        const state = {
+            score: 0,
+            stage: 0, // 0:Intro, 1:Bubbles, 2:Mud, 3:Maze, 4:Outro
+            audioEnabled: true,
+            theme: 'light' // 'light' or 'dark'
+        };
+
+        const scoreDisplay = document.getElementById('score-display');
+        const stageTitle = document.getElementById('stage-title');
+        
+        // --- AUDIO SYSTEM (Tone.js & Web Speech API) ---
+        let synth, popSynth, splashSynth, droneSynth, autoFilter;
+        const speechSynth = window.speechSynthesis;
+        let turkishVoice = null;
+
+        async function initAudio() {
+            await Tone.start();
+            
+            // UI Synth (Success/Errors)
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle" }
+            }).toDestination();
+            
+            // Interaction Synths
+            popSynth = new Tone.MembraneSynth().toDestination();
+            popSynth.volume.value = -10;
+
+            splashSynth = new Tone.NoiseSynth({
+                noise: { type: 'pink' },
+                envelope: { attack: 0.05, decay: 0.4, sustain: 0, release: 0.1 }
+            }).toDestination();
+            splashSynth.volume.value = -15;
+            
+            // Ambient Spa Drone
+            autoFilter = new Tone.AutoFilter("8n").toDestination().start();
+            droneSynth = new Tone.FMSynth({
+                harmonicity: 0.5,
+                modulationIndex: 1.2,
+                oscillator: { type: "sine" },
+                envelope: { attack: 2, decay: 2, sustain: 1, release: 3 }
+            }).connect(autoFilter);
+            droneSynth.volume.value = -25; // Quiet background
+            
+            // Start Drone
+            droneSynth.triggerAttack("C3");
+
+            // Init Turkish Voice Engine
+            initVoice();
+        }
+
+        function initVoice() {
+            const populateVoices = () => {
+                const voices = speechSynth.getVoices();
+                turkishVoice = voices.find(v => v.lang.includes('tr')) || voices[0];
+            };
+            populateVoices();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = populateVoices;
+            }
+        }
+
+        function playSound(type) {
+            if(!state.audioEnabled) return;
+            const now = Tone.now();
+            
+            switch(type) {
+                case 'pop': popSynth.triggerAttackRelease("G4", "8n", now); break;
+                case 'splash': splashSynth.triggerAttackRelease("8n", now); break;
+                case 'success':
+                    synth.triggerAttackRelease("C4", "8n", now);
+                    synth.triggerAttackRelease("E4", "8n", now + 0.15);
+                    synth.triggerAttackRelease("G4", "4n", now + 0.3);
+                    break;
+                case 'error':
+                    synth.triggerAttackRelease("D3", "8n", now);
+                    synth.triggerAttackRelease("C3", "4n", now + 0.2);
+                    break;
+                case 'mud':
+                    // Subtle noise for drawing mud
+                    splashSynth.triggerAttackRelease("16n", now);
+                    break;
+            }
+        }
+
+        function speak(text, rate = 0.95) {
+            if(!state.audioEnabled) return;
+            if(speechSynth.speaking) speechSynth.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            if(turkishVoice) utterance.voice = turkishVoice;
+            utterance.lang = 'tr-TR';
+            utterance.rate = rate; 
+            utterance.pitch = 1.1;
+            speechSynth.speak(utterance);
+        }
+
+        // --- THEME & UI UTILS ---
+        const btnTheme = document.getElementById('btn-theme');
+        const htmlDoc = document.documentElement;
+
+        btnTheme.addEventListener('click', () => {
+            playSound('pop');
+            if (htmlDoc.classList.contains('dark')) {
+                htmlDoc.classList.remove('dark');
+                state.theme = 'light';
+            } else {
+                htmlDoc.classList.add('dark');
+                state.theme = 'dark';
+            }
+            // Redraw canvas if needed
+            if(state.stage === 3) drawMaze(); 
+        });
+
+        document.getElementById('btn-sound').addEventListener('click', (e) => {
+            state.audioEnabled = !state.audioEnabled;
+            const icon = e.currentTarget.querySelector('i');
+            if(state.audioEnabled) {
+                icon.className = 'fa-solid fa-volume-high pointer-events-none';
+                Tone.Destination.mute = false;
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-red-500 pointer-events-none';
+                Tone.Destination.mute = true;
+                if(speechSynth.speaking) speechSynth.cancel();
+            }
+        });
+
+        function addScore(points) {
+            state.score += points;
+            scoreDisplay.innerText = state.score;
+            scoreDisplay.parentElement.classList.add('scale-125', 'bg-yellow-200');
+            setTimeout(() => scoreDisplay.parentElement.classList.remove('scale-125', 'bg-yellow-200'), 300);
+        }
+
+        function switchScreen(screenId, title) {
+            ['screen-intro', 'screen-stage1', 'screen-stage2', 'screen-stage3', 'screen-outro'].forEach(id => {
+                document.getElementById(id).classList.add('hide');
+                document.getElementById(id).classList.remove('fade-in');
+            });
+            const target = document.getElementById(screenId);
+            target.classList.remove('hide');
+            // Small delay for display block to apply before animating
+            requestAnimationFrame(() => {
+                target.classList.add('fade-in');
+            });
+            stageTitle.innerText = title;
+        }
+
+        function createSteam() {
+            const container = document.getElementById('steam-layer');
+            setInterval(() => {
+                // Don't generate if totally hidden or in specific screens
+                if(state.stage === 0 || state.stage === 4) return;
+                
+                const steam = document.createElement('div');
+                steam.className = 'steam';
+                const size = Math.random() * 150 + 100;
+                steam.style.width = `${size}px`;
+                steam.style.height = `${size}px`;
+                steam.style.left = `${Math.random() * 100}%`;
+                steam.style.animationDuration = `${Math.random() * 5 + 7}s`;
+                
+                container.appendChild(steam);
+                setTimeout(() => steam.remove(), 12000); // cleanup
+            }, 600);
+        }
+
+        // --- STAGE 1: BUBBLES (Adjectives/Sıfatlar) ---
+        let bubbleInterval;
+        let poolLevel = 0; // max 5
+        
+        const vocabulary = [
+            { word: "Şifalı", isPositive: true, noun: "Su", concept: "Şifalı Su" },
+            { word: "Sıcak", isPositive: true, noun: "Havuz", concept: "Sıcak Havuz" },
+            { word: "Berrak", isPositive: true, noun: "Kaynak", concept: "Berrak Kaynak" },
+            { word: "Huzurlu", isPositive: true, noun: "Ortam", concept: "Huzurlu Ortam" },
+            { word: "Yumuşak", isPositive: true, noun: "Çamur", concept: "Yumuşak Çamur" },
+            { word: "Soğuk", isPositive: false },
+            { word: "Kirli", isPositive: false },
+            { word: "Gürültülü", isPositive: false }
+        ];
+
+        function startStage1() {
+            switchScreen('screen-stage1', 'Aşama 1: Termal Mineraller');
+            speak("Havuzu doldurmak için sıfat tamlamaları oluşturacağız. Olumlu ve güzel sıfatları taşıyan baloncukları patlat. Soğuk ve kirli olanlardan uzak dur!");
+            
+            const container = document.getElementById('bubble-container');
+            poolLevel = 0;
+            updatePoolVisuals();
+
+            bubbleInterval = setInterval(() => {
+                const item = vocabulary[Math.floor(Math.random() * vocabulary.length)];
+                spawnBubble(item, container);
+            }, 1200);
+        }
+
+        function spawnBubble(data, container) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble font-sans';
+            const size = Math.random() * 40 + 80; // 80-120px
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 70 + 15}%`;
+            bubble.style.bottom = '-120px';
+            bubble.innerText = data.word;
+
+            container.appendChild(bubble);
+
+            // Animation Loop
+            let pos = -120;
+            const speed = Math.random() * 1.5 + 1.2;
+            
+            function animateBubble() {
+                if(pos > window.innerHeight) {
+                    bubble.remove();
+                    return;
+                }
+                pos += speed;
+                bubble.style.bottom = `${pos}px`;
+                bubble.frameId = requestAnimationFrame(animateBubble);
+            }
+            animateBubble();
+
+            // Interaction
+            bubble.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                cancelAnimationFrame(bubble.frameId);
+                
+                if(data.isPositive) {
+                    playSound('splash');
+                    addScore(20);
+                    showGrammarPopup(data);
+                    poolLevel++;
+                    updatePoolVisuals();
+                    
+                    if(poolLevel >= 5) {
+                        clearInterval(bubbleInterval);
+                        setTimeout(endStage1, 2000);
+                    }
+                } else {
+                    playSound('error');
+                    bubble.style.background = 'radial-gradient(circle, rgba(239,68,68,0.8), rgba(153,27,27,0.9))';
+                    bubble.style.color = 'white';
+                    speak("Dikkat et, " + data.word + " termal havuz için uygun bir sıfat değil.");
+                }
+                
+                bubble.style.transform = 'scale(0)';
+                bubble.style.opacity = '0';
+                setTimeout(() => bubble.remove(), 300);
+            });
+        }
+
+        function showGrammarPopup(data) {
+            const popup = document.getElementById('grammar-popup');
+            document.getElementById('grammar-formula').innerHTML = `Sıfat (<span class="text-termal font-bold">${data.word}</span>) + İsim (<span class="text-amber-500 font-bold">${data.noun}</span>) = Sıfat Tamlaması`;
+            document.getElementById('grammar-tamlama').innerText = data.concept;
+            
+            popup.style.opacity = 1;
+            popup.style.transform = 'translate(-50%, -50%) scale(1)';
+            speak(`${data.word} ${data.noun}. Mükemmel bir tamlama!`);
+            
+            setTimeout(() => {
+                popup.style.opacity = 0;
+                popup.style.transform = 'translate(-50%, -50%) scale(0.9)';
+            }, 2500);
+        }
+
+        function updatePoolVisuals() {
+            const pool = document.getElementById('pool-water');
+            const heightPerc = 25 + (poolLevel * 15); // max ~100%
+            pool.style.height = `${heightPerc}%`;
+            document.getElementById('pool-level-text').innerText = `${poolLevel * 20}%`;
+        }
+
+        function endStage1() {
+            playSound('success');
+            showFact(
+                "Afyon'un dünyaca ünlü Sandıklı ilçesinde, şifalı termal su ile özel bir toprak karıştırılarak 'Çamur Banyoları' yapılır. Şimdi çamur zamanı, fiilleri öğrenmeye hazır mısın?",
+                startStage2
+            );
+        }
+
+        // --- STAGE 2: MUD BATH (Verbs/Emir Kipleri) ---
+        const mCanvas = document.getElementById('mud-canvas');
+        const mCtx = mCanvas.getContext('2d', { willReadFrequently: true });
+        const mInstruction = document.getElementById('mud-instruction');
+        const mIcon = document.getElementById('mud-icon');
+        const mProgressBar = document.getElementById('mud-progress-bar');
+        
+        let mudState = 0; // 0: Sür, 1: Ovala, 2: Bekle, 3: Yıka
+        let isDrawing = false;
+        let actionProgress = 0;
+        let lastPos = null;
+
+        function startStage2() {
+            switchScreen('screen-stage2', 'Aşama 2: Fiil Atölyesi');
+            
+            // Setup Canvas dynamically to match container
+            const containerW = mCanvas.parentElement.clientWidth;
+            mCanvas.width = containerW;
+            mCanvas.height = containerW; // aspect ratio 1:1
+            mCtx.lineCap = 'round';
+            mCtx.lineJoin = 'round';
+            
+            setMudTask(0);
+            setupMudInteractions();
+        }
+
+        function setMudTask(stateIndex) {
+            if (stateIndex > 3) return; 
+            
+            mudState = stateIndex;
+            actionProgress = 0;
+            
+            const tasks = [
+                { text: "1. Çamuru SÜR", icon: "fa-hand-pointer", speech: "Çamuru sürmek için parmağını veya fareyi kullan. Emir kipi: Sür!" },
+                { text: "2. İyice OVALA", icon: "fa-arrows-rotate", speech: "Harika. Şimdi dairesel hareketlerle çamuru ovala. Emir kipi: Ovala!" },
+                { text: "3. Kurumasını BEKLE", icon: "fa-hourglass-half", speech: "Çamur sürüldü. Şifasını vermesi için biraz bekle." },
+                { text: "4. Suyla YIKA", icon: "fa-shower", speech: "Süre doldu! Şimdi bol suyla yıka ve durulan. Emir kipi: Yıka!" }
+            ];
+
+            const task = tasks[stateIndex];
+            mInstruction.innerText = task.text;
+            mIcon.className = `fa-solid ${task.icon} text-3xl animate-bounce`;
+            speak(task.speech);
+
+            mProgressBar.style.width = '0%';
+
+            if(mudState === 2) {
+                startMudTimer();
+            } else if (mudState === 3) {
+                mCtx.globalCompositeOperation = 'destination-out'; // Eraser mode
+            }
+        }
+
+        function updateMudUI() {
+            const perc = Math.min(100, (actionProgress / 100) * 100);
+            mProgressBar.style.width = `${perc}%`;
+            
+            if(perc >= 100 && mudState !== 2) {
+                if (mudState === 3) {
+                    mudState = 4; // Bir daha tetiklenmesini engellemek için durumu 4 yap
+                    playSound('success');
+                    setTimeout(endStage2, 1000);
+                } else if (mudState < 3) {
+                    playSound('success');
+                    setMudTask(mudState + 1);
+                }
+            }
+        }
+
+        function startMudTimer() {
+            const overlay = document.getElementById('mud-timer-overlay');
+            const timerText = document.getElementById('mud-timer-text');
+            overlay.classList.remove('hide');
+            let timeLeft = 3;
+            timerText.innerText = timeLeft;
+            
+            const interval = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = timeLeft;
+                playSound('pop'); // Tick sound
+                
+                if(timeLeft <= 0) {
+                    clearInterval(interval);
+                    overlay.classList.add('hide');
+                    setMudTask(3); // Go to Yıka
+                }
+            }, 1000);
+        }
+
+        function getCanvasPos(e) {
+            const rect = mCanvas.getBoundingClientRect();
+            // Handle both touch and mouse
+            const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+            
+            // Calculate scale in case CSS resizes the canvas visually
+            const scaleX = mCanvas.width / rect.width;
+            const scaleY = mCanvas.height / rect.height;
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function drawMud(e) {
+            if (!isDrawing || mudState === 2 || mudState > 3) return;
+            e.preventDefault();
+
+            const pos = getCanvasPos(e);
+
+            mCtx.beginPath();
+            if (lastPos) {
+                mCtx.moveTo(lastPos.x, lastPos.y);
+            } else {
+                mCtx.moveTo(pos.x, pos.y);
+            }
+            mCtx.lineTo(pos.x, pos.y);
+            
+            if(mudState === 0) {
+                // SÜR: Thick dark brown
+                mCtx.strokeStyle = state.theme === 'dark' ? '#5d4037' : '#795548'; 
+                mCtx.lineWidth = 45;
+                mCtx.stroke();
+                actionProgress += 1.5;
+                if(Math.random() > 0.7) playSound('mud');
+            } else if (mudState === 1) {
+                // OVALA: Medium brown, track distance for circular motion illusion
+                mCtx.strokeStyle = state.theme === 'dark' ? '#4e342e' : '#8d6e63';
+                mCtx.lineWidth = 35;
+                mCtx.stroke();
+                if(lastPos) {
+                    const dist = Math.hypot(pos.x - lastPos.x, pos.y - lastPos.y);
+                    actionProgress += dist * 0.15; // Requires more movement
+                }
+            } else if (mudState === 3) {
+                // YIKA: Eraser
+                mCtx.lineWidth = 60;
+                mCtx.stroke();
+                actionProgress += 2;
+                if(Math.random() > 0.8) playSound('splash');
+            }
+
+            lastPos = pos;
+            updateMudUI();
+        }
+
+        function setupMudInteractions() {
+            const startDraw = (e) => { isDrawing = true; lastPos = getCanvasPos(e); };
+            const stopDraw = () => { isDrawing = false; lastPos = null; };
+
+            mCanvas.addEventListener('mousedown', startDraw);
+            mCanvas.addEventListener('mousemove', drawMud);
+            window.addEventListener('mouseup', stopDraw);
+
+            mCanvas.addEventListener('touchstart', startDraw, {passive: false});
+            mCanvas.addEventListener('touchmove', drawMud, {passive: false});
+            window.addEventListener('touchend', stopDraw);
+        }
+
+        function endStage2() {
+            playSound('success');
+            showFact(
+                "Efsaneye göre Frig Kralı Midas'ın kızı Suna amansız bir hastalığa yakalanır. Onu iyileştiren tek şey Gazlıgöl'ün şifalı suları olmuştur. Sıra okuduğunu anlama ve yön bulma testinde!",
+                startStage3
+            );
+        }
+
+        // --- STAGE 3: MAZE (Gazlıgöl / Reading) ---
+        const mazeCanvas = document.getElementById('maze-canvas');
+        const ctxMaze = mazeCanvas.getContext('2d');
+        const tileSize = 30; // 10x10 Grid for 300x300
+        
+        // Yeniden tasarlanmış zorunlu 3 kapılı labirent rotası
+        // 0: Path, 1: Wall, 2: QuestionGate, 3: Start, 4: End
+        const mapData = [
+            [3, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 1, 0, 0, 0, 1, 1, 1, 1],
+            [1, 0, 1, 0, 1, 0, 1, 1, 1, 1],
+            [1, 2, 1, 0, 1, 2, 1, 0, 0, 4],
+            [1, 0, 0, 0, 1, 0, 1, 0, 1, 1],
+            [1, 1, 1, 1, 1, 0, 1, 2, 1, 1],
+            [1, 0, 0, 0, 0, 0, 1, 0, 1, 1],
+            [1, 0, 1, 1, 1, 1, 1, 0, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        let pPos = { r: 0, c: 0 };
+        
+        const qBank = [
+            {
+                q: "Metne göre, Sandıklı ilçesi neyi ile meşhurdur?",
+                opts: ["Deniz turizmi", "Çamur Banyoları", "Kayak merkezi"],
+                ans: 1
+            },
+            {
+                q: "Kral Midas'ın kızı Suna'yı iyileştiren suyun bulunduğu yer neresidir?",
+                opts: ["Gazlıgöl", "Bodrum", "Uludağ"],
+                ans: 0
+            },
+            {
+                q: "Afyon'un termal havuzlarında dışarıda lapa lapa kar yağarken suyun sıcaklığı yaklaşık kaç derecedir?",
+                opts: ["10 Derece", "40 Derece", "100 Derece"],
+                ans: 1
+            }
+        ];
+        let currentGate = null;
+
+        function startStage3() {
+            switchScreen('screen-stage3', 'Aşama 3: Kayıp Şifa');
+            speak("Prenses Suna'yı hedefe ulaştır. Engellerdeki soruları okuyarak doğru cevabı bul ve yolları aç.");
+            
+            // Find start (3)
+            for(let r=0; r<10; r++) {
+                for(let c=0; c<10; c++) {
+                    if(mapData[r][c] === 3) pPos = {r, c};
+                }
+            }
+            
+            drawMaze();
+            setupMazeInput();
+        }
+
+        function drawMaze() {
+            ctxMaze.clearRect(0, 0, mazeCanvas.width, mazeCanvas.height);
+            
+            const isDark = state.theme === 'dark';
+            const wallColor = isDark ? '#334155' : '#0f766e'; // slate-700 / teal-700
+            const pathColor = isDark ? '#1e293b' : '#ccfbf1'; // slate-800 / teal-50
+            
+            for(let r=0; r<10; r++) {
+                for(let c=0; c<10; c++) {
+                    const t = mapData[r][c];
+                    const x = c * tileSize;
+                    const y = r * tileSize;
+                    
+                    // Base Path
+                    ctxMaze.fillStyle = pathColor;
+                    ctxMaze.fillRect(x, y, tileSize, tileSize);
+
+                    if(t === 1) { // Wall
+                        ctxMaze.fillStyle = wallColor;
+                        ctxMaze.fillRect(x, y, tileSize, tileSize);
+                        // inner bevel for depth
+                        ctxMaze.strokeStyle = isDark ? '#475569' : '#115e59';
+                        ctxMaze.lineWidth = 2;
+                        ctxMaze.strokeRect(x+1, y+1, tileSize-2, tileSize-2);
+                    } else if (t === 2) { // Gate
+                        ctxMaze.fillStyle = '#f59e0b'; // amber-500
+                        ctxMaze.fillRect(x, y, tileSize, tileSize);
+                        ctxMaze.fillStyle = '#fff';
+                        ctxMaze.font = 'bold 18px sans-serif';
+                        ctxMaze.fillText('?', x + 9, y + 22);
+                    } else if (t === 4) { // End
+                        ctxMaze.fillStyle = '#38bdf8'; // sky-400
+                        ctxMaze.fillRect(x, y, tileSize, tileSize);
+                        ctxMaze.fillStyle = '#fff';
+                        ctxMaze.font = '16px "Font Awesome 6 Free"';
+                        ctxMaze.fillText('\uf593', x + 6, y + 21); // hot-tub icon
+                    }
+                }
+            }
+
+            // Draw Player (Princess)
+            const px = pPos.c * tileSize;
+            const py = pPos.r * tileSize;
+            ctxMaze.fillStyle = '#ec4899'; // pink-500
+            ctxMaze.beginPath();
+            ctxMaze.arc(px + tileSize/2, py + tileSize/2, tileSize/2 - 4, 0, Math.PI*2);
+            ctxMaze.fill();
+            ctxMaze.strokeStyle = '#fff';
+            ctxMaze.lineWidth = 2;
+            ctxMaze.stroke();
+        }
+
+        function movePlayer(dr, dc) {
+            if(document.getElementById('modal-quiz').classList.contains('hide') === false) return; // Prevent move during quiz
+
+            const nR = pPos.r + dr;
+            const nC = pPos.c + dc;
+            
+            if(nR >= 0 && nR < 10 && nC >= 0 && nC < 10) {
+                const t = mapData[nR][nC];
+                
+                if(t === 1) {
+                    playSound('error');
+                    return;
+                }
+                
+                if(t === 2) {
+                    currentGate = {r: nR, c: nC};
+                    openQuiz();
+                    return;
+                }
+                
+                pPos.r = nR;
+                pPos.c = nC;
+                playSound('pop');
+                drawMaze();
+                
+                if(t === 4) {
+                    setTimeout(finishGame, 600);
+                }
+            }
+        }
+
+        function openQuiz() {
+            const modal = document.getElementById('modal-quiz');
+            const qObj = qBank.pop(); // Take last question
+            
+            if(!qObj) {
+                // If out of questions, just open gate
+                handleQuizResult(true);
+                return;
+            }
+
+            document.getElementById('quiz-question').innerText = qObj.q;
+            speak(qObj.q);
+            
+            const optsContainer = document.getElementById('quiz-options');
+            optsContainer.innerHTML = '';
+            
+            qObj.opts.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'w-full text-left bg-teal-50 hover:bg-teal-100 dark:bg-slate-600 dark:hover:bg-slate-500 text-slate-800 dark:text-white font-bold p-4 rounded-xl border-2 border-teal-200 dark:border-slate-500 transition-colors duration-200';
+                btn.innerText = opt;
+                btn.onclick = () => handleQuizResult(idx === qObj.ans);
+                optsContainer.appendChild(btn);
+            });
+            
+            modal.classList.remove('hide');
+        }
+
+        function handleQuizResult(isCorrect) {
+            if(isCorrect) {
+                playSound('success');
+                addScore(50);
+                speak("Tebrikler! Okuduğunu çok iyi anladın, kapı açılıyor.");
+                mapData[currentGate.r][currentGate.c] = 0; // Turn to path
+                document.getElementById('modal-quiz').classList.add('hide');
+                
+                // Jump into the cleared spot
+                pPos.r = currentGate.r;
+                pPos.c = currentGate.c;
+                drawMaze();
+            } else {
+                playSound('error');
+                speak("Tekrar düşün bakalım, metinde farklı bir bilgi geçiyordu.");
+                // User must try again (we don't close modal)
+            }
+        }
+
+        function setupMazeInput() {
+            document.getElementById('btn-up').onclick = () => movePlayer(-1, 0);
+            document.getElementById('btn-down').onclick = () => movePlayer(1, 0);
+            document.getElementById('btn-left').onclick = () => movePlayer(0, -1);
+            document.getElementById('btn-right').onclick = () => movePlayer(0, 1);
+
+            document.addEventListener('keydown', (e) => {
+                if(state.stage !== 3) return;
+                switch(e.key) {
+                    case 'ArrowUp': movePlayer(-1, 0); break;
+                    case 'ArrowDown': movePlayer(1, 0); break;
+                    case 'ArrowLeft': movePlayer(0, -1); break;
+                    case 'ArrowRight': movePlayer(0, 1); break;
+                }
+            });
+        }
+
+        // --- FLOW & MODALS ---
+        let factCallback = null;
+
+        function showFact(text, callback) {
+            const modal = document.getElementById('modal-fact');
+            document.getElementById('fact-text').innerText = text;
+            speak(text, 0.9); // slightly slower for facts
+            factCallback = callback;
+            modal.classList.remove('hide');
+        }
+
+        document.getElementById('btn-fact-continue').addEventListener('click', () => {
+            playSound('pop');
+            document.getElementById('modal-fact').classList.add('hide');
+            if(speechSynth.speaking) speechSynth.cancel();
+            if(factCallback) {
+                state.stage++;
+                factCallback();
+            }
+        });
+
+        function finishGame() {
+            playSound('success');
+            state.stage = 4;
+            if(droneSynth) droneSynth.volume.rampTo(-40, 2); // Fade out ambient
+            switchScreen('screen-outro', 'Tebrikler!');
+            speak("Mükemmel iş çıkardın! Tüm görevleri tamamladın. Şimdi Türkiye haritasına dönüp yeni yerler keşfedebilirsin.");
+        }
+
+        // --- BOOT ---
+        document.getElementById('btn-start').addEventListener('click', async () => {
+            // Must be user-initiated for Audio/TTS
+            await initAudio();
+            state.stage = 1;
+            startStage1();
+        });
+
+        window.onload = () => {
+            createSteam();
+        };
+
+    </script>
+</body>
+</html>
