@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troya: Efsaneler Katmanı | Bilgi ve Deneyim</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        ancient: {
+                            gold: '#D4AF37',
+                            dark: '#0f172a',
+                            light: '#f8fafc',
+                            bronze: '#CD7F32'
+                        }
+                    },
+                    fontFamily: {
+                        'cinzel': ['"Cinzel"', 'serif'],
+                        'montserrat': ['"Montserrat"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        /* Arkaplan Yönetimi */
+        .bg-faded {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: url('arkaplan.png') center center / cover no-repeat;
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+            transition: opacity 0.5s;
+        }
+        
+        .light .bg-faded { opacity: 0.08; }
+
+        .ancient-font { font-family: 'Cinzel', serif; }
+
+        /* Cam Efekti (Glassmorphism) */
+        .glass-morphism {
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: background-color 0.5s, border-color 0.5s, transform 0.3s;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+        .dark .glass-morphism {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .light .glass-morphism {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        /* İlerleme Çubukları / Noktaları */
+        .step-indicator {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: rgba(150, 150, 150, 0.4);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .step-indicator.active {
+            background: #D4AF37;
+            box-shadow: 0 0 15px #D4AF37;
+            transform: scale(1.4);
+        }
+
+        /* Sahne Geçişleri */
+        .stage { transition: all 0.6s ease-in-out; }
+        
+        /* Buton Efektleri */
+        .btn-interact {
+            transition: all 0.2s ease;
+        }
+        .btn-interact:active {
+            transform: scale(0.95);
+        }
+
+        /* İnfografik Kaydırma Çubuğu Özelleştirmesi */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(212, 175, 55, 0.5);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(212, 175, 55, 0.8);
+        }
+
+        /* Uzun Basma Mekaniği CSS */
+        .long-press-btn {
+            position: relative;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .progress-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: rgba(212, 175, 55, 0.3);
+            z-index: 0;
+            transition: width 0.1s linear;
+        }
+        .long-press-btn span, .long-press-btn i {
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Iframe Konteyner */
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 78vh;
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col items-center">
+
+    <div class="bg-faded"></div>
+
+    <audio id="snd-success" src="ses_basari.mp3" preload="auto"></audio>
+    <audio id="snd-error" src="ses_hata.mp3" preload="auto"></audio>
+    <audio id="snd-yonerge-1" src="yonerge_kapak.mp3" preload="auto"></audio>
+    <audio id="snd-yonerge-2" src="yonerge_turkce.mp3" preload="auto"></audio>
+    <audio id="snd-yonerge-3" src="yonerge_h5p.mp3" preload="auto"></audio>
+
+    <div id="imgModal" class="fixed inset-0 bg-black/85 z-[200] hidden flex items-center justify-center p-4 cursor-zoom-out" onclick="closeModal()">
+        <div class="relative max-w-5xl w-full max-h-[90vh] flex justify-center items-center">
+            <img src="info.png" alt="Troya İnfografik Büyütülmüş" class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/10" onclick="event.stopPropagation()">
+            <button class="absolute top-4 right-4 bg-black/60 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl hover:bg-black/80 transition-colors" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <nav class="w-full max-w-7xl flex flex-wrap justify-between items-center p-4 md:p-6 z-50 gap-4">
+        <div class="flex items-center gap-4">
+            <img src="orjinal.svg" alt="Proje Logosu" class="h-10 md:h-12 w-auto drop-shadow-md">
+            
+            <div class="bg-white/50 dark:bg-white/10 p-1.5 md:p-2 rounded-xl border border-slate-200 dark:border-white/20">
+                <img src="unesco.png" class="h-6 md:h-8 dark:invert" alt="UNESCO">
+            </div>
+            
+            <div>
+                <h2 class="ancient-font text-xl md:text-2xl font-bold text-amber-600 dark:text-amber-500">TROYA</h2>
+                <p class="text-[9px] md:text-[10px] uppercase tracking-[2px] md:tracking-[3px] opacity-70">Efsaneler Katmanı</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 md:gap-6">
+            <button onclick="toggleTheme()" class="btn-interact bg-indigo-100 text-indigo-700 hover:bg-indigo-200 dark:bg-slate-800 dark:text-amber-400 dark:hover:bg-slate-700 px-4 py-2 rounded-full font-bold shadow-sm flex items-center gap-2 text-xs md:text-sm border border-transparent dark:border-slate-600">
+                <i class="fas fa-moon" id="theme-icon"></i> <span class="hidden md:inline">Tema</span>
+            </button>
+            <div class="flex gap-2">
+                <div class="step-indicator active" data-step="0"></div>
+                <div class="step-indicator" data-step="1"></div>
+                <div class="step-indicator" data-step="2"></div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-1 w-full max-w-7xl px-4 flex flex-col justify-start py-4">
+        
+        <section id="stage0" class="stage block w-full">
+            <div class="text-center mb-6">
+                <a href="https://drive.google.com/file/d/1NkyQ3_bhLhugAU5YhPR5x8ZifGmBmCYO/view?usp=drive_link" target="_blank" class="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg hover:scale-105 transition-transform mb-6 ring-2 ring-white/20">
+                    <i class="fab fa-google-drive text-xl"></i> Elif Ünal'nın çalışmasının tamamına ulaşmak için tıklayınız.
+                </a>
+                
+                <h1 class="ancient-font text-3xl md:text-5xl font-black mb-3 text-amber-600 dark:text-amber-500">Troya (Truva) Nedir?</h1>
+                <p class="text-sm md:text-base text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed px-4">
+                    Homeros'un İlyada Destanı'na konu olan, tarihin en ünlü savaşlarından birine ev sahipliği yapmış antik kenttir. MÖ 3000'den MS 5. yüzyıla kadar kesintisiz yerleşim gören bu şehir, üst üste kurulmuş 9 ana katman ve 50'den fazla yapı evresinden oluşur.
+                </p>
+                <button onclick="playInstruction('snd-yonerge-1')" class="mt-3 text-amber-600 dark:text-amber-400 text-sm hover:underline"><i class="fas fa-volume-up"></i> Yönergeyi Dinle</button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="glass-morphism p-4 md:p-6 rounded-[2rem] flex flex-col border-t-4 border-amber-500">
+                    <h3 class="ancient-font text-xl text-center mb-4 font-bold"><i class="fas fa-scroll text-amber-500"></i> Troya'nın Katmanları</h3>
+                    <div class="flex-1 bg-black/5 dark:bg-black/30 rounded-xl p-2 mb-4 custom-scrollbar overflow-y-auto relative group" style="max-height: 35vh;">
+                        <img src="info.png" alt="Troya İnfografik" class="w-full object-contain rounded-lg cursor-zoom-in hover:opacity-90 transition-opacity" onclick="openModal()" onerror="this.outerHTML='<div class=\'text-center p-10 text-slate-500\'><i class=\'fas fa-image text-4xl mb-2\'></i><br>İnfografik görseli (info.png) yüklenemedi. Ancak görevine devam edebilirsin.</div>\''">
+                        <div class="absolute bottom-3 right-3 bg-black/70 text-white px-3 py-1.5 rounded-lg text-xs pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                            <i class="fas fa-search-plus"></i> Büyütmek için tıkla
+                        </div>
+                    </div>
+                    <button id="btnOkudum" onclick="checkGorev('okudum')" class="btn-interact w-full bg-slate-200 dark:bg-slate-700 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600 text-slate-700 dark:text-white py-4 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-eye"></i> İnfografiği Okudum
+                    </button>
+                </div>
+
+                <div class="glass-morphism p-4 md:p-6 rounded-[2rem] flex flex-col border-t-4 border-blue-500">
+                    <h3 class="ancient-font text-xl text-center mb-4 font-bold"><i class="fas fa-film text-blue-500"></i> Efsanenin Doğuşu</h3>
+                    <div class="flex-1 w-full aspect-video rounded-xl overflow-hidden mb-4 shadow-inner bg-black">
+                        <iframe src="https://www.youtube.com/embed/BiCUZsyZqcM?si=j2db1-iSlcGBW69M" title="Troya Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                    <button id="btnIzledim" onclick="checkGorev('izledim')" class="btn-interact w-full bg-slate-200 dark:bg-slate-700 hover:bg-emerald-500 hover:text-white dark:hover:bg-emerald-600 text-slate-700 dark:text-white py-4 rounded-xl font-bold text-lg transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-check"></i> Videoyu İzledim
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center pb-10">
+                <button id="btnStage1Next" onclick="nextStep(0)" disabled class="bg-slate-400 text-white/50 px-12 py-5 rounded-full font-black text-xl shadow-xl transition-all cursor-not-allowed flex items-center justify-center gap-3 mx-auto">
+                    <i class="fas fa-lock"></i> Görevleri Tamamla
+                </button>
+            </div>
+        </section>
+
+        <section id="stage1" class="stage hidden opacity-0 translate-y-10 w-full max-w-4xl mx-auto">
+            <div class="text-center mb-8 mt-10">
+                <h1 class="ancient-font text-4xl md:text-5xl font-black mb-4 text-emerald-600 dark:text-emerald-400">Türkçe Dil Becerisi</h1>
+                <p class="text-lg text-slate-600 dark:text-slate-400">Tarihi hissetmek için Türkçe okuma yeteneğini kullan!</p>
+                <button onclick="playInstruction('snd-yonerge-2')" class="mt-2 text-emerald-600 dark:text-emerald-400 text-sm hover:underline"><i class="fas fa-volume-up"></i> Yönergeyi Dinle</button>
+            </div>
+
+            <div class="glass-morphism rounded-[3rem] p-8 md:p-12 text-center relative overflow-hidden group">
+                <i class="fas fa-book-open text-6xl text-emerald-500 mb-6 transition-transform group-hover:scale-110"></i>
+                
+                <p class="text-xl md:text-2xl leading-relaxed text-slate-800 dark:text-white font-semibold mb-8">
+                    Aşağıdaki efsanevi cümleyi sesli bir şekilde okurken <span class="text-emerald-500">butona basılı tut.</span><br>
+                    Enerji dolduğunda mühür açılacak!
+                </p>
+
+                <div class="bg-slate-200/50 dark:bg-black/30 p-8 rounded-2xl border-2 border-dashed border-emerald-500/50 mb-10 shadow-inner">
+                    <p class="text-2xl md:text-3xl font-black italic text-slate-800 dark:text-white ancient-font tracking-wide">
+                        "Troya, Dokuz Katmanlı Tarihin ve Efsanelerin Beşiğidir."
+                    </p>
+                </div>
+
+                <button id="btnLongPress" class="long-press-btn bg-slate-800 dark:bg-slate-700 text-white px-10 py-6 rounded-3xl font-bold text-xl md:text-2xl shadow-[0_0_20px_rgba(16,185,129,0.3)] mx-auto flex items-center justify-center gap-3 transition-transform hover:scale-105 active:scale-100">
+                    <div class="progress-fill" id="pressProgress"></div>
+                    <i class="fas fa-fingerprint text-3xl"></i> <span>Okurken Basılı Tut</span>
+                </button>
+                <p class="mt-4 text-sm font-medium text-slate-500 dark:text-slate-400" id="pressStatus">Enerjiyi doldurmak için basılı tut...</p>
+            </div>
+        </section>
+
+        <section id="stage2" class="stage hidden opacity-0 translate-y-10 w-full">
+            <div class="text-center mb-6 mt-4">
+                <h1 class="ancient-font text-3xl md:text-5xl font-black mb-3 text-blue-600 dark:text-blue-400">Katmanları Sırala!</h1>
+                <p class="text-base md:text-lg text-slate-600 dark:text-slate-400">"Katmanları ait oldukları döneme göre doğru sıraya koy."</p>
+                <button onclick="playInstruction('snd-yonerge-3')" class="mt-2 text-blue-600 dark:text-blue-400 text-sm hover:underline"><i class="fas fa-volume-up"></i> Yönergeyi Dinle</button>
+            </div>
+
+            <div class="glass-morphism rounded-[2rem] p-2 md:p-6 text-center relative mb-8">
+                <div class="iframe-container bg-white dark:bg-slate-800">
+                    <iframe src="https://mrkcbyk.github.io/troya-etkinlik/" title="Troya Katmanları Oyunu"></iframe>
+                </div>
+            </div>
+
+            <div class="text-center pb-12">
+                <a href="https://memleketim.github.io/17/index.html" class="inline-flex items-center gap-3 bg-amber-600 hover:bg-amber-700 text-white px-10 py-5 rounded-full font-black text-xl shadow-xl hover:scale-105 transition-all ring-4 ring-amber-600/30">
+                    <i class="fas fa-map-marked-alt text-2xl"></i> Haritaya Dön
+                </a>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="msgBox" class="fixed bottom-10 left-1/2 -translate-x-1/2 glass-morphism bg-white dark:bg-slate-800 px-6 py-4 rounded-2xl text-base md:text-lg font-bold shadow-2xl transition-all opacity-0 translate-y-10 z-[100] pointer-events-none border border-slate-200 dark:border-slate-700 flex items-center min-w-[300px]">
+        <i class="fas fa-check-circle text-emerald-500 mr-3 text-2xl"></i> <span class="text-slate-800 dark:text-white"></span>
+    </div>
+
+    <script>
+        // --- Web Audio API (Graceful Degradation) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSyntheticSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if (type === 'success') {
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); 
+                oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1); 
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.4);
+            } else if (type === 'error') {
+                oscillator.type = 'sawtooth';
+                oscillator.frequency.setValueAtTime(200, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.3);
+            } else if (type === 'tick') {
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(600, audioCtx.currentTime);
+                gainNode.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.05);
+            }
+        }
+
+        function playSound(type) {
+            const elId = type === 'success' ? 'snd-success' : 'snd-error';
+            const el = document.getElementById(elId);
+            if (el) {
+                el.currentTime = 0;
+                let promise = el.play();
+                if (promise !== undefined) {
+                    promise.catch(err => {
+                        console.warn("Ses dosyası çalınamadı, sentetik ses üretiliyor.", err);
+                        playSyntheticSound(type);
+                    });
+                }
+            } else {
+                playSyntheticSound(type);
+            }
+        }
+
+        function playInstruction(audioId) {
+            const el = document.getElementById(audioId);
+            if (el) {
+                el.currentTime = 0;
+                let promise = el.play();
+                if (promise !== undefined) {
+                    promise.catch(err => {
+                        showMessage("Ses dosyası bulunamadı, lütfen ekrandaki metinleri takip edin.", true);
+                    });
+                }
+            }
+        }
+
+        // --- Resim Modal (Enlarge) Fonksiyonları ---
+        function openModal() {
+            document.getElementById('imgModal').classList.remove('hidden');
+            playSound('tick');
+        }
+
+        function closeModal() {
+            document.getElementById('imgModal').classList.add('hidden');
+        }
+
+        // --- Bildirim Sistemi ---
+        function showMessage(text, isError = false) {
+            const box = document.getElementById('msgBox');
+            box.querySelector('span').innerText = text;
+            box.querySelector('i').className = isError ? 'fas fa-times-circle text-red-500 mr-3 text-2xl' : 'fas fa-check-circle text-emerald-500 mr-3 text-2xl';
+            box.classList.remove('opacity-0', 'translate-y-10');
+            setTimeout(() => {
+                box.classList.add('opacity-0', 'translate-y-10');
+            }, 3000);
+        }
+
+        // --- Tema Yönetimi ---
+        function toggleTheme() {
+            const html = document.documentElement;
+            const icon = document.getElementById('theme-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        }
+
+        // --- Görev Yönetimi (Stage 1) ---
+        let okudum = false;
+        let izledim = false;
+
+        function checkGorev(type) {
+            if(type === 'okudum') {
+                okudum = true;
+                const btn = document.getElementById('btnOkudum');
+                btn.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-700');
+                btn.classList.add('bg-emerald-500', 'text-white', 'pointer-events-none');
+                btn.innerHTML = '<i class="fas fa-check-double"></i> İnfografik Okundu';
+            }
+            if(type === 'izledim') {
+                izledim = true;
+                const btn = document.getElementById('btnIzledim');
+                btn.classList.remove('bg-slate-200', 'dark:bg-slate-700', 'text-slate-700');
+                btn.classList.add('bg-emerald-500', 'text-white', 'pointer-events-none');
+                btn.innerHTML = '<i class="fas fa-check-double"></i> Video İzlendi';
+            }
+
+            playSound('tick');
+
+            if(okudum && izledim) {
+                const nextBtn = document.getElementById('btnStage1Next');
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('bg-slate-400', 'text-white/50', 'cursor-not-allowed');
+                nextBtn.classList.add('bg-amber-500', 'hover:bg-amber-600', 'text-white', 'hover:scale-105');
+                nextBtn.innerHTML = 'Sonraki Aşamaya Geç <i class="fas fa-arrow-right ml-2"></i>';
+                showMessage("Harika! Temel bilgileri edindin.");
+            }
+        }
+
+        // --- Sayfa Geçiş Fonksiyonu ---
+        function nextStep(current) {
+            const currentStage = document.getElementById(`stage${current}`);
+            const nextStage = document.getElementById(`stage${current + 1}`);
+            
+            document.querySelectorAll('.step-indicator').forEach(dot => {
+                if(parseInt(dot.dataset.step) <= current + 1) dot.classList.add('active');
+            });
+
+            currentStage.classList.add('opacity-0', '-translate-y-10');
+            setTimeout(() => {
+                currentStage.classList.add('hidden');
+                if(nextStage) {
+                    nextStage.classList.remove('hidden');
+                    setTimeout(() => {
+                        nextStage.classList.remove('opacity-0', 'translate-y-10');
+                        if(current === 0) playSound('success');
+                    }, 50);
+                }
+            }, 600);
+        }
+
+        // --- Uzun Basma Mekaniği (Aşama 2 - Türkçe Dil Becerisi) ---
+        const longPressBtn = document.getElementById('btnLongPress');
+        const pressProgress = document.getElementById('pressProgress');
+        const pressStatus = document.getElementById('pressStatus');
+        
+        let pressTimer;
+        let progress = 0;
+        let isPressing = false;
+        let isCompleted = false;
+
+        function startPress(e) {
+            if(isCompleted) return;
+            e.preventDefault(); 
+            isPressing = true;
+            pressStatus.innerText = "Okumaya devam et...";
+            pressStatus.classList.add("text-emerald-500");
+            
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            pressTimer = setInterval(() => {
+                progress += 2; 
+                pressProgress.style.width = `${progress}%`;
+                
+                if(progress % 20 === 0) playSyntheticSound('tick');
+
+                if(progress >= 100) {
+                    completePress();
+                }
+            }, 30);
+        }
+
+        function cancelPress() {
+            if(isCompleted) return;
+            isPressing = false;
+            clearInterval(pressTimer);
+            progress = 0;
+            pressProgress.style.width = `0%`;
+            pressStatus.innerText = "Daha uzun basılı tutmalısın!";
+            pressStatus.classList.remove("text-emerald-500");
+            pressStatus.classList.add("text-amber-500");
+        }
+
+        function completePress() {
+            clearInterval(pressTimer);
+            isCompleted = true;
+            isPressing = false;
+            
+            longPressBtn.classList.remove('bg-slate-800', 'dark:bg-slate-700');
+            longPressBtn.classList.add('bg-emerald-500', 'pointer-events-none');
+            longPressBtn.innerHTML = '<i class="fas fa-unlock text-3xl"></i> <span>Mühür Açıldı!</span>';
+            
+            pressStatus.innerText = "Tebrikler! Mükemmel okudun.";
+            pressStatus.classList.replace("text-amber-500", "text-emerald-500");
+
+            playSound('success');
+            showMessage("Türkçe dil becerin harika!");
+            
+            confetti({
+                particleCount: 150,
+                spread: 80,
+                origin: { y: 0.6 },
+                colors: ['#10B981', '#D4AF37', '#ffffff']
+            });
+
+            setTimeout(() => {
+                nextStep(1);
+            }, 2500);
+        }
+
+        // Fare ve Dokunmatik Olay Dinleyicileri
+        longPressBtn.addEventListener('mousedown', startPress);
+        longPressBtn.addEventListener('mouseup', cancelPress);
+        longPressBtn.addEventListener('mouseleave', cancelPress);
+
+        longPressBtn.addEventListener('touchstart', startPress, {passive: false});
+        longPressBtn.addEventListener('touchend', cancelPress);
+        longPressBtn.addEventListener('touchcancel', cancelPress);
+        
+        longPressBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Esc tuşu ile görsel modalını kapatma esnekliği
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+    </script>
+</body>
+</html>
