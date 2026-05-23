@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Çanakkale Lezzet Serüveni - Ülkem Yanımda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cinzel:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'Georgia', 'serif'],
+                        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        cinzel: ['"Cinzel"', 'serif'],
+                    },
+                    colors: {
+                        bg: 'var(--color-bg)',
+                        paper: 'var(--color-paper)',
+                        text: 'var(--color-text)',
+                        olive: 'var(--color-olive)',
+                        clay: 'var(--color-clay)',
+                        border: 'var(--color-border)',
+                        muted: 'var(--color-muted)',
+                    },
+                    boxShadow: {
+                        xs: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Dinamik Tema Değişkenleri */
+        :root {
+            --color-bg: #f9f7f2;
+            --color-paper: #ffffff;
+            --color-text: #2d2a26;
+            --color-olive: #5a5a40;
+            --color-clay: #a67c52;
+            --color-border: #e5e0d5;
+            --color-muted: #8c857d;
+        }
+        html.dark {
+            --color-bg: #161613;
+            --color-paper: #1c1c18;
+            --color-text: #e8e6e1;
+            --color-olive: #92946c;
+            --color-clay: #c99665;
+            --color-border: #363630;
+            --color-muted: #a19d96;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-olive); }
+        
+        @keyframes bubbles {
+            0% { transform: translateY(0) scale(1); opacity: 0.8; }
+            50% { opacity: 0.4; }
+            100% { transform: translateY(-30px) scale(0.6); opacity: 0; }
+        }
+        .bubble-anim { animation: bubbles 1.5s infinite ease-out; }
+
+        /* Tıklama engelleyici görünmez katmanlar için koruma */
+        .click-through { pointer-events: none; }
+        .click-auto { pointer-events: auto; }
+    </style>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body class="min-h-screen pb-12 flex flex-col">
+    <div id="app" v-cloak class="flex-1 flex flex-col">
+
+        <nav class="fixed top-0 left-0 right-0 h-16 bg-paper/90 backdrop-blur-md border-b border-border z-50 flex items-center justify-between px-4 md:px-8 shadow-sm">
+            <div class="flex items-center gap-3">
+                <img src="orjinal.svg" alt="Ülkem Yanımda Logo" class="h-10 w-auto object-contain" onerror="this.outerHTML='<span class=\'font-cinzel font-bold text-olive text-lg\'>🌿 ÜLKEM YANIMDA</span>'">
+            </div>
+            
+            <div class="flex items-center gap-2 md:gap-4">
+                <button @click="toggleTheme" class="w-10 h-10 rounded-full bg-bg border border-border text-olive flex items-center justify-center hover:bg-border transition cursor-pointer" :title="isDarkMode ? 'Aydınlık Mod' : 'Karanlık Mod'">
+                    {{ isDarkMode ? '☀️' : '🌙' }}
+                </button>
+                <button @click="toggleSound" class="w-10 h-10 rounded-full bg-bg border border-border text-olive flex items-center justify-center hover:bg-border transition cursor-pointer" :title="soundEnabled ? 'Sesi Kapat' : 'Sesi Aç'">
+                    {{ soundEnabled ? '🔊' : '🔇' }}
+                </button>
+                <a href="https://memleketim.github.io/17/index.html" class="bg-olive hover:bg-olive/90 text-white font-sans font-bold text-xs tracking-widest uppercase px-4 py-2 rounded-lg transition cursor-pointer shadow-sm">
+                    Haritaya Dön 🗺️
+                </a>
+            </div>
+        </nav>
+
+        <a href="https://drive.google.com/file/d/1NkyQ3_bhLhugAU5YhPR5x8ZifGmBmCYO/view" target="_blank" class="block bg-clay hover:bg-clay/90 text-white text-center py-2 px-4 text-xs font-bold font-sans tracking-wide transition mt-16 shadow-md z-40 relative">
+            Elif Ünsal'ın çalışmasının tamamına ulaşmak için tıklayınız. ✨
+        </a>
+
+        <header class="bg-paper border-b border-border py-6 px-4 md:px-8 z-30 shadow-sm relative">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-4 text-center md:text-left flex-wrap justify-center md:justify-start">
+                    <div class="p-3 bg-bg rounded-2xl text-olive border border-border shadow-inner">
+                        <svg class="w-8 h-8 text-olive animate-[spin_10s_linear_infinite]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-serif font-black tracking-tight text-text">
+                            ÇANAKKALE <span class="text-clay italic font-normal">Lezzet Serüveni</span>
+                        </h1>
+                        <p class="text-muted text-xs md:text-sm font-serif italic mt-0.5">
+                            Ezine Peyniri ve Yöresel Yemekler
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 flex-wrap justify-center">
+                    <div class="bg-bg border border-border rounded-xl py-2.5 px-5 flex items-center gap-3 shadow-sm">
+                        <span class="text-3xl animate-bounce">🎖️</span>
+                        <div>
+                            <span class="text-[10px] text-olive font-sans font-bold block leading-none tracking-widest uppercase">Toplam Skorun</span>
+                            <span class="text-xl md:text-2xl font-serif font-black text-text">{{ score }}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-bg border border-border rounded-xl py-2 px-3 flex items-center gap-1.5 shadow-sm">
+                        <span class="text-[10px] text-olive font-sans font-bold block uppercase mr-2.5 tracking-wider">Rozetlerin:</span>
+                        <div class="flex gap-1.5">
+                            <div v-for="badge in rozetler" :key="badge.id"
+                                 class="w-8 h-8 rounded-lg flex items-center justify-center text-sm transition relative group"
+                                 :class="isUnlocked(badge.id) ? 'bg-paper shadow border border-clay/50' : 'bg-border/40 opacity-30 select-none grayscale'"
+                                 :title="badge.title + ': ' + badge.description">
+                                <span>{{ badge.icon }}</span>
+                                <div class="absolute bottom-11 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col bg-text text-bg text-[10px] p-2 rounded shadow w-36 text-center z-50 leading-tight click-through">
+                                    <strong class="block text-clay">{{ badge.title }}</strong>
+                                    {{ badge.description }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 md:px-8 mt-8 flex-1 w-full">
+            <section class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-8">
+                <button @click="setActiveTab('showcase')"
+                        class="p-4 rounded-xl border text-center transition flex flex-col items-center justify-center gap-2 font-serif duration-150 cursor-pointer"
+                        :class="activeTab === 'showcase' ? 'bg-olive border-olive text-bg shadow-md font-bold' : 'bg-paper border-border hover:bg-bg hover:text-olive text-text'">
+                    <span class="text-2xl">🗺️</span>
+                    <span class="text-[10px] md:text-xs font-sans font-bold tracking-wider uppercase">Lezzet Haritası</span>
+                </button>
+
+                <button @click="setActiveTab('cooking')"
+                        class="p-4 rounded-xl border text-center transition flex flex-col items-center justify-center gap-2 font-serif duration-150 cursor-pointer"
+                        :class="activeTab === 'cooking' ? 'bg-olive border-olive text-bg shadow-md font-bold' : 'bg-paper border-border hover:bg-bg hover:text-olive text-text'">
+                    <span class="text-2xl">👨‍🍳</span>
+                    <span class="text-[10px] md:text-xs font-sans font-bold tracking-wider uppercase">Aşçıbaşı Atölyesi</span>
+                </button>
+
+                <button @click="setActiveTab('detective')"
+                        class="p-4 rounded-xl border text-center transition flex flex-col items-center justify-center gap-2 font-serif duration-150 cursor-pointer"
+                        :class="activeTab === 'detective' ? 'bg-clay border-clay text-bg shadow-md font-bold' : 'bg-paper border-border hover:bg-bg hover:text-clay text-text'">
+                    <span class="text-2xl">🧀</span>
+                    <span class="text-[10px] md:text-xs font-sans font-bold tracking-wider uppercase">Ezine Yolculuğu</span>
+                </button>
+
+                <button @click="setActiveTab('mill')"
+                        class="p-4 rounded-xl border text-center transition flex flex-col items-center justify-center gap-2 font-serif duration-150 cursor-pointer"
+                        :class="activeTab === 'mill' ? 'bg-yellow-600 border-yellow-600 text-white shadow-md font-bold' : 'bg-paper border-border hover:bg-bg hover:text-yellow-600 text-text'">
+                    <span class="text-2xl">🫒</span>
+                    <span class="text-[10px] md:text-xs font-sans font-bold tracking-wider uppercase">Sıvı Altın Değirmeni</span>
+                </button>
+
+                <button @click="setActiveTab('quiz')"
+                        class="col-span-2 md:col-span-1 p-4 rounded-xl border text-center transition flex flex-col items-center justify-center gap-2 font-serif duration-150 cursor-pointer"
+                        :class="activeTab === 'quiz' ? 'bg-red-800 border-red-800 text-white shadow-md font-bold' : 'bg-paper border-border hover:bg-bg hover:text-red-800 text-text'">
+                    <span class="text-2xl">🏆</span>
+                    <span class="text-[10px] md:text-xs font-sans font-bold tracking-wider uppercase">Bilgi Yarışması</span>
+                </button>
+            </section>
+
+            <div v-if="activeTab === 'showcase'" class="space-y-8 animate-fade-in-up">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <div class="lg:col-span-5 space-y-4">
+                        <h3 class="font-sans font-bold text-olive uppercase text-[10px] tracking-[0.2em]">Yöresel Tatlar Listesi (Tıkla ve İncele!)</h3>
+                        <div class="space-y-3">
+                            <div v-for="food in lezzetler" :key="food.id"
+                                 @click="setSelectedInspectFood(food)"
+                                 class="p-4 rounded-xl border transition-all duration-150 cursor-pointer flex items-center justify-between group"
+                                 :class="selectedInspectFood?.id === food.id ? 'bg-paper border-clay shadow ring-1 ring-clay/30' : 'bg-paper/80 border-border hover:border-olive/50 hover:shadow-xs'">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded overflow-hidden flex-shrink-0 bg-bg">
+                                        <img :src="food.imageUrl" :alt="food.name" class="w-full h-full object-cover">
+                                    </div>
+                                    <div>
+                                        <h4 class="font-serif font-bold text-text text-base group-hover:text-clay transition">{{ food.name }}</h4>
+                                        <span class="text-[10px] text-clay font-sans font-bold block mt-0.5" v-if="food.highlight">{{ food.highlight }}</span>
+                                        <span class="text-[10px] text-olive/60 font-sans block mt-0.5" v-else>Çanakkale Geleneği</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 bg-paper rounded-2xl p-6 md:p-8 border border-border shadow-sm space-y-6">
+                        <div v-if="selectedInspectFood" class="space-y-6">
+                            <div class="relative rounded-xl overflow-hidden aspect-video shadow-inner bg-bg">
+                                <img :src="selectedInspectFood.imageUrl" :alt="selectedInspectFood.name" class="w-full h-full object-contain" />
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none"></div>
+                                <span class="absolute bottom-4 left-4 bg-paper/95 border border-border text-[9px] font-sans font-bold tracking-wider text-olive py-1 px-3 rounded shadow-xs">
+                                    🍅 %100 DOĞAL YÖRESEL MALZEMELER
+                                </span>
+                            </div>
+
+                            <div class="space-y-3">
+                                <h3 class="text-3xl font-serif font-black text-text">{{ selectedInspectFood.name }}</h3>
+                                <div v-if="selectedInspectFood.highlight" class="bg-bg text-olive rounded-lg p-3.5 border border-border text-xs font-serif font-semibold italic leading-relaxed">
+                                    {{ selectedInspectFood.highlight }}
+                                </div>
+                                <p class="text-text font-sans text-sm leading-relaxed md:text-base block pt-2">
+                                    {{ selectedInspectFood.description }}
+                                </p>
+                            </div>
+
+                            <div class="border-t border-border pt-4 space-y-2">
+                                <span class="text-[10px] font-sans font-bold tracking-widest text-olive block">İÇİNDEKİ YÖRESEL MALZEMELER</span>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <span v-for="ing in selectedInspectFood.ingredients" :key="ing"
+                                          class="text-xs bg-bg font-sans font-semibold text-olive py-1.5 px-3 rounded border border-border">
+                                        {{ ing }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-border pt-4 space-y-2.5">
+                                <span class="text-[10px] font-sans font-bold tracking-widest text-clay block">💡 BİLİYOR MUYDUNUZ? (Öğretici Bilgiler)</span>
+                                <ul class="space-y-2">
+                                    <li v-for="(t, idx) in selectedInspectFood.trivia" :key="idx" class="flex gap-2 items-start text-xs md:text-sm text-text">
+                                        <span class="text-clay font-bold font-serif">❧</span>
+                                        <p class="leading-relaxed font-serif italic">{{ t }}</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-paper rounded-2xl p-6 border border-border shadow-sm space-y-4">
+                    <div class="flex items-center gap-2 border-b border-border pb-3 mb-4">
+                        <span class="text-2xl">📚</span>
+                        <div>
+                            <h3 class="font-serif font-bold text-text text-lg">Kültür ve Türkçe Kelime Öğrenme Panosu</h3>
+                            <p class="text-xs font-sans text-olive/70">Genel dil bilgini ve coğrafi kültürünü geliştirecek kelimelerin Türkçe tanımlarını oku!</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+                        <div v-for="(vocab, idx) in cografiSozluk" :key="vocab.term"
+                             @click="toggleVocabulary(idx)"
+                             class="p-3.5 rounded-xl border text-center transition cursor-pointer select-none"
+                             :class="openedVocabularyIndex === idx ? 'bg-bg border-clay text-text shadow-xs' : 'bg-paper border-border hover:border-olive text-olive'">
+                            <strong class="text-sm font-serif font-bold flex items-center justify-center gap-1">
+                                {{ vocab.term }}
+                                <svg class="w-3.5 h-3.5 transition" :class="openedVocabularyIndex === idx ? 'rotate-180 text-clay' : 'text-olive'" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </strong>
+                            <p v-if="openedVocabularyIndex === idx" class="text-xs text-text mt-2 leading-relaxed text-left border-t pt-2 border-border font-sans">
+                                {{ vocab.desc }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="activeTab === 'cooking'" class="space-y-8 animate-fade-in-up">
+                <div class="bg-paper rounded-2xl p-6 md:p-8 border border-border max-w-5xl mx-auto shadow-sm">
+                    <div class="flex items-center gap-3 border-b border-border pb-5 mb-6">
+                        <span class="text-4xl">👨‍🍳</span>
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-serif font-black text-text">Aşçıbaşı Atölyesi: Çanakkale Lezzetleri Pişiyor!</h2>
+                            <p class="text-muted text-sm font-sans mt-1">
+                                Geleneksel tarifleri adım adım takip et, malzemeleri doğru sırada ekle ve usta aşçı ol! 
+                            </p>
+                        </div>
+                    </div>
+
+                    <div v-if="!cookingRecipe" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div v-for="recipe in lezzetler" :key="recipe.id"
+                             class="bg-bg border border-border rounded-xl p-5 hover:shadow-sm transition duration-200 flex flex-col justify-between">
+                            <div>
+                                <div class="relative rounded-lg overflow-hidden mb-4 aspect-video border border-border/35 bg-white flex items-center justify-center">
+                                    <img :src="recipe.imageUrl" :alt="recipe.name" class="w-full h-full object-contain" />
+                                    <div v-if="completedYemekler.includes(recipe.id)" class="absolute top-2 right-2 bg-olive text-white rounded-full p-1.5 shadow">
+                                        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <h3 class="text-lg font-serif font-black text-text mb-1">{{ recipe.name }}</h3>
+                                <p class="text-muted text-xs line-clamp-3 mb-4 font-sans">{{ recipe.description }}</p>
+                            </div>
+                            <button @click="startCooking(recipe)"
+                                    class="w-full bg-olive hover:bg-olive/90 text-white font-sans font-bold text-xs tracking-widest uppercase py-3 rounded-lg transition duration-150 cursor-pointer">
+                                🍴 {{ completedYemekler.includes(recipe.id) ? 'Tekrar Pişir' : 'Yemeği Pişir!' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-5 bg-bg/50 rounded-xl p-5 border border-border space-y-5">
+                            <div class="flex items-center justify-between border-b pb-3 border-border">
+                                <h3 class="font-serif font-black text-text text-base flex items-center gap-1.5">
+                                    <img :src="cookingRecipe.imageUrl" class="w-6 h-6 rounded-full object-cover">
+                                    {{ cookingRecipe.name }}
+                                </h3>
+                                <button @click="stopCooking" class="text-[10px] text-clay border border-border bg-paper hover:bg-bg px-2.5 py-1 rounded-md transition font-sans font-bold tracking-wider uppercase cursor-pointer">
+                                    Kapat / Değiştir
+                                </button>
+                            </div>
+
+                            <div v-if="!cookingRecipeFinished" class="space-y-3">
+                                <span class="text-olive text-[10px] font-sans font-bold tracking-wider uppercase block">TARİF ADIMLARI (Sırayla Uygula!)</span>
+                                <div v-for="(step, idx) in cookingRecipe.cookingSteps" :key="idx"
+                                     class="p-3.5 rounded-lg text-sm transition"
+                                     :class="idx === currentCookingStepIndex ? 'bg-paper border border-border border-l-4 border-l-clay shadow-xs font-serif text-text' : idx < currentCookingStepIndex ? 'bg-bg text-olive opacity-50 line-through' : 'bg-bg text-muted border border-transparent'">
+                                    <div class="flex items-start gap-2.5">
+                                        <span class="w-5 h-5 rounded-full flex items-center justify-center font-mono text-[10px] font-bold mt-0.5"
+                                              :class="idx === currentCookingStepIndex ? 'bg-clay text-white' : 'bg-border text-muted'">
+                                            {{ idx + 1 }}
+                                        </span>
+                                        <div class="flex-1 text-xs md:text-sm">
+                                            <p>{{ step.instruction }}</p>
+                                            <div v-if="idx === currentCookingStepIndex && step.requiredIngredients.length > 0" class="mt-2 flex flex-wrap gap-1">
+                                                <span v-for="reqIng in step.requiredIngredients" :key="reqIng" 
+                                                      class="text-[9px] px-1.5 py-0.5 rounded"
+                                                      :class="stepAddedIngredients.includes(reqIng) ? 'bg-olive text-bg' : 'bg-border text-text'">
+                                                    {{ reqIng }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-else class="text-center py-8 space-y-4">
+                                <span class="text-5xl animate-bounce inline-block">🍲</span>
+                                <h4 class="text-xl font-serif font-black text-text">Eline Sağlık, Harika Kokuyor!</h4>
+                                <p class="text-muted text-sm leading-relaxed font-sans">
+                                    Tebrikler kahraman! {{ cookingRecipe.name }} yemeğini usulüne uygun pişirdin!
+                                </p>
+                                <button @click="stopCooking" class="bg-olive hover:bg-olive/90 text-white font-sans font-bold text-xs tracking-widest uppercase py-3 px-6 rounded-lg transition cursor-pointer w-full mt-4">
+                                    Diğer Yemekleri Dene! 🚀
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-7 space-y-6">
+                            <div v-if="!cookingRecipeFinished" class="space-y-6">
+                                <div class="bg-bg rounded-xl p-6 border border-border flex flex-col items-center justify-center min-h-[220px] relative overflow-hidden">
+                                    <div class="absolute top-2 right-2 flex items-center gap-1.5 bg-paper border border-border px-3 py-1 rounded-full shadow-xs text-xs font-semibold">
+                                        <span class="w-2.5 h-2.5 rounded-full" :class="heatLevel === 'ORTA' ? 'bg-red-500 animate-pulse' : 'bg-gray-400'"></span>
+                                        Sıcaklık: <strong class="text-clay uppercase">{{ heatLevel }}</strong>
+                                    </div>
+
+                                    <div v-if="cookingError" class="absolute top-4 left-4 right-4 bg-red-100 border border-red-200 text-red-800 text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-xs z-10 animate-shake">
+                                        <span>⚠️ {{ cookingError }}</span>
+                                    </div>
+
+                                    <div class="relative py-4 flex flex-col items-center mt-6">
+                                        <div class="w-48 h-32 bg-[#a35c37] border-4 border-[#864a2a] rounded-b-3xl relative flex flex-col justify-end items-center shadow-lg z-10">
+                                            <div class="absolute top-0 w-52 h-2.5 bg-[#864a2a] rounded-full left-1/2 -translate-x-1/2"></div>
+                                            <div class="w-44 h-24 bg-[#fedcb9]/90 rounded-b-2xl mb-1 p-2 overflow-hidden flex flex-wrap gap-1 items-end justify-center">
+                                                <span v-for="(ing, i) in stepAddedIngredients" :key="i" class="text-[10px] bg-clay text-white rounded-md px-1.5 py-0.5">
+                                                    {{ ing }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <span class="text-muted text-xs text-center font-medium font-sans mt-2">
+                                        Bu adımdaki malzemeler: <strong class="text-text font-serif italic">{{ stepAddedIngredients.length > 0 ? stepAddedIngredients.join(", ") : "Henüz eklenmedi" }}</strong>
+                                    </span>
+                                </div>
+
+                                <div class="bg-bg rounded-xl p-4 border border-border">
+                                    <h4 class="font-sans font-bold text-[10px] text-olive uppercase tracking-widest mb-2.5">Eylemler (Tarife göre tıkla):</h4>
+                                    <div class="flex flex-wrap gap-3">
+                                        <button @click="adjustHeat" class="flex items-center gap-1.5 text-xs font-sans font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg border cursor-pointer transition duration-150"
+                                                :class="heatLevel === 'ORTA' ? 'bg-clay text-white border-clay' : 'bg-paper text-olive border-border hover:bg-bg'">
+                                            🔥 {{ heatLevel === 'ORTA' ? 'Ocağı Kapat' : 'Ocağı Yak' }}
+                                        </button>
+                                        <button @click="triggerAction('karistir')" class="bg-olive hover:bg-olive/90 text-white text-xs font-sans font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg transition cursor-pointer">
+                                            🥄 Karıştır!
+                                        </button>
+                                        <button @click="triggerAction('pisir')" class="bg-clay hover:bg-clay/90 text-white text-xs font-sans font-bold tracking-wider uppercase px-4 py-2.5 rounded-lg transition cursor-pointer">
+                                            ⏳ Pişmesini Bekle / Fırınla!
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="bg-paper rounded-xl p-4 border border-border shadow-xs">
+                                    <div class="flex items-center gap-1.5 mb-3.5">
+                                        <span class="font-sans font-bold text-[10px] text-olive uppercase tracking-widest">Mutfak Ambarı (Tarife Bakarak Seç)</span>
+                                    </div>
+                                    <div class="flex flex-wrap gap-2.5">
+                                        <button v-for="ing in cookingRecipe.ingredients" :key="ing"
+                                                @click="addCookingIngredient(ing)"
+                                                :disabled="stepAddedIngredients.includes(ing)"
+                                                class="text-xs py-2 px-3.5 rounded-lg border transition transform font-sans font-semibold cursor-pointer"
+                                                :class="stepAddedIngredients.includes(ing) ? 'bg-border border-transparent text-muted cursor-not-allowed scale-95' : 'bg-bg border-border text-text hover:bg-paper hover:border-olive shadow-xs'">
+                                            {{ ing }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="activeTab === 'detective'" class="space-y-8 animate-fade-in-up">
+                <div class="bg-paper rounded-2xl p-6 md:p-8 border border-border max-w-4xl mx-auto shadow-sm">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-5 mb-6">
+                        <div>
+                            <span class="bg-bg text-olive text-[10px] font-sans font-bold tracking-widest uppercase border border-border py-1 px-3.5 rounded-full">
+                                COĞRAFİ İŞARET KAMPANYASI 🧀
+                            </span>
+                            <h2 class="text-2xl md:text-3xl font-serif font-black text-text mt-2.5">
+                                Ezine Peyniri'nin Gururlu Başarı Yolculuğu
+                            </h2>
+                        </div>
+                        <button @click="showCografiInfo = !showCografiInfo" class="mt-3 md:mt-0 text-xs text-clay font-sans font-bold tracking-wider uppercase hover:text-olive hover:underline cursor-pointer">
+                            Coğrafi İşaret Nedir? ❓
+                        </button>
+                    </div>
+
+                    <div v-if="showCografiInfo" class="bg-bg rounded-xl p-5 mb-6 text-text text-sm leading-relaxed border border-border font-serif italic">
+                        <strong class="block text-olive font-sans font-bold uppercase tracking-widest text-xs mb-1.5">Coğrafi İşaret Nedir? 🏆</strong>
+                        Bir peynir düşünün ki, tadını sadece Çanakkale'nin Kaz Dağları'ndaki kekikli rüzgarlardan alsın! İşte <strong>coğrafi işaret</strong> o topraklara ait koruma mührüdür. 
+                        <strong class="block mt-2 font-sans font-bold text-clay uppercase text-[10px] tracking-wider">Ezine Peyniri, Avrupa Birliği'nden (AB) bu mührü alan İLK tescilli Türk peyniridir!</strong>
+                    </div>
+
+                    <div v-if="detectiveStep === 'intro'" class="text-center py-10 space-y-6">
+                        <div class="relative inline-flex items-center justify-center">
+                            <img src="peynir.png" alt="Ezine Peyniri" class="w-32 h-32 object-contain drop-shadow-md">
+                        </div>
+                        <h3 class="text-2xl font-serif font-black text-text mb-3">Dedektif Ol ve Tescili Al!</h3>
+                        <p class="text-muted max-w-xl mx-auto mb-8 text-sm md:text-base font-sans">
+                            Sütün sağılmasından, AB mührünü alana kadar süreci yönet!
+                        </p>
+                        <button @click="startDetectiveJourney" class="bg-olive hover:bg-olive/90 text-white font-sans font-bold text-xs tracking-widest uppercase px-8 py-4 rounded-xl shadow-sm transition duration-200 cursor-pointer">
+                            Maceraya Başla! 🚀
+                        </button>
+                    </div>
+
+                    <div v-if="detectiveStep === 'milk'" class="space-y-6">
+                        <div class="bg-bg rounded-xl p-4 border border-border flex items-start gap-4">
+                            <span class="text-4xl">🐑</span>
+                            <div>
+                                <h4 class="font-serif font-black text-text">Adım 1: Kaz Dağları'nda Taze Süt Toplama</h4>
+                                <p class="text-muted text-sm mt-1">Süt tankını doldurmak için butona tıkla.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center py-6">
+                            <div class="w-32 h-44 bg-bg rounded-xl border-2 border-border relative overflow-hidden shadow-inner mb-6">
+                                <div class="absolute bottom-0 left-0 right-0 bg-white transition-all duration-300" :style="{ height: milkedPercent + '%' }"></div>
+                                <div class="absolute inset-0 flex items-center justify-center font-bold font-mono text-olive text-lg drop-shadow-sm">{{ milkedPercent }}%</div>
+                            </div>
+                            <button @click="milkAnimal" class="bg-olive hover:bg-olive/90 text-white font-bold text-xs uppercase py-3 px-6 rounded-xl shadow-xs transition cursor-pointer">
+                                🥛 Sütü Sağ!
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="detectiveStep === 'stir'" class="space-y-6">
+                        <div class="bg-bg rounded-xl p-4 border border-border flex items-start gap-4">
+                            <span class="text-4xl">🧪</span>
+                            <div>
+                                <h4 class="font-serif font-black text-text">Adım 2: Doğal Maya ve Mayalama</h4>
+                                <p class="text-muted text-sm mt-1">Şirden mayası eklenen sütü karıştır.</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center py-8">
+                            <div class="relative w-48 h-48 rounded-full border-4 border-border flex items-center justify-center bg-bg shadow-inner">
+                                <div class="w-40 h-40 rounded-full border border-dashed border-clay flex items-center justify-center transition-transform duration-200" :style="{ transform: 'rotate(' + (stirProgress * 3.6) + 'deg)' }">
+                                    <span class="text-3xl">🥄</span>
+                                </div>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <span class="bg-paper text-olive text-xs font-mono font-bold py-1 px-3 rounded border border-border shadow-xs">% {{ stirProgress }}</span>
+                                </div>
+                            </div>
+                            <button @click="stirCurd" class="bg-olive hover:bg-olive/90 text-white font-bold text-xs uppercase py-3 px-6 rounded-xl mt-6 cursor-pointer">
+                                🥄 Karıştır!
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="detectiveStep === 'age'" class="space-y-6">
+                        <div class="bg-bg rounded-xl p-4 border border-border flex items-start gap-4">
+                            <span class="text-4xl">⏳</span>
+                            <div>
+                                <h4 class="font-serif font-black text-text">Adım 3: Mahzende Olgunlaşma</h4>
+                                <p class="text-muted text-sm mt-1">Ezine peyniri 11 ay dinlenmelidir. Bekletelim!</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center py-8">
+                            <div class="text-center mb-6">
+                                <span class="text-olive block text-[10px] font-sans font-bold uppercase">GEÇEN SÜRE</span>
+                                <span class="text-6xl md:text-8xl font-serif font-black text-clay block my-2">{{ monthsWaited }} / 11</span>
+                            </div>
+                            <button @click="advanceMonth" class="bg-olive text-white font-bold text-xs uppercase py-3 px-6 rounded-xl cursor-pointer">
+                                ⏳ 1 Ay İlerlet
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="detectiveStep === 'stamp'" class="space-y-6">
+                        <div v-if="!isStamped" class="text-center py-10 space-y-6">
+                            <div class="relative inline-flex items-center justify-center w-32 h-32 bg-bg border border-border rounded-full shadow-inner overflow-hidden p-2">
+                                <span class="text-4xl opacity-30">🫥</span>
+                            </div>
+                            <h3 class="text-3xl font-serif font-black text-text mb-2">Peynir Olgunlaştı! 🥳</h3>
+                            <p class="text-muted text-sm font-sans mb-6 max-w-lg mx-auto">
+                                AB tescil komitesi onayladı. İlk AB Coğrafi İşaret Mührünü basmaya hak kazandın!
+                            </p>
+                            <button @click="stampABSeal" class="bg-clay text-white font-bold text-xs uppercase px-8 py-4 rounded-xl cursor-pointer">
+                                🛡️ Tescil Mührünü Vur!
+                            </button>
+                        </div>
+                        <div v-else class="text-center py-10 space-y-6">
+                            <div class="inline-flex items-center justify-center w-40 h-40 rounded-full bg-white shadow-lg overflow-hidden p-2 border-4 border-yellow-500 animate-[pulse_2s_ease-in-out_infinite]">
+                                <img src="cografi.png" alt="Coğrafi İşaret" class="w-full h-full object-contain" onerror="this.outerHTML='<span class=\'text-5xl\'>🏆</span>'">
+                            </div>
+                            <h3 class="text-3xl font-serif font-black text-olive uppercase tracking-tight">MUHTEŞEM BAŞARI!</h3>
+                            <p class="text-text font-serif italic max-w-xl mx-auto">
+                                Ezine Peyniri artık tescilli bir dünya markası! 
+                            </p>
+                            <button @click="resetDetective" class="bg-bg border border-border text-olive font-bold text-xs uppercase px-5 py-3 rounded-xl hover:bg-border cursor-pointer">
+                                Yeniden Oyna
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="activeTab === 'mill'" class="space-y-8 animate-fade-in-up">
+                <div class="bg-paper rounded-2xl p-6 md:p-8 border border-border max-w-5xl mx-auto shadow-sm">
+                    <div class="flex items-center gap-3 border-b border-border pb-5 mb-6">
+                        <span class="text-4xl">🫒</span>
+                        <div>
+                            <h2 class="text-2xl md:text-3xl font-serif font-black text-text">Sıvı Altın Değirmeni: Sıfat ve Zarf Oyunu</h2>
+                            <p class="text-muted text-sm font-sans mt-1">
+                                Zeytin ezme taşını döndürmek için gelen kelimeyi "Sıfat" veya "Zarf" olarak doğru ayır ve sızma zeytinyağını süz!
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="bg-bg border border-border rounded-xl p-6 flex flex-col items-center justify-center relative shadow-inner">
+                            <div class="w-40 h-40 border-8 border-double border-olive/50 rounded-full flex items-center justify-center relative transition-transform duration-700 ease-in-out"
+                                 :style="{ transform: 'rotate(' + millRotation + 'deg)' }">
+                                <span class="text-4xl text-clay">✹</span>
+                                <div class="absolute w-3 h-12 bg-clay rounded-full -top-5"></div>
+                            </div>
+                            
+                            <div class="w-20 h-24 mt-4 border-4 border-olive/30 border-t-0 rounded-b-2xl relative overflow-hidden bg-black/5">
+                                <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-yellow-500 to-yellow-300 transition-all duration-500"
+                                     :style="{ height: millOilLevel + '%' }"></div>
+                            </div>
+                            <span class="mt-3 text-[10px] font-bold text-clay uppercase tracking-widest">Süzülen Yağ</span>
+                        </div>
+
+                        <div class="flex flex-col gap-4 justify-center">
+                            <div v-if="millIndex < millWords.length" class="bg-paper border border-border rounded-xl p-6 text-center shadow-sm">
+                                <span class="text-[10px] text-muted font-bold uppercase tracking-widest block mb-2">Sıradaki Kelime:</span>
+                                <h3 class="text-3xl font-serif font-black text-olive">{{ millWords[millIndex].text }}</h3>
+                            </div>
+                            <div v-else class="bg-paper border border-border rounded-xl p-6 text-center shadow-sm">
+                                <span class="text-4xl block mb-2">🎉</span>
+                                <h3 class="text-xl font-serif font-black text-olive">Yağlar Süzüldü!</h3>
+                                <p class="text-sm text-muted mt-2">Türkçemizi de sızma yağ gibi berrak kullandın!</p>
+                                <button @click="resetMill" class="mt-4 bg-clay text-white font-bold text-xs uppercase py-2 px-4 rounded cursor-pointer">Tekrar Oyna</button>
+                            </div>
+
+                            <div v-if="millIndex < millWords.length" class="grid grid-cols-2 gap-3 mt-2">
+                                <button @click="sortMillWord('sifat')" class="bg-bg border-2 border-dashed border-border hover:border-olive hover:bg-olive/10 text-text p-4 rounded-xl transition cursor-pointer text-center">
+                                    <strong class="block font-serif text-lg mb-1">SIFAT</strong>
+                                    <span class="text-[10px] text-muted">İsmi niteler (ör: taze)</span>
+                                </button>
+                                <button @click="sortMillWord('zarf')" class="bg-bg border-2 border-dashed border-border hover:border-clay hover:bg-clay/10 text-text p-4 rounded-xl transition cursor-pointer text-center">
+                                    <strong class="block font-serif text-lg mb-1">ZARF</strong>
+                                    <span class="text-[10px] text-muted">Eylemi niteler (ör: yavaşça)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="activeTab === 'quiz'" class="space-y-8 animate-fade-in-up">
+                <div class="bg-paper rounded-2xl p-6 md:p-8 border border-border max-w-3xl mx-auto shadow-sm">
+                    <div class="flex items-center justify-between border-b border-border pb-4 mb-6">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">🏆</span>
+                            <h2 class="text-xl md:text-2xl font-serif font-black text-text">Lezzet Dedektifi Bilgi Yarışması</h2>
+                        </div>
+                        <span class="text-[10px] font-sans font-bold text-clay bg-bg border border-border px-3.5 py-1 rounded-full uppercase tracking-wider hidden sm:inline-block">
+                            TÜRKÇE & KÜLTÜR SINAVI
+                        </span>
+                    </div>
+
+                    <div v-if="!quizFinished" class="space-y-6">
+                        <div class="space-y-1">
+                            <div class="flex justify-between text-[10px] text-olive font-sans font-bold tracking-wider uppercase">
+                                <span>ÇANAKKALE SEVİYESİ</span>
+                                <span>Soru {{ currentQuizIndex + 1 }} / {{ quizQuestions.length }}</span>
+                            </div>
+                            <div class="h-2 w-full bg-border rounded-full overflow-hidden">
+                                <div class="bg-clay h-full rounded-full transition-all duration-300" :style="{ width: ((currentQuizIndex + 1) / quizQuestions.length * 100) + '%' }"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-bg rounded-xl p-5 border border-border">
+                            <h3 class="text-lg md:text-xl font-serif font-black text-text leading-snug">{{ quizQuestions[currentQuizIndex].question }}</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                            <button v-for="(option, idx) in quizQuestions[currentQuizIndex].options" :key="idx"
+                                    @click="selectQuizOption(idx)" :disabled="quizHasAnswered"
+                                    class="p-4 rounded-xl border text-left text-sm md:text-base cursor-pointer font-sans transition duration-150 flex justify-between items-center"
+                                    :class="getQuizOptionClass(idx)">
+                                <span>{{ option }}</span>
+                                <span v-if="quizHasAnswered && idx === quizQuestions[currentQuizIndex].answerIndex" class="text-olive font-bold">✓</span>
+                                <span v-if="quizHasAnswered && selectedQuizOption === idx && idx !== quizQuestions[currentQuizIndex].answerIndex" class="text-red-500 font-bold">✗</span>
+                            </button>
+                        </div>
+
+                        <div v-if="quizHasAnswered" class="bg-bg rounded-xl p-5 border border-border space-y-4">
+                            <div>
+                                <h4 class="font-sans font-bold text-[10px] text-olive uppercase flex items-center gap-1.5 mb-2 tracking-widest">💡 Şefin Çözümü</h4>
+                                <p class="text-text font-serif italic text-sm leading-relaxed">{{ quizQuestions[currentQuizIndex].explanation }}</p>
+                            </div>
+                            <div v-if="quizQuestions[currentQuizIndex].vocabularyFocus" class="bg-paper rounded-xl p-4 border border-border flex items-start gap-3">
+                                <span class="text-2xl">📚</span>
+                                <div>
+                                    <h4 class="font-sans font-bold text-[10px] text-olive uppercase tracking-widest">Günün Türkçe Kelimesi</h4>
+                                    <p class="text-sm mt-1">
+                                        <strong class="text-text font-serif font-black">{{ quizQuestions[currentQuizIndex].vocabularyFocus.word }}</strong>:
+                                        <span class="text-olive italic text-xs block mt-1">{{ quizQuestions[currentQuizIndex].vocabularyFocus.meaning }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                            <button @click="nextQuizQuestion" class="w-full bg-olive text-white font-sans font-bold text-xs uppercase py-3.5 px-6 rounded-xl cursor-pointer">
+                                {{ currentQuizIndex < quizQuestions.length - 1 ? 'Sonraki Soruya Geç' : 'Testi Tamamla' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-else class="text-center py-6 space-y-6">
+                        <div class="relative inline-block">
+                            <span class="text-8xl animate-pulse">🏆</span>
+                        </div>
+                        <h3 class="text-2xl md:text-3xl font-serif font-black text-text">Tebrikler Lezzet Dedektifi!</h3>
+                        
+                        <div class="bg-bg border border-border rounded-xl p-5 max-w-sm mx-auto grid grid-cols-2 gap-4">
+                            <div class="border-r border-border">
+                                <span class="text-olive text-[10px] block font-sans font-bold uppercase tracking-wider">Skorun</span>
+                                <span class="text-4xl font-serif font-black text-clay block mt-1">{{ quizCorrectAnswers * 20 }}</span>
+                            </div>
+                            <div>
+                                <span class="text-olive text-[10px] block font-sans font-bold uppercase tracking-wider">Doğru Sayın</span>
+                                <span class="text-4xl font-serif font-black text-olive block mt-1">{{ quizCorrectAnswers }} / {{ quizQuestions.length }}</span>
+                            </div>
+                        </div>
+
+                        <button @click="resetQuiz" class="bg-bg border border-border text-olive font-bold text-xs uppercase px-5 py-3 rounded-xl hover:bg-border cursor-pointer mx-auto inline-flex">
+                            Yeniden Çöz
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="mt-16 border-t border-border py-8 text-center text-xs text-olive bg-paper relative z-30">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="text-left">
+                    <p class="font-bold text-text">Ülkem Yanımda © 2026. Tüm hakları saklıdır.</p>
+                    <p class="mt-1 text-muted font-serif italic text-xs">Türkçe öğrenimini eğlenceli mutfak kültürüyle pekiştiren eğitim akademisi.</p>
+                </div>
+                <div class="flex gap-4 bg-bg text-olive rounded py-2 px-4 text-[10px] font-sans font-bold shadow-xs border border-border uppercase">
+                    <span>KONU: BİR ŞEHRİN ÖNEMLİ UNSURLARI</span>
+                    <span>GASTRONOMİ</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Web Audio & AI TTS
+        class SoundManager {
+            constructor() {
+                this.ctx = null;
+                this.synth = window.speechSynthesis;
+                this.soundEnabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            toggle(state) {
+                this.soundEnabled = state;
+                if (!state) this.synth.cancel();
+            }
+            speak(text) {
+                if (!this.soundEnabled) return;
+                this.synth.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'tr-TR';
+                u.rate = 1.05;
+                this.synth.speak(u);
+            }
+            playTone(freq1, freq2, duration, type='sine') {
+                if (!this.soundEnabled) return;
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq1, now);
+                if(freq2) osc.frequency.exponentialRampToValueAtTime(freq2, now + duration/2);
+                
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+                
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + duration);
+            }
+            playSuccess() { this.playTone(523.25, 880, 0.3); }
+            playFailure() { this.playTone(220, 147, 0.3, 'sawtooth'); }
+            playClick() { this.playTone(800, 400, 0.06); }
+            playBubbles() {
+                if (!this.soundEnabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                for (let i=0; i<6; i++) {
+                    setTimeout(() => this.playTone(120 + Math.random()*240, null, 0.08), i*60);
+                }
+            }
+        }
+
+        const audio = new SoundManager();
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    activeTab: 'showcase',
+                    score: 0,
+                    unlockedBadgeIds: ['gurme-baslangic'],
+                    isDarkMode: false,
+                    soundEnabled: true,
+                    
+                    selectedInspectFood: null,
+                    openedVocabularyIndex: null,
+                    showCografiInfo: false,
+                    completedYemekler: [],
+
+                    // Cooking States
+                    cookingRecipe: null,
+                    currentCookingStepIndex: 0,
+                    stepAddedIngredients: [], // Adım bazlı malzeme tutucu (her adım geçişinde sıfırlanır)
+                    heatLevel: 'KAPALI',
+                    cookingRecipeFinished: false,
+                    cookingError: '',
+
+                    // Detective States
+                    detectiveStep: 'intro',
+                    milkedPercent: 0,
+                    stirProgress: 0,
+                    monthsWaited: 0,
+                    isStamped: false,
+
+                    // Mill (Sıvı Altın) States
+                    millWords: [
+                        { text: 'Berrak', type: 'sifat' },
+                        { text: 'Nefis', type: 'sifat' },
+                        { text: 'Taze', type: 'sifat' },
+                        { text: 'Yavaşça', type: 'zarf' },
+                        { text: 'Özenle', type: 'zarf' },
+                        { text: 'Bolca', type: 'zarf' }
+                    ],
+                    millIndex: 0,
+                    millRotation: 0,
+                    millOilLevel: 0,
+
+                    // Quiz States
+                    currentQuizIndex: 0,
+                    selectedQuizOption: null,
+                    quizHasAnswered: false,
+                    quizCorrectAnswers: 0,
+                    quizFinished: false,
+
+                    rozetler: [
+                        { id: "gurme-baslangic", title: "Minik Kaşif 🧭", description: "Çanakkale'nin bereketli lezzet haritasını ilk kez inceledin.", icon: "🧭" },
+                        { id: "peynir-dedektifi", title: "Ezine Dedektifi 🧀", description: "Ezine peynirinin Kaz Dağları'ndan AB tesciline kadar giden başarı yolculuğunu tamamladın.", icon: "🧀" },
+                        { id: "canakkale-sefi", title: "Çanakkale Şefi 👨‍🍳", description: "Mutfak simülasyonunda yemek hazırlamayı başarıyla tamamladın.", icon: "👨‍🍳" },
+                        { id: "bilge-gurme", title: "Türkçe Kelime Ustası 🎓", description: "Yöresel lezzetlerin kelime anlamlarını ve tanımları doğru bildin.", icon: "🎓" },
+                        { id: "lezzet-sampiyonu", title: "Lezzet Şampiyonu 🏆", description: "Bilgi Yarışması'ndaki tüm soruları doğru cevaplayarak altın madalyayı kaptın!", icon: "🏆" }
+                    ],
+
+                    lezzetler: [
+                        {
+                            id: "ezine-peyniri",
+                            name: "Meşhur Ezine Peyniri",
+                            description: "Kaz Dağları'nın rüzgarlı esintileriyle beslenen koyun, keçi ve ineklerin mis kokulu sütlerinden yapılır.",
+                            highlight: "🏆 Avrupa Birliği'nden (AB) coğrafi işaret alan ilk tescilli Türk peyniridir!",
+                            imageUrl: "peynir.png",
+                            trivia: ["Sadece Ezine, Bayramiç ve Ayvacık'ta üretilir.", "Kaz Dağları'ndaki kekik aroması siner."],
+                            ingredients: ["Koyun Sütü", "Keçi Sütü", "İnek Sütü", "Doğal Maya", "Deniz Tuzu"],
+                            cookingSteps: [
+                                { instruction: "Sütleri tencereye ekle.", requiredIngredients: ["Koyun Sütü", "Keçi Sütü", "İnek Sütü"], actionType: "ekle" },
+                                { instruction: "Maya ve tuz ekleyip yavaşça karıştır.", requiredIngredients: ["Doğal Maya", "Deniz Tuzu"], actionType: "karistir" },
+                                { instruction: "Ocağı yakıp hafifçe ısıt (Pişmesini bekle).", requiredIngredients: [], actionType: "pisir" }
+                            ]
+                        },
+                        {
+                            id: "ovmac-corbasi",
+                            name: "Ovmaç Çorbası",
+                            description: "Hamurun el ile ovulup küçük topçuklar haline getirilmesi ve taze sebzelerle pişirilmesiyle hazırlanır.",
+                            highlight: "Çanakkale Geleneği",
+                            imageUrl: "corba.png",
+                            trivia: ["Adını hamurun 'ovmak' tekniğinden alır.", "Kış aylarında şifa kaynağıdır."],
+                            ingredients: ["Tereyağı", "Soğan", "Domates Salçası", "Et Suyu", "Hamur Kırıntıları"],
+                            cookingSteps: [
+                                { instruction: "Tereyağı ve soğanı tencereye ekle.", requiredIngredients: ["Tereyağı", "Soğan"], actionType: "ekle" },
+                                { instruction: "Salça ve et suyu ekleyip karıştır.", requiredIngredients: ["Domates Salçası", "Et Suyu"], actionType: "karistir" },
+                                { instruction: "Ocağı yak ve malzemeleri kaynamaya bırak (Pişir).", requiredIngredients: [], actionType: "pisir" },
+                                { instruction: "Hamur kırıntılarını ekleyip karıştır.", requiredIngredients: ["Hamur Kırıntıları"], actionType: "karistir" }
+                            ]
+                        },
+                        {
+                            id: "sardalya-baligi",
+                            name: "Sardalya Balığı",
+                            description: "Çanakkale Boğazı'nın hızlı akıntılarında yaşayan bu leziz balık, asma yaprağına sarılarak pişirilir.",
+                            highlight: "Çanakkale Geleneği",
+                            imageUrl: "sardalya.png",
+                            trivia: ["Asma yaprağı, balığın kendi suyunda kalmasını sağlar.", "En lezzetli zamanı Ağustos ayıdır."],
+                            ingredients: ["Taze Sardalya", "Zeytinyağı", "Asma Yaprağı"],
+                            cookingSteps: [
+                                { instruction: "Balıkları ve zeytinyağını tezgaha ekle.", requiredIngredients: ["Taze Sardalya", "Zeytinyağı"], actionType: "ekle" },
+                                { instruction: "Asma yaprağına sararak rulo yap (Karıştırma hareketini kullan).", requiredIngredients: ["Asma Yaprağı"], actionType: "karistir" },
+                                { instruction: "Ocağı (veya fırını) yakarak ızgarada pişir.", requiredIngredients: [], actionType: "pisir" }
+                            ]
+                        },
+                        {
+                            id: "melki-kavurmasi",
+                            name: "Melki (Mantar) Kavurması",
+                            description: "Çam ormanlarında pürlerin altında kendiliğinden yetişen özel turuncu renkli bir mantardır.",
+                            highlight: "Çanakkale Geleneği",
+                            imageUrl: "melki.png",
+                            trivia: ["Diğer yörelerde Kanlıca mantarı denir.", "Sonbahar yağmurları sonrası toplanır."],
+                            ingredients: ["Melki Mantarı", "Soğan", "Zeytinyağı", "Tuz"],
+                            cookingSteps: [
+                                { instruction: "Zeytinyağı ve soğanı tavaya ekle.", requiredIngredients: ["Zeytinyağı", "Soğan"], actionType: "ekle" },
+                                { instruction: "Melki mantarlarını ekleyip sotele (karıştır).", requiredIngredients: ["Melki Mantarı"], actionType: "karistir" },
+                                { instruction: "Tuz ekleyerek ocağı aç ve pişmeye bırak.", requiredIngredients: ["Tuz"], actionType: "pisir" }
+                            ]
+                        },
+                        {
+                            id: "tumbi-yemegi",
+                            name: "Tumbi Yemeği",
+                            description: "İçinde bulgur, patlıcan ve taze sebzeler barındıran; fırınlanarak yapılan pratik, sağlıklı bir lezzettir.",
+                            highlight: "Çanakkale Geleneği",
+                            imageUrl: "tumbi.png",
+                            trivia: ["Bulgur ve sebzelerin harmanlanıp yoğrulmasıyla yapılır.", "Fırınlandığı için çok hafiftir."],
+                            ingredients: ["Bulgur", "Patlıcan", "Zeytinyağı", "Domates Sosu"],
+                            cookingSteps: [
+                                { instruction: "Bulgur, patlıcan ve zeytinyağını kaba ekle.", requiredIngredients: ["Bulgur", "Patlıcan", "Zeytinyağı"], actionType: "ekle" },
+                                { instruction: "Köfte gibi yoğur (Karıştır butonuna bas).", requiredIngredients: [], actionType: "karistir" },
+                                { instruction: "Fırını çalıştırıp pişir.", requiredIngredients: [], actionType: "pisir" },
+                                { instruction: "Piştikten sonra domates sosu gezdir.", requiredIngredients: ["Domates Sosu"], actionType: "ekle" } // Son adım ekle ile bitiyor
+                            ]
+                        }
+                    ],
+
+                    cografiSozluk: [
+                        { term: "Coğrafi İşaret", desc: "Bir yiyecek veya ürünün sadece o yöreye ait, o toprağın özelliklerini taşıyan resmi tescilli mühre sahip olduğunu ifade eder. Örn: Ezine Peyniri." },
+                        { term: "Tescilli", desc: "Devlet veya uluslararası kurumlar (Avrupa Birliği gibi) tarafından kalitesi ve orijinalliği yasal olarak onaylanmış demektir." },
+                        { term: "Bereketli", desc: "Üzerinde bolca şifalı ot yetiştiren, ürün veren zengin topraklar için kullanılır." },
+                        { term: "Harmanlamak", desc: "Farklı güzelliklerin, lezzetlerin veya sebzelerin bir araya getirilip karıştırılması." },
+                        { term: "Yöresel", desc: "Sadece belli bir bölgeye, kente veya köye özgü olan kültürel zenginlik." }
+                    ],
+
+                    quizQuestions: [
+                        {
+                            question: "Avrupa Birliği'nden (AB) coğrafi işaret alan İLK tescilli Türk peyniri hangisidir?",
+                            options: ["Kars Kaşarı", "Ezine Peyniri", "Erzincan Tulum Peyniri", "İzmir Tulumu"],
+                            answerIndex: 1,
+                            explanation: "Ezine peyniri, üstün lezzetiyle AB'den coğrafi işaret tescili alan ilk Türk peynirimizdir!",
+                            vocabularyFocus: { word: "Coğrafi İşaret", meaning: "Bir yiyeceğin sadece oraya ait olduğunu gösteren yasal koruma." }
+                        },
+                        {
+                            question: "Eller arasında 'ovularak' yapılan hamur kırıntılarıyla pişen Çanakkale şifa çorbası hangisidir?",
+                            options: ["Ezogelin", "Tarhana", "Ovmaç Çorbası", "Mercimek"],
+                            answerIndex: 2,
+                            explanation: "Ovmaç çorbası, ismini unlu hamurun eller arasında ovulmasından alır.",
+                            vocabularyFocus: { word: "Ovmak", meaning: "Elin avuç içiyle bastırarak sürtmek veya kırıntı haline getirmek." }
+                        },
+                        {
+                            question: "Çanakkale Sardalya Balığı, kurumaması için genellikle hangi yaprağa sarılarak pişirilir?",
+                            options: ["İncir Yaprağı", "Asma Yaprağı", "Dut Yaprağı", "Çınar Yaprağı"],
+                            answerIndex: 1,
+                            explanation: "Sardalyalar asma yapraklarına rulo şeklinde sarılarak ızgara edilir. Kendi suyunda pişer.",
+                            vocabularyFocus: { word: "Izgara", meaning: "Ateş üzerinde teller yardımıyla pişirme." }
+                        },
+                        {
+                            question: "Çam ormanlarında pürlerin altında gizlenen turuncu renkli protein zengini mantar hangisidir?",
+                            options: ["Melki", "Kültür Mantarı", "Trüf", "İstiridye"],
+                            answerIndex: 0,
+                            explanation: "Eti aratmayacak lezzetteki Melki mantarı, sonbahar yağmurlarından sonra yetişir.",
+                            vocabularyFocus: { word: "Melki", meaning: "Çam ormanlarının altından toplanan turuncu mantar." }
+                        },
+                        {
+                            question: "Tumbi yemeğinin içerisinde hangi besleyici tahıl ve sebze harmanı yer alır?",
+                            options: ["Pirinç-Kabak", "Bulgur-Patlıcan", "Nohut-Patates", "Fasulye-Biber"],
+                            answerIndex: 1,
+                            explanation: "Tumbi yemeği bulgur, patlıcan ve taze yeşilliklerin yoğrulup fırınlanmasıyla yapılır.",
+                            vocabularyFocus: { word: "Yoğurmak", meaning: "Malzemeleri el yardımıyla karıştırıp hamur haline getirmek." }
+                        }
+                    ]
+                }
+            },
+            mounted() {
+                if (this.lezzetler.length > 0) {
+                    this.selectedInspectFood = this.lezzetler[0];
+                }
+                
+                // İlk yönergeyi seslendir
+                setTimeout(() => {
+                    this.playInstruction("Haritadan bir yöresel yemek seçerek kültürümüzü keşfetmeye başlayabilirsin.");
+                }, 1000);
+            },
+            methods: {
+                toggleTheme() {
+                    this.isDarkMode = !this.isDarkMode;
+                    document.documentElement.classList.toggle('dark', this.isDarkMode);
+                    audio.playClick();
+                },
+                toggleSound() {
+                    this.soundEnabled = !this.soundEnabled;
+                    audio.toggle(this.soundEnabled);
+                    audio.playClick();
+                },
+                playInstruction(text) {
+                    audio.speak(text);
+                },
+                setActiveTab(name) {
+                    audio.playClick();
+                    this.activeTab = name;
+                    
+                    // Tab geçişlerinde yapay zeka yönergeleri
+                    if(name === 'mill') this.playInstruction("Sıvı altın değirmenine hoş geldin. Kelimelerin sıfat mı zarf mı olduğunu bul.");
+                    if(name === 'cooking') this.playInstruction("Aşçıbaşı atölyesinde yöresel yemekleri tarifine uygun pişir.");
+                    if(name === 'detective') this.playInstruction("Peynir tescili için görevleri tamamla.");
+                    if(name === 'quiz') this.playInstruction("Testte Türkçe bilgini göster.");
+                },
+                addScore(points) { this.score += points; },
+                unlockBadge(id) {
+                    if (!this.unlockedBadgeIds.includes(id)) {
+                        this.unlockedBadgeIds.push(id);
+                        audio.playSuccess();
+                    }
+                },
+                isUnlocked(id) { return this.unlockedBadgeIds.includes(id); },
+                
+                // TAB 1
+                setSelectedInspectFood(food) {
+                    audio.playClick();
+                    this.selectedInspectFood = food;
+                    this.playInstruction(food.name + ". İçindeki doğal malzemeleri incele.");
+                },
+                toggleVocabulary(idx) {
+                    audio.playClick();
+                    this.openedVocabularyIndex = this.openedVocabularyIndex === idx ? null : idx;
+                    this.unlockBadge('bilge-gurme');
+                    if (this.openedVocabularyIndex !== null) {
+                        this.playInstruction(this.cografiSozluk[idx].term + ": " + this.cografiSozluk[idx].desc);
+                    }
+                },
+
+                // TAB 2 (COOKING) - YENİ KATI KONTROL SİSTEMİ
+                startCooking(recipe) {
+                    audio.playClick();
+                    this.cookingRecipe = recipe;
+                    this.currentCookingStepIndex = 0;
+                    this.stepAddedIngredients = [];
+                    this.heatLevel = 'KAPALI';
+                    this.cookingRecipeFinished = false;
+                    this.cookingError = '';
+                    this.playInstruction(recipe.name + " yapımına başlıyoruz. İlk adımı uygula.");
+                },
+                stopCooking() {
+                    audio.playClick();
+                    this.cookingRecipe = null;
+                },
+                adjustHeat() {
+                    audio.playClick();
+                    this.heatLevel = this.heatLevel === 'KAPALI' ? 'ORTA' : 'KAPALI';
+                    if(this.heatLevel === 'ORTA') audio.playBubbles();
+                },
+                addCookingIngredient(name) {
+                    if (this.stepAddedIngredients.includes(name)) return;
+                    audio.playClick();
+                    this.cookingError = '';
+
+                    const step = this.cookingRecipe.cookingSteps[this.currentCookingStepIndex];
+                    
+                    if (step.requiredIngredients.includes(name)) {
+                        this.stepAddedIngredients.push(name);
+                        
+                        // Sadece 'ekle' türü aksiyonsa ve malzemeler tamamsa otomatik geç
+                        if (step.actionType === 'ekle') {
+                            if (this.stepAddedIngredients.length === step.requiredIngredients.length) {
+                                this.advanceCookingStep();
+                            }
+                        }
+                    } else {
+                        this.cookingError = `Hata: "${name}" şu an eklenmemeli! Tarifi dikkatlice oku.`;
+                        audio.playFailure();
+                    }
+                },
+                triggerAction(action) {
+                    audio.playClick();
+                    this.cookingError = '';
+                    const step = this.cookingRecipe.cookingSteps[this.currentCookingStepIndex];
+
+                    if (step.actionType === action) {
+                        // İşlem öncesi malzemeler tam eklenmiş mi kontrolü
+                        if (step.requiredIngredients.length > 0 && this.stepAddedIngredients.length !== step.requiredIngredients.length) {
+                            this.cookingError = "Gerekli malzemeleri ambardan eklemeden bu işlemi yapamazsın!";
+                            audio.playFailure();
+                            return;
+                        }
+
+                        // Pişirme için ocak yanıyor mu kontrolü
+                        if (action === 'pisir' && this.heatLevel === 'KAPALI') {
+                            this.cookingError = "Lütfen önce ocağı yak/fırını çalıştır!";
+                            audio.playFailure();
+                            return;
+                        }
+
+                        if(action === 'karistir') audio.playBubbles();
+                        this.advanceCookingStep();
+                    } else {
+                        this.cookingError = `Şu an bu adımı uygulayamazsın! Beklenen işlem bu değil.`;
+                        audio.playFailure();
+                    }
+                },
+                advanceCookingStep() {
+                    audio.playSuccess();
+                    this.stepAddedIngredients = []; // Yeni adıma geçerken tencereyi sanal olarak sıfırlar (UI için)
+                    
+                    if (this.currentCookingStepIndex < this.cookingRecipe.cookingSteps.length - 1) {
+                        this.currentCookingStepIndex++;
+                    } else {
+                        this.cookingRecipeFinished = true;
+                        this.addScore(30);
+                        this.playInstruction("Tebrikler. Harika pişirdin.");
+                        if (!this.completedYemekler.includes(this.cookingRecipe.id)) {
+                            this.completedYemekler.push(this.cookingRecipe.id);
+                        }
+                        if (this.completedYemekler.length >= 2) this.unlockBadge('canakkale-sefi');
+                    }
+                },
+
+                // TAB 3 (DETECTIVE)
+                startDetectiveJourney() {
+                    audio.playClick();
+                    this.detectiveStep = 'milk';
+                    this.milkedPercent = 0;
+                    this.stirProgress = 0;
+                    this.monthsWaited = 0;
+                    this.isStamped = false;
+                },
+                milkAnimal() {
+                    audio.playClick();
+                    if (this.milkedPercent < 100) {
+                        this.milkedPercent += 25;
+                        audio.playBubbles();
+                        if (this.milkedPercent >= 100) {
+                            audio.playSuccess();
+                            setTimeout(() => this.detectiveStep = 'stir', 800);
+                        }
+                    }
+                },
+                stirCurd() {
+                    audio.playClick();
+                    if (this.stirProgress < 100) {
+                        this.stirProgress += 25;
+                        audio.playBubbles();
+                        if (this.stirProgress >= 100) {
+                            audio.playSuccess();
+                            setTimeout(() => this.detectiveStep = 'age', 800);
+                        }
+                    }
+                },
+                advanceMonth() {
+                    audio.playClick();
+                    if (this.monthsWaited < 11) {
+                        this.monthsWaited++;
+                        if (this.monthsWaited === 11) {
+                            audio.playSuccess();
+                            setTimeout(() => this.detectiveStep = 'stamp', 800);
+                        }
+                    }
+                },
+                stampABSeal() {
+                    audio.playClick();
+                    audio.playSuccess();
+                    this.isStamped = true;
+                    this.addScore(105);
+                    this.unlockBadge('peynir-dedektifi');
+                    this.playInstruction("Tebrikler. Avrupa Birliği tescil mührü başarıyla basıldı.");
+                },
+                resetDetective() { this.startDetectiveJourney(); },
+
+                // TAB 4 (SIVI ALTIN DEĞİRMENİ)
+                sortMillWord(type) {
+                    if (this.millIndex >= this.millWords.length) return;
+                    
+                    const word = this.millWords[this.millIndex];
+                    if (word.type === type) {
+                        audio.playSuccess();
+                        this.millRotation += 90;
+                        this.millOilLevel += (100 / this.millWords.length);
+                        this.millIndex++;
+                        this.addScore(10);
+                        
+                        if(this.millIndex >= this.millWords.length) {
+                            this.playInstruction("Harika! Sıfat ve zarfları ayırarak zeytinyağını süzdün.");
+                        }
+                    } else {
+                        audio.playFailure();
+                        this.playInstruction("Hata! Sıfatlar ismi, zarflar eylemi niteler. Tekrar düşün.");
+                    }
+                },
+                resetMill() {
+                    audio.playClick();
+                    this.millIndex = 0;
+                    this.millRotation = 0;
+                    this.millOilLevel = 0;
+                },
+
+                // TAB 5 (QUIZ)
+                selectQuizOption(idx) {
+                    if (this.quizHasAnswered) return;
+                    audio.playClick();
+                    this.selectedQuizOption = idx;
+                    this.quizHasAnswered = true;
+
+                    if (idx === this.quizQuestions[this.currentQuizIndex].answerIndex) {
+                        audio.playSuccess();
+                        this.quizCorrectAnswers++;
+                        this.addScore(20);
+                    } else {
+                        audio.playFailure();
+                    }
+                    this.playInstruction(this.quizQuestions[this.currentQuizIndex].explanation);
+                },
+                getQuizOptionClass(idx) {
+                    if (!this.quizHasAnswered) return this.selectedQuizOption === idx ? 'border-clay bg-bg text-text' : 'border-border hover:bg-bg text-text';
+                    if (idx === this.quizQuestions[this.currentQuizIndex].answerIndex) return 'border-olive bg-olive/20 text-text font-black';
+                    if (this.selectedQuizOption === idx) return 'border-red-400 bg-red-100 text-red-800';
+                    return 'border-border/60 text-muted cursor-not-allowed';
+                },
+                nextQuizQuestion() {
+                    audio.playClick();
+                    if (this.currentQuizIndex < this.quizQuestions.length - 1) {
+                        this.currentQuizIndex++;
+                        this.selectedQuizOption = null;
+                        this.quizHasAnswered = false;
+                        audio.synth.cancel();
+                    } else {
+                        this.quizFinished = true;
+                        if (this.quizCorrectAnswers === this.quizQuestions.length) {
+                            this.unlockBadge('lezzet-sampiyonu');
+                            this.addScore(50);
+                        }
+                    }
+                },
+                resetQuiz() {
+                    audio.playClick();
+                    this.currentQuizIndex = 0;
+                    this.selectedQuizOption = null;
+                    this.quizHasAnswered = false;
+                    this.quizCorrectAnswers = 0;
+                    this.quizFinished = false;
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
