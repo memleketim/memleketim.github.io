@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aynalı Çarşı: Işığın ve Türkünün Peşinde</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts (Türkçe Karakter Uyumlu Elite Fontlar) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Montserrat:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Cinzel', 'serif'],
+                        body: ['Lora', 'serif']
+                    },
+                    colors: {
+                        bazaar: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            200: '#fde68a',
+                            300: '#fcd34d',
+                            400: '#fbbf24',
+                            500: '#f59e0b', // Saray Sarısı
+                            600: '#d97706',
+                            700: '#b45309',
+                            800: '#92400e',
+                            900: '#78350f',
+                        },
+                        turquoiseCustom: {
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .dark .glass-panel {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        /* Custom Confetti Canvas Container */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 40;
+        }
+        /* Custom radio button styles for the table */
+        .custom-radio {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+        }
+        .dark .custom-radio { border-color: #475569; }
+        .custom-radio:checked {
+            border-color: #f59e0b; /* bazaar-500 */
+        }
+        .custom-radio:checked::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.625rem;
+            height: 0.625rem;
+            background-color: #f59e0b;
+            border-radius: 50%;
+        }
+        /* Audio Player Custom Range */
+        input[type=range].audio-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range].audio-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 14px;
+            width: 14px;
+            border-radius: 50%;
+            background: #f59e0b;
+            cursor: pointer;
+            margin-top: -5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+        input[type=range].audio-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #cbd5e1;
+            border-radius: 2px;
+        }
+        .dark input[type=range].audio-slider::-webkit-slider-runnable-track {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-tr from-[#fafaf9] via-[#fef3c7] to-[#ccfbf1] dark:from-[#0f172a] dark:via-[#1e1b4b] dark:to-[#022c22] min-h-screen text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300 overflow-x-hidden flex flex-col justify-between">
+
+    <!-- TOP BAR (Logo, Dark/Light, Sound Controls) -->
+    <header class="w-full py-4 px-6 flex justify-between items-center z-40 relative">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-md p-1">
+                <object data="orjinal.svg" type="image/svg+xml" class="w-full h-full pointer-events-none" id="logo-svg">
+                    <!-- Fallback SVG -->
+                    <svg viewBox="0 0 100 100" class="w-10 h-10 text-bazaar-600 fill-current">
+                        <path d="M50,15 L15,85 L50,70 L85,85 Z" />
+                    </svg>
+                </object>
+            </div>
+            <div>
+                <h1 class="text-md md:text-lg font-extrabold text-bazaar-800 dark:text-bazaar-300 tracking-wide font-serif">AYNALI ÇARŞI</h1>
+                <p class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold tracking-wider">TÜRKÇE VE TÜRK KÜLTÜRÜ PORTALİ</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button id="master-sound-btn" onclick="toggleMute()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-bazaar-700 dark:text-bazaar-400 hover:scale-110 transition-transform" title="Sesi Aç/Kapat">
+                <i class="fas fa-volume-up text-md" id="sound-icon"></i>
+            </button>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-amber-500 hover:scale-110 transition-transform" title="Mod Değiştir">
+                <i class="fas fa-sun dark:hidden text-md"></i>
+                <i class="fas fa-moon hidden dark:block text-slate-300 text-md"></i>
+            </button>
+            <a href="https://memleketim.github.io/17/index.html" class="px-3 py-2 bg-gradient-to-r from-bazaar-600 to-amber-600 hover:from-bazaar-700 hover:to-amber-700 text-white font-bold rounded-lg shadow-md transition-all text-xs flex items-center gap-1.5">
+                <i class="fas fa-map"></i>
+                <span class="hidden md:inline">Haritaya Dön</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <main class="flex-grow flex items-center justify-center p-4 md:p-6 w-full max-w-7xl mx-auto z-10">
+        
+        <!-- SECTION 1: WELCOME SCREEN -->
+        <div id="screen-welcome" class="w-full max-w-4xl glass-panel rounded-3xl p-6 md:p-10 shadow-2xl relative border border-white/20 flex flex-col justify-between overflow-hidden">
+            <div class="absolute -right-20 -top-20 w-80 h-80 bg-bazaar-200/20 dark:bg-bazaar-900/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <!-- Information & Intro -->
+            <div class="text-center relative z-10 flex-grow flex flex-col justify-center">
+                <span class="px-4 py-1.5 bg-bazaar-100 dark:bg-bazaar-900/40 text-bazaar-800 dark:text-bazaar-300 text-xs font-bold rounded-full tracking-widest uppercase inline-block mb-4">Tarihi Çarşı Serisi</span>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-white mb-6 leading-tight font-serif">
+                    Çanakkale'nin Aynalı Çarşısı'nda <br><span class="text-bazaar-600 dark:text-bazaar-400">Tarihî Bir Serüven</span>
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center mb-8">
+                    <!-- Photo Integration -->
+                    <img src="carsi.png" alt="Aynalı Çarşı" class="w-full h-auto object-cover rounded-2xl shadow-md border-4 border-white dark:border-slate-800" onerror="this.src='https://placehold.co/800x600/fde68a/78350f?text=Aynali+Carsi+Fotografi'">
+                    
+                    <!-- History Text -->
+                    <div class="text-left text-sm md:text-base text-slate-600 dark:text-slate-300 font-body leading-relaxed space-y-3">
+                        <p>
+                            Çanakkale'nin kalbinde yer alan <strong>Aynalı Çarşı</strong>, günümüzde halen varlığını sürdüren ve meşhur türkülere konu olmuş tarihi bir mekanımızdır.
+                        </p>
+                        <p>
+                            Eskiden bu çarşıda atlar için koşum takımları ve süs eşyaları yapan dükkanlar yer alırdı. At gözlüklerine o dönemde "ayna" denildiği için, çarşıda bu ürünlerin satılmasından dolayı bir tür benzetme olarak <strong>Aynalı Çarşı</strong> adının kullanılmakta olduğu sanılmaktadır.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Elif Ünsal Premium Credit Bar -->
+                <div class="max-w-xl mx-auto mb-8 bg-gradient-to-r from-bazaar-500/10 via-teal-500/10 to-bazaar-500/10 border border-bazaar-500/20 p-3 rounded-2xl shadow-inner group hover:border-bazaar-500 transition-all duration-300">
+                    <a href="https://drive.google.com/file/d/1NkyQ3_bhLhugAU5YhPR5x8ZifGmBmCYO/view" target="_blank" class="flex items-center justify-center gap-2 text-bazaar-800 dark:text-bazaar-200 hover:text-bazaar-600 dark:hover:text-bazaar-300 font-semibold text-xs md:text-sm transition-colors">
+                        <span class="flex h-2.5 w-2.5 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-bazaar-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-bazaar-500"></span>
+                        </span>
+                        <span>Elif Ünsal'ın çalışmasının tamamına ulaşmak için tıklayınız.</span>
+                        <i class="fas fa-external-link-alt text-xs group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                    <button onclick="changeScreen('screen-song-puzzle')" class="w-full sm:w-auto px-8 py-4 bg-bazaar-500 hover:bg-bazaar-600 active:scale-95 text-white font-extrabold rounded-2xl shadow-lg hover:shadow-bazaar-500/30 transition-all text-base flex items-center justify-center gap-3 group">
+                        <span>Çarşıya Giriş Yap!</span>
+                        <i class="fas fa-door-open group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                    
+                    <button onclick="readWelcomeText()" class="w-full sm:w-auto px-6 py-4 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 active:scale-95 text-slate-700 dark:text-slate-300 font-bold rounded-2xl transition-all text-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-volume-up"></i>
+                        <span>Yazıyı Dinle</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: LYRIC/SONG PUZZLE SCREEN -->
+        <div id="screen-song-puzzle" class="hidden w-full max-w-5xl glass-panel rounded-3xl p-6 md:p-8 shadow-2xl relative border border-white/20 flex flex-col justify-between">
+            <div class="text-center mb-6">
+                <span class="px-3 py-1 bg-bazaar-100 dark:bg-bazaar-900/40 text-bazaar-700 dark:text-bazaar-300 text-[10px] font-bold rounded-full uppercase tracking-wider">AŞAMA 1: TÜRKÜ BULMACASI</span>
+                <h3 class="text-2xl md:text-3xl font-extrabold text-slate-800 dark:text-white font-serif mt-2">Çanakkale Türküsü</h3>
+                <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto mt-1">Türküyü müzik çalarımızdan dinle, kelimeleri seçerek eksik dizeleri tamamla!</p>
+            </div>
+
+            <!-- Custom Audio Player UI -->
+            <div class="w-full max-w-2xl mx-auto mb-6 bg-slate-800 text-white rounded-2xl p-4 shadow-lg flex items-center gap-4">
+                <button onclick="toggleSong()" id="custom-play-btn" class="w-12 h-12 flex-shrink-0 bg-bazaar-500 hover:bg-bazaar-600 rounded-full flex items-center justify-center text-xl transition-colors">
+                    <i class="fas fa-play" id="custom-play-icon"></i>
+                </button>
+                <div class="flex-grow flex flex-col gap-1">
+                    <div class="flex justify-between text-xs font-semibold text-slate-300">
+                        <span class="truncate pr-2"><i class="fas fa-music text-bazaar-400 mr-1"></i> Çanakkale İçinde</span>
+                        <span id="audio-time-display">00:00 / 04:06</span>
+                    </div>
+                    <input type="range" id="song-progress" class="audio-slider w-full" value="0" min="0" max="100" step="0.1" onchange="seekSong(this.value)" oninput="seekSongUpdate(this.value)">
+                </div>
+                <!-- Hidden Real Audio Element -->
+                <audio id="carsi-song" src="sarki4.mp3" preload="metadata"></audio>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start my-2">
+                <!-- Song Lyrics Area (Left) -->
+                <div class="lg:col-span-7 bg-amber-50/50 dark:bg-slate-900/40 rounded-2xl p-6 border-l-4 border-bazaar-500">
+                    <!-- Lyric Lines with 5 Blanks -->
+                    <div class="space-y-5 text-sm md:text-base leading-loose font-body text-slate-700 dark:text-slate-200">
+                        <p>
+                            Çanakkale içinde <span id="blank-0" onclick="activeBlankSelection(0)" class="inline-block w-24 h-7 align-middle border-b-2 border-dashed border-bazaar-500 bg-white/60 dark:bg-slate-800/60 rounded text-center font-bold text-bazaar-600 cursor-pointer hover:bg-bazaar-50 transition-colors shadow-sm">...</span> çarşı,<br>
+                            Ana ben gidiyom düşmana karşı.<br>
+                            Of gençliğim eyvah!
+                        </p>
+                        <p>
+                            Çanakkale <span id="blank-1" onclick="activeBlankSelection(1)" class="inline-block w-24 h-7 align-middle border-b-2 border-dashed border-bazaar-500 bg-white/60 dark:bg-slate-800/60 rounded text-center font-bold text-bazaar-600 cursor-pointer hover:bg-bazaar-50 transition-colors shadow-sm">...</span> bir uzun selvi,<br>
+                            Kimimiz nişanlı kimimiz <span id="blank-2" onclick="activeBlankSelection(2)" class="inline-block w-24 h-7 align-middle border-b-2 border-dashed border-bazaar-500 bg-white/60 dark:bg-slate-800/60 rounded text-center font-bold text-bazaar-600 cursor-pointer hover:bg-bazaar-50 transition-colors shadow-sm">...</span><br>
+                            Of gençliğim eyvah!
+                        </p>
+                        <p>
+                            Çanakkale üstünü duman bürüdü,<br>
+                            On üçüncü fırka harbe yürüdü.<br>
+                            Of <span id="blank-3" onclick="activeBlankSelection(3)" class="inline-block w-24 h-7 align-middle border-b-2 border-dashed border-bazaar-500 bg-white/60 dark:bg-slate-800/60 rounded text-center font-bold text-bazaar-600 cursor-pointer hover:bg-bazaar-50 transition-colors shadow-sm">...</span> eyvah!
+                        </p>
+                        <p>
+                            Çanakkale içinde bir dolu testi,<br>
+                            Analar babalar <span id="blank-4" onclick="activeBlankSelection(4)" class="inline-block w-24 h-7 align-middle border-b-2 border-dashed border-bazaar-500 bg-white/60 dark:bg-slate-800/60 rounded text-center font-bold text-bazaar-600 cursor-pointer hover:bg-bazaar-50 transition-colors shadow-sm">...</span> kesti.<br>
+                            Of gençliğim eyvah!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Word Selection Area (Right) -->
+                <div class="lg:col-span-5 flex flex-col h-full gap-4">
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 shadow-lg">
+                        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2"><i class="fas fa-hand-pointer text-bazaar-500"></i> Kelimeler</h4>
+                        <p class="text-[10px] text-slate-400 mb-4">Bir kelime seç ve türküdeki yerine tıkla!</p>
+                        <div id="lyric-words-pool" class="flex flex-wrap gap-2">
+                            <!-- Dynamic word buttons -->
+                        </div>
+                    </div>
+                    
+                    <!-- Feedback Message -->
+                    <div id="song-feedback" class="hidden p-3 rounded-xl border text-xs font-bold flex items-center gap-2 shadow-sm">
+                        <i id="song-feedback-icon" class="fas"></i>
+                        <span id="song-feedback-msg"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dictionary & Details (Hidden until solved) -->
+            <div id="song-dictionary" class="hidden mt-6 bg-teal-50 dark:bg-slate-800/80 rounded-2xl p-5 border border-teal-200 dark:border-teal-900/50">
+                <h4 class="font-bold text-teal-800 dark:text-teal-300 mb-3 text-sm flex items-center gap-2"><i class="fas fa-book-open"></i> Türküdeki Eski Kelimelerin Anlamları</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-xs text-slate-700 dark:text-slate-300">
+                    <div><span class="font-bold text-bazaar-600">Of, Eyvah:</span> Üzüntü ve acı bildiren ünlem sözcükleri.</div>
+                    <div><span class="font-bold text-bazaar-600">Testi:</span> İçine su konulan topraktan yapılmış kap.</div>
+                    <div><span class="font-bold text-bazaar-600">Ana, Bacı:</span> Anne ve kız kardeş.</div>
+                    <div><span class="font-bold text-bazaar-600">Harp:</span> Savaş.</div>
+                    <div><span class="font-bold text-bazaar-600">On üçüncü fırka:</span> O dönemdeki bir askeri birlik (tümen).</div>
+                    <div><span class="font-bold text-bazaar-600">Nişanlı, Evli:</span> Evlilik yolunda sözlenmiş veya evlenmiş kişi.</div>
+                    <div><span class="font-bold text-bazaar-600">Gençlik:</span> İnsanın genç olduğu dönem.</div>
+                </div>
+                <div class="mt-4 p-3 bg-white/60 dark:bg-slate-900/50 rounded-lg text-xs italic text-slate-600 dark:text-slate-400 border-l-4 border-amber-400">
+                    <strong>Önemli Not:</strong> Türküde "Ana ben gidiyom" deniyor. Yazı dilinde "gidiyorum" şeklinde yazmalıyız. Ancak türküler halkın içinden çıktığı için, yöresel söyleyiş (ağız) özellikleri taşıyabilir.
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="changeScreen('screen-real-imaginary')" class="px-5 py-2 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-md">
+                        <span>Sonraki Aşamaya Geç</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Navigation inside Stage 1 -->
+            <div class="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center">
+                <button onclick="changeScreen('screen-welcome')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Giriş Sayfası</span>
+                </button>
+                
+                <button onclick="checkSongAnswers()" class="px-6 py-2.5 bg-bazaar-500 hover:bg-bazaar-600 text-white font-extrabold rounded-xl text-xs flex items-center gap-1.5 shadow-md">
+                    <span>Cevapları Kontrol Et</span>
+                    <i class="fas fa-check-double"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SECTION 3: REAL VS IMAGINARY TABLE GAME -->
+        <div id="screen-real-imaginary" class="hidden w-full max-w-5xl glass-panel rounded-3xl p-6 md:p-8 shadow-2xl relative border border-white/20 flex flex-col justify-between">
+            <div class="text-center mb-6">
+                <span class="px-3 py-1 bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-300 text-[10px] font-bold rounded-full uppercase tracking-wider">AŞAMA 2: OKUMA ANLAMA</span>
+                <h3 class="text-2xl md:text-3xl font-extrabold text-brand-600 dark:text-teal-400 font-serif mt-2">Gerçek mi, Hayal Ürünü mü?</h3>
+                <p class="text-xs md:text-sm text-slate-500 dark:text-slate-400 max-w-2xl mx-auto mt-2">Aşağıdaki cümleleri okuyun. Gerçek hayatta olabilecek olaylar için <strong>Gerçek</strong>'i, tamamen zihnimizde canlandırdığımız durumlar için <strong>Hayal Ürünü</strong>'nü seçin!</p>
+            </div>
+
+            <div class="overflow-x-auto bg-white dark:bg-slate-800 rounded-2xl shadow border border-slate-200 dark:border-slate-700 mb-6">
+                <table class="w-full text-left border-collapse text-sm">
+                    <thead>
+                        <tr class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+                            <th class="p-4 font-bold text-slate-700 dark:text-slate-200">Cümle</th>
+                            <th class="p-4 font-bold text-slate-700 dark:text-slate-200 text-center w-24">Gerçek</th>
+                            <th class="p-4 font-bold text-slate-700 dark:text-slate-200 text-center w-28">Hayal Ürünü</th>
+                            <th class="p-4 font-bold text-slate-700 dark:text-slate-200 text-center w-32">Değerlendirme</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body-real-imaginary" class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <!-- Rows rendered via JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Explanations Box (Hidden until check) -->
+            <div id="real-imaginary-explanations" class="hidden bg-teal-50 dark:bg-slate-800 rounded-2xl p-6 border border-teal-200 dark:border-teal-900/50 mb-6">
+                <h4 class="font-bold text-teal-800 dark:text-teal-300 mb-4 text-sm flex items-center gap-2"><i class="fas fa-lightbulb"></i> Etkinlik Açıklamaları</h4>
+                <div id="explanations-content" class="space-y-4 text-xs text-slate-700 dark:text-slate-300 font-body">
+                    <!-- Dynamic Explanations -->
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center border-t border-slate-200 dark:border-slate-700 pt-4">
+                <button onclick="changeScreen('screen-song-puzzle')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Türküye Dön</span>
+                </button>
+                <div class="flex gap-3">
+                    <button id="btn-re-solve" class="hidden px-5 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow" onclick="resetRealImaginary()">
+                        <i class="fas fa-redo"></i>
+                        <span>Tekrar Çöz</span>
+                    </button>
+                    <button id="btn-check-table" onclick="checkRealImaginaryTable()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-xs flex items-center gap-1.5 shadow-md">
+                        <span>Kontrol Et</span>
+                        <i class="fas fa-check"></i>
+                    </button>
+                    <button id="btn-finish-game" class="hidden px-6 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-xl text-xs flex items-center gap-1.5 shadow-md" onclick="completeGame()">
+                        <span>Oyunu Bitir</span>
+                        <i class="fas fa-flag-checkered"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 4: FINAL SCREEN -->
+        <div id="screen-results" class="hidden w-full max-w-3xl glass-panel rounded-3xl p-8 md:p-12 shadow-2xl relative border border-white/20 text-center overflow-hidden">
+            <canvas id="confetti-canvas"></canvas>
+
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="w-24 h-24 bg-gradient-to-tr from-bazaar-400 to-amber-300 text-white rounded-full flex items-center justify-center text-5xl mb-6 shadow-xl animate-bounce border-4 border-white dark:border-slate-800">
+                    <i class="fas fa-star"></i>
+                </div>
+
+                <span class="px-4 py-1.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold rounded-full uppercase tracking-widest mb-3">GÖREV TAMAMLANDI!</span>
+                <h3 class="text-3xl md:text-5xl font-black text-slate-800 dark:text-white font-serif mb-4 drop-shadow-sm">Mükemmel İş Çıkardın!</h3>
+                <p class="text-base text-slate-600 dark:text-slate-300 max-w-lg mb-10 leading-relaxed font-body">
+                    Aynalı Çarşı'nın tarihini öğrendin, meşhur Çanakkale Türküsü'nü eksiksiz tamamladın ve gerçek ile hayal ürünü olanı ustalıkla ayırt ettin. Bu başarınla kültürümüze harika bir katkı sağladın!
+                </p>
+
+                <!-- Final Actions -->
+                <div class="flex flex-col sm:flex-row gap-4 w-full justify-center">
+                    <button onclick="resetGameEntirely()" class="px-6 py-3.5 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 transition-colors">
+                        <i class="fas fa-redo"></i>
+                        <span>Tekrar Oyna</span>
+                    </button>
+                    <a href="https://memleketim.github.io/17/index.html" class="px-8 py-3.5 bg-bazaar-500 hover:bg-bazaar-600 text-white font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-bazaar-500/30 transition-all transform hover:-translate-y-1">
+                        <i class="fas fa-map-marked-alt text-lg"></i>
+                        <span>Haritaya Dön</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MAIN SOUND PLAYER FLOATING BAR -->
+    <footer class="w-full bg-slate-900 text-slate-400 text-xs py-3.5 px-6 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-slate-800 z-30">
+        <div class="flex items-center gap-3">
+            <span class="text-bazaar-400 flex items-center gap-1"><i class="fas fa-robot"></i> Yapay Zeka Ses Motoru</span>
+            <span class="hidden md:inline text-slate-500">|</span>
+            <span id="audio-status-text" class="text-[11px] text-slate-400">Sistem Hazır</span>
+        </div>
+
+        <div class="flex items-center gap-4 bg-slate-800/80 px-4 py-1.5 rounded-full border border-slate-700/60">
+            <button onclick="replayCurrentVoice()" class="hover:text-bazaar-400 transition-colors" title="AI Sesi Yeniden Oynat">
+                <i class="fas fa-redo"></i>
+            </button>
+            <button onclick="toggleAudioPlayback()" class="text-white hover:text-bazaar-400 transition-colors text-sm" title="Duraklat/Devam Et">
+                <i class="fas fa-pause" id="btn-play-pause-icon"></i>
+            </button>
+            <div class="flex items-center gap-1.5">
+                <i class="fas fa-volume-down text-[10px]"></i>
+                <input type="range" min="0" max="1" step="0.1" value="0.8" oninput="changeVolume(this.value)" class="w-16 md:w-20 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-bazaar-400" />
+                <i class="fas fa-volume-up text-[10px]"></i>
+            </div>
+            <select id="tts-rate-select" onchange="changeSpeechRate(this.value)" class="bg-slate-900 border-none text-[10px] text-bazaar-400 rounded-md py-0.5 px-1 focus:ring-0 cursor-pointer">
+                <option value="0.8">Yavaş (0.8x)</option>
+                <option value="1.0" selected>Normal (1.0x)</option>
+                <option value="1.2">Hızlı (1.2x)</option>
+            </select>
+        </div>
+
+        <div class="text-[10px] text-slate-500">
+            &copy; 2026 Çanakkale Portali - Aynalı Çarşı Serüveni
+        </div>
+    </footer>
+
+    <script>
+        // DATA MODEL FOR THE APPLICATION
+        const AppData = {
+            // Stage 1: Lyric Puzzle Words & Blanks
+            songWords: [
+                { id: "word-0", text: "aynalı", correctIndex: 0 },
+                { id: "word-1", text: "içinde", correctIndex: 1 },
+                { id: "word-2", text: "evli", correctIndex: 2 },
+                { id: "word-3", text: "gençliğim", correctIndex: 3 },
+                { id: "word-4", text: "mektubu", correctIndex: 4 }
+            ],
+            songPool: ["eyvah", "aynalı", "evli", "fırka", "içinde", "mektubu", "dolu", "gençliğim", "duman", "kesti"],
+            
+            // Stage 2: Real vs Imaginary Sentences
+            sentences: [
+                {
+                    id: "q1",
+                    text: "Aynalı Çarşı'dan alınan at gözlükleri aniden kanatlanıp gökyüzüne uçtu.",
+                    isReal: false,
+                    explanation: "Eşyalar kanatlanıp uçamaz, bu sadece masallarda olabilen tamamen zihnimizde canlandırdığımız bir hayal ürünüdür."
+                },
+                {
+                    id: "q2",
+                    text: "Çanakkale'de bulunan Aynalı Çarşı, günümüzde hala ziyaret edilebilen tarihi bir yerdir.",
+                    isReal: true,
+                    explanation: "Tarihi Aynalı Çarşı restore edilmiştir ve bugün hala açıktır, isteyen herkes gidip ziyaret edebilir."
+                },
+                {
+                    id: "q3",
+                    text: "Çarşının girişindeki dev aynalar dile gelip ziyaretçilere 'Hoş geldiniz' dedi.",
+                    isReal: false,
+                    explanation: "Gerçek hayatta aynalar veya cansız varlıklar konuşamaz. Bu kurgusal bir hayal ürünüdür."
+                },
+                {
+                    id: "q4",
+                    text: "Eskiden bu çarşıda atlar için süs eşyaları ve koşum takımları satılırdı.",
+                    isReal: true,
+                    explanation: "Tarihi kayıtlara göre çarşının geçmişteki asıl işlevi ve amacı buydu."
+                },
+                {
+                    id: "q5",
+                    text: "Aynalı Çarşı, Çanakkale Savaşı sırasında askerlerimizin dilinden düşmeyen meşhur türküye konu olmuştur.",
+                    isReal: true,
+                    explanation: "Çanakkale Türküsü ('Çanakkale içinde aynalı çarşı') gerçekten de tarihi kanıtları olan bir halk türküsüdür."
+                }
+            ],
+
+            // Audio Files Map
+            audio: {
+                intro: "yonergecarsi1.mp3",
+                puzzleInstruction: "yonergecarsi2.mp3",
+                tableInstruction: "yonergecarsi3.mp3",
+                outro: "yonergecarsi4.mp3"
+            }
+        };
+
+        // GLOBAL STATES
+        let currentScreen = "screen-welcome";
+        let isMuted = false;
+        let speechRate = 1.0;
+        let synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let isAudioPlaying = false;
+        let currentInstructionAudio = null;
+
+        // CUSTOM SONG PLAYER STATES
+        let songPlayer = document.getElementById("carsi-song");
+        let songProgress = document.getElementById("song-progress");
+        let songTimeDisplay = document.getElementById("audio-time-display");
+        let isDraggingSlider = false;
+
+        // STAGE 1 STATES
+        let activeBlankIdx = null;
+        let userSongAnswers = { 0: null, 1: null, 2: null, 3: null, 4: null };
+
+        // SOUND EFFECTS SYSTEM (AudioContext)
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        const sfx = {
+            init: () => {
+                if(audioCtx.state === 'suspended') audioCtx.resume();
+            },
+            click: () => {
+                if(isMuted) return;
+                sfx.init();
+                playTone(600, 'sine', 0.05, 0.05); 
+                setTimeout(() => playTone(800, 'sine', 0.05, 0.05), 50);
+            },
+            correct: () => {
+                if(isMuted) return;
+                sfx.init();
+                playTone(523.25, 'sine', 0.1, 0.1); 
+                setTimeout(()=>playTone(659.25, 'sine', 0.1, 0.1), 100); 
+                setTimeout(()=>playTone(783.99, 'sine', 0.3, 0.1), 200); 
+                setTimeout(()=>playTone(1046.50, 'sine', 0.4, 0.1), 300); 
+            },
+            wrong: () => {
+                if(isMuted) return;
+                sfx.init();
+                playTone(300, 'sawtooth', 0.2, 0.1);
+                setTimeout(()=>playTone(250, 'sawtooth', 0.4, 0.1), 200);
+            }
+        };
+
+        function playTone(freq, type, duration, vol) {
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        // INITIAL ONLOAD
+        window.onload = function() {
+            initLyricPuzzle();
+            renderRealImaginaryTable();
+            setupAudioPlayer();
+        };
+
+        // SCREEN MANAGER
+        function changeScreen(screenId) {
+            sfx.click();
+            stopSpeech();
+            songPlayer.pause(); // Always pause the song when changing screens
+            document.getElementById("custom-play-icon").className = "fas fa-play";
+
+            document.getElementById("screen-welcome").classList.add("hidden");
+            document.getElementById("screen-song-puzzle").classList.add("hidden");
+            document.getElementById("screen-real-imaginary").classList.add("hidden");
+            document.getElementById("screen-results").classList.add("hidden");
+
+            const activeScreen = document.getElementById(screenId);
+            if (activeScreen) {
+                activeScreen.classList.remove("hidden");
+                currentScreen = screenId;
+            }
+
+            if (screenId === "screen-song-puzzle") {
+                speakText("Aşama 1: Çanakkale Türküsü'nü dinleyerek boş bırakılan yerlere uygun kelimeleri yerleştirin.", AppData.audio.puzzleInstruction);
+            } else if (screenId === "screen-real-imaginary") {
+                speakText("Aşama 2: Aşağıdaki cümleleri okuyun. Gerçek hayatta olabilecek olaylar için Gerçek'i, zihnimizde canlandırdığımız kurgular için Hayal Ürünü'nü seçin.", AppData.audio.tableInstruction);
+            } else if (screenId === "screen-results") {
+                triggerConfetti();
+                speakText("Tebrikler! Aynalı Çarşı'nın sırlarını çözdün ve oyunları başarıyla tamamladın.", AppData.audio.outro);
+            }
+        }
+
+        // DARK MODE CONTROLLER
+        function toggleDarkMode() {
+            sfx.click();
+            const html = document.documentElement;
+            if (html.classList.contains("dark")) {
+                html.classList.remove("dark");
+            } else {
+                html.classList.add("dark");
+            }
+        }
+
+        // AUDIO CONTROLLER & SPEECH ENGINE
+        function toggleMute() {
+            isMuted = !isMuted;
+            const soundIcon = document.getElementById("sound-icon");
+            if (isMuted) {
+                soundIcon.className = "fas fa-volume-mute text-slate-400";
+                stopSpeech();
+                updateAudioStatus("Sistem Sesi Kapatıldı");
+            } else {
+                soundIcon.className = "fas fa-volume-up text-bazaar-600 dark:text-bazaar-400";
+                updateAudioStatus("AI Ses Motoru Aktif");
+                replayCurrentVoice();
+            }
+        }
+
+        function changeVolume(val) {
+            if (currentUtterance) {
+                currentUtterance.volume = val;
+            }
+            if (currentInstructionAudio) {
+                currentInstructionAudio.volume = val;
+            }
+        }
+
+        function changeSpeechRate(val) {
+            speechRate = parseFloat(val);
+            if (isAudioPlaying) {
+                replayCurrentVoice();
+            }
+        }
+
+        function updateAudioStatus(msg) {
+            document.getElementById("audio-status-text").innerText = msg;
+        }
+
+        function toggleAudioPlayback() {
+            sfx.click();
+            const icon = document.getElementById("btn-play-pause-icon");
+            
+            if (currentInstructionAudio) {
+                if (isAudioPlaying) {
+                    currentInstructionAudio.pause();
+                    isAudioPlaying = false;
+                    icon.className = "fas fa-play";
+                    updateAudioStatus("Duraklatıldı");
+                } else {
+                    currentInstructionAudio.play();
+                    isAudioPlaying = true;
+                    icon.className = "fas fa-pause";
+                    updateAudioStatus("Devam ediyor...");
+                }
+                return;
+            }
+
+            if (isAudioPlaying) {
+                synth.pause();
+                isAudioPlaying = false;
+                icon.className = "fas fa-play";
+                updateAudioStatus("Duraklatıldı");
+            } else {
+                if (synth.paused) {
+                    synth.resume();
+                    isAudioPlaying = true;
+                    icon.className = "fas fa-pause";
+                    updateAudioStatus("Devam ediyor...");
+                } else {
+                    replayCurrentVoice();
+                }
+            }
+        }
+
+        function stopSpeech() {
+            if (synth) {
+                synth.cancel();
+            }
+            if (currentInstructionAudio) {
+                currentInstructionAudio.pause();
+                currentInstructionAudio.currentTime = 0;
+                currentInstructionAudio = null;
+            }
+            isAudioPlaying = false;
+            document.getElementById("btn-play-pause-icon").className = "fas fa-play";
+        }
+
+        function speakText(textToSpeak, externalMp3File = null) {
+            if (isMuted) return;
+            stopSpeech();
+
+            if(!songPlayer.paused) {
+                songPlayer.pause();
+                document.getElementById("custom-play-icon").className = "fas fa-play";
+            }
+
+            if (externalMp3File) {
+                currentInstructionAudio = new Audio(externalMp3File);
+                
+                currentInstructionAudio.onplay = function() {
+                    isAudioPlaying = true;
+                    document.getElementById("btn-play-pause-icon").className = "fas fa-pause";
+                    updateAudioStatus("Kayıtlı Ses Oynatılıyor...");
+                };
+                
+                currentInstructionAudio.onended = function() {
+                    isAudioPlaying = false;
+                    document.getElementById("btn-play-pause-icon").className = "fas fa-play";
+                    updateAudioStatus("Hazır.");
+                    currentInstructionAudio = null;
+                };
+                
+                currentInstructionAudio.play().catch(e => {
+                    console.error("MP3 dosyası çalınamadı:", e);
+                });
+                
+                return; 
+            }
+
+            if ('speechSynthesis' in window) {
+                currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+                currentUtterance.lang = 'tr-TR';
+                currentUtterance.rate = speechRate;
+                
+                const voices = synth.getVoices();
+                const trVoice = voices.find(voice => voice.lang.includes('tr'));
+                if (trVoice) {
+                    currentUtterance.voice = trVoice;
+                }
+
+                currentUtterance.onstart = function() {
+                    isAudioPlaying = true;
+                    document.getElementById("btn-play-pause-icon").className = "fas fa-pause";
+                    updateAudioStatus("Yapay Zeka Konuşuyor...");
+                };
+
+                currentUtterance.onend = function() {
+                    isAudioPlaying = false;
+                    document.getElementById("btn-play-pause-icon").className = "fas fa-play";
+                    updateAudioStatus("Hazır.");
+                };
+
+                synth.speak(currentUtterance);
+            }
+        }
+
+        function replayCurrentVoice() {
+            sfx.click();
+            if (currentScreen === "screen-welcome") {
+                readWelcomeText();
+            } else if (currentScreen === "screen-song-puzzle") {
+                speakText("Aşama 1: Çanakkale Türküsü'nü dinleyerek boş bırakılan yerlere uygun kelimeleri yerleştirin.", AppData.audio.puzzleInstruction);
+            } else if (currentScreen === "screen-real-imaginary") {
+                speakText("Aşama 2: Aşağıdaki cümleleri okuyun. Gerçek hayatta olabilecek olaylar için Gerçek'i, zihnimizde canlandırdığımız kurgular için Hayal Ürünü'nü seçin.", AppData.audio.tableInstruction);
+            }
+        }
+
+        function readWelcomeText() {
+            sfx.click();
+            const welcomeText = "Çanakkale'nin kalbinde yer alan Aynalı Çarşı, günümüzde halen varlığını sürdüren ve meşhur türkülere konu olmuş tarihi bir mekanımızdır. Eskiden bu çarşıda atlar için koşum takımları ve süs eşyaları yapan dükkanlar yer alırdı. At gözlüklerine o dönemde ayna denildiği için, çarşıda bu ürünlerin satılmasından dolayı bir tür benzetme olarak Aynalı Çarşı adının kullanılmakta olduğu sanılmaktadır.";
+            speakText(welcomeText, AppData.audio.intro);
+        }
+
+        // STAGE 1: CUSTOM SONG PLAYER
+        function setupAudioPlayer() {
+            songPlayer.addEventListener('timeupdate', () => {
+                if (!isDraggingSlider) {
+                    const progress = (songPlayer.currentTime / songPlayer.duration) * 100;
+                    songProgress.value = progress || 0;
+                    updateTimeDisplay();
+                }
+            });
+
+            songPlayer.addEventListener('loadedmetadata', updateTimeDisplay);
+            songPlayer.addEventListener('ended', () => {
+                document.getElementById("custom-play-icon").className = "fas fa-play";
+            });
+        }
+
+        function toggleSong() {
+            sfx.click();
+            const icon = document.getElementById("custom-play-icon");
+            if (songPlayer.paused) {
+                stopSpeech(); 
+                songPlayer.play();
+                icon.className = "fas fa-pause";
+            } else {
+                songPlayer.pause();
+                icon.className = "fas fa-play";
+            }
+        }
+
+        function formatTime(seconds) {
+            if(isNaN(seconds)) return "00:00";
+            const m = Math.floor(seconds / 60);
+            const s = Math.floor(seconds % 60);
+            return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        function updateTimeDisplay() {
+            const current = formatTime(songPlayer.currentTime);
+            const total = isNaN(songPlayer.duration) ? "04:06" : formatTime(songPlayer.duration);
+            songTimeDisplay.innerText = `${current} / ${total}`;
+        }
+
+        function seekSongUpdate(value) {
+            isDraggingSlider = true;
+            if(!isNaN(songPlayer.duration)) {
+                const newTime = (value / 100) * songPlayer.duration;
+                songTimeDisplay.innerText = `${formatTime(newTime)} / ${formatTime(songPlayer.duration)}`;
+            }
+        }
+
+        function seekSong(value) {
+            isDraggingSlider = false;
+            if(!isNaN(songPlayer.duration)) {
+                songPlayer.currentTime = (value / 100) * songPlayer.duration;
+            }
+        }
+
+        // STAGE 1: LYRIC PUZZLE IMPLEMENTATION
+        function initLyricPuzzle() {
+            const poolContainer = document.getElementById("lyric-words-pool");
+            poolContainer.innerHTML = "";
+
+            const shuffled = [...AppData.songPool].sort(() => Math.random() - 0.5);
+
+            shuffled.forEach((word) => {
+                const btn = document.createElement("button");
+                btn.className = "py-2 px-3.5 bg-white hover:bg-bazaar-50 dark:bg-slate-700 dark:hover:bg-slate-600 text-bazaar-800 dark:text-bazaar-200 font-bold rounded-xl text-xs transition-all shadow-sm border-2 border-slate-200 dark:border-slate-600";
+                btn.innerText = word;
+                btn.onclick = () => selectWordForBlank(word);
+                poolContainer.appendChild(btn);
+            });
+        }
+
+        function activeBlankSelection(blankIdx) {
+            sfx.click();
+            for (let i = 0; i < 5; i++) {
+                const el = document.getElementById(`blank-${i}`);
+                el.classList.remove("border-brand-500", "bg-brand-50", "ring-2", "ring-bazaar-500", "scale-110");
+            }
+            activeBlankIdx = blankIdx;
+            const activeEl = document.getElementById(`blank-${blankIdx}`);
+            activeEl.classList.add("ring-2", "ring-bazaar-500", "bg-bazaar-50", "scale-110");
+            
+            if('speechSynthesis' in window && !isMuted && songPlayer.paused && !currentInstructionAudio) {
+                let u = new SpeechSynthesisUtterance(`${blankIdx + 1}. Boşluk`);
+                u.lang = 'tr-TR';
+                synth.speak(u);
+            }
+        }
+
+        function selectWordForBlank(word) {
+            sfx.click();
+            if (activeBlankIdx === null) {
+                speakText("Lütfen kelimeyi yerleştirmek istediğin noktalı boşluğa tıkla!");
+                return;
+            }
+
+            userSongAnswers[activeBlankIdx] = word;
+            const blankEl = document.getElementById(`blank-${activeBlankIdx}`);
+            blankEl.innerText = word;
+            blankEl.classList.remove("text-bazaar-600", "border-dashed", "scale-110");
+            blankEl.classList.add("text-slate-800", "dark:text-white", "font-black", "border-solid", "bg-amber-100", "dark:bg-amber-900/50");
+
+            activeBlankIdx = null;
+        }
+
+        function checkSongAnswers() {
+            let correctCount = 0;
+            const targets = { 0: "aynalı", 1: "içinde", 2: "evli", 3: "gençliğim", 4: "mektubu" };
+
+            for (let i = 0; i < 5; i++) {
+                const blankEl = document.getElementById(`blank-${i}`);
+                blankEl.classList.remove("scale-110", "ring-2");
+                
+                if (userSongAnswers[i] === targets[i]) {
+                    correctCount++;
+                    blankEl.className = "inline-block px-2 min-w-[6rem] h-7 align-middle border-b-2 border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 rounded text-center font-black text-emerald-600";
+                } else {
+                    blankEl.className = "inline-block px-2 min-w-[6rem] h-7 align-middle border-b-2 border-red-500 bg-red-50 dark:bg-red-950/40 rounded text-center font-black text-red-600";
+                }
+            }
+
+            const feedback = document.getElementById("song-feedback");
+            const feedbackIcon = document.getElementById("song-feedback-icon");
+            const feedbackMsg = document.getElementById("song-feedback-msg");
+
+            feedback.classList.remove("hidden");
+            if (correctCount === 5) {
+                sfx.correct();
+                feedback.className = "mt-4 p-3 rounded-xl border bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 text-sm font-bold flex items-center gap-2 shadow-sm";
+                feedbackIcon.className = "fas fa-check-circle text-lg";
+                feedbackMsg.innerText = "Harika! Çanakkale Türküsünü hatasız tamamladın. Şimdi aşağıdaki Türkü Sözlüğü'nü inceleyebilirsin.";
+                
+                document.getElementById("song-dictionary").classList.remove("hidden");
+                
+                speakText("Mükemmel! Tüm boşlukları doğru doldurdunuz. Aşağıda açılan sözlükten türküdeki eski kelimelerin anlamlarını okuyabilirsiniz.");
+            } else {
+                sfx.wrong();
+                feedback.className = "mt-4 p-3 rounded-xl border bg-red-100 dark:bg-red-950/40 text-red-800 dark:text-red-300 border-red-200 dark:border-red-800 text-sm font-bold flex items-center gap-2 shadow-sm";
+                feedbackIcon.className = "fas fa-exclamation-triangle text-lg";
+                feedbackMsg.innerText = "Bazı kelimeler yanlış yerde gibi görünüyor. Lütfen tekrar dene.";
+                speakText("Bazı yanlışlıklar var, kelimeleri tekrar yerleştirmeyi deneyebilirsin.");
+            }
+        }
+
+        // STAGE 2: REAL VS IMAGINARY TABLE
+        function renderRealImaginaryTable() {
+            const tbody = document.getElementById("table-body-real-imaginary");
+            tbody.innerHTML = "";
+
+            AppData.sentences.forEach((sentence, index) => {
+                const tr = document.createElement("tr");
+                tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors";
+                
+                tr.innerHTML = `
+                    <td class="p-4 text-slate-700 dark:text-slate-300 border-b border-slate-100 dark:border-slate-700 font-medium">
+                        ${index + 1}. ${sentence.text}
+                    </td>
+                    <td class="p-4 text-center border-b border-slate-100 dark:border-slate-700">
+                        <input type="radio" name="${sentence.id}" value="real" class="custom-radio" onclick="sfx.click()">
+                    </td>
+                    <td class="p-4 text-center border-b border-slate-100 dark:border-slate-700">
+                        <input type="radio" name="${sentence.id}" value="imaginary" class="custom-radio" onclick="sfx.click()">
+                    </td>
+                    <td class="p-4 text-center border-b border-slate-100 dark:border-slate-700 font-bold" id="result-${sentence.id}">
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function checkRealImaginaryTable() {
+            let allAnswered = true;
+            let allCorrect = true;
+            
+            const expContent = document.getElementById("explanations-content");
+            expContent.innerHTML = ""; 
+
+            AppData.sentences.forEach((sentence, index) => {
+                const radios = document.getElementsByName(sentence.id);
+                let selectedValue = null;
+                for (let r of radios) {
+                    if (r.checked) selectedValue = r.value;
+                    r.disabled = true;
+                }
+
+                const resultTd = document.getElementById(`result-${sentence.id}`);
+                
+                if (!selectedValue) {
+                    allAnswered = false;
+                    resultTd.innerHTML = '<span class="text-slate-400 text-xs">Boş</span>';
+                    allCorrect = false;
+                } else {
+                    const isChoiceReal = (selectedValue === "real");
+                    const isCorrect = (isChoiceReal === sentence.isReal);
+
+                    if (isCorrect) {
+                        resultTd.innerHTML = '<span class="text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-1"><i class="fas fa-check"></i> Doğru</span>';
+                    } else {
+                        resultTd.innerHTML = '<span class="text-red-500 dark:text-red-400 flex items-center justify-center gap-1"><i class="fas fa-times"></i> Yanlış</span>';
+                        allCorrect = false;
+                    }
+
+                    const typeLabel = sentence.isReal ? "GERÇEK" : "HAYAL ÜRÜNÜ";
+                    const expHtml = `
+                        <div class="pb-3 ${index !== AppData.sentences.length - 1 ? 'border-b border-teal-200/50 dark:border-teal-800/50' : ''}">
+                            <p class="font-bold text-teal-900 dark:text-teal-200 mb-1">${index + 1}. ${sentence.text} &rarr; ${typeLabel}</p>
+                            <p class="text-slate-600 dark:text-slate-400">Açıklama: ${sentence.explanation}</p>
+                        </div>
+                    `;
+                    expContent.insertAdjacentHTML('beforeend', expHtml);
+                }
+            });
+
+            if (!allAnswered) {
+                sfx.wrong();
+                speakText("Tüm cümleleri işaretlemediniz. Lütfen eksikleri tamamlayıp tekrar deneyin.");
+                AppData.sentences.forEach(s => {
+                    const r = document.getElementsByName(s.id);
+                    r.forEach(btn => btn.disabled = false);
+                });
+                return;
+            }
+
+            document.getElementById("real-imaginary-explanations").classList.remove("hidden");
+            document.getElementById("btn-check-table").classList.add("hidden");
+            
+            if (allCorrect) {
+                sfx.correct();
+                document.getElementById("btn-finish-game").classList.remove("hidden");
+                speakText("Mükemmel! Cümlelerin hepsini doğru analiz ettin. Aşağıdaki açıklamaları okuduktan sonra oyunu bitir düğmesine basabilirsin.");
+            } else {
+                sfx.wrong();
+                document.getElementById("btn-re-solve").classList.remove("hidden");
+                speakText("Bazı yanlışların var. Hatalarını görmek için aşağıdaki açıklamaları oku ve tekrar çözmek için butona tıkla.");
+            }
+        }
+
+        function resetRealImaginary() {
+            sfx.click();
+            renderRealImaginaryTable(); 
+            document.getElementById("real-imaginary-explanations").classList.add("hidden");
+            document.getElementById("btn-re-solve").classList.add("hidden");
+            document.getElementById("btn-finish-game").classList.add("hidden");
+            document.getElementById("btn-check-table").classList.remove("hidden");
+            speakText("Tablo sıfırlandı, tekrar deneyebilirsin.");
+        }
+
+        function completeGame() {
+            changeScreen("screen-results");
+        }
+
+        function resetGameEntirely() {
+            sfx.click();
+            userSongAnswers = { 0: null, 1: null, 2: null, 3: null, 4: null };
+            activeBlankIdx = null;
+            for (let i = 0; i < 5; i++) {
+                const el = document.getElementById(`blank-${i}`);
+                el.innerText = "...";
+                el.className = "inline-block w-24 h-7 align-middle border-b-2 border-dashed border-bazaar-500 bg-white/60 dark:bg-slate-800/60 rounded text-center font-bold text-bazaar-600 cursor-pointer hover:bg-bazaar-50 transition-colors shadow-sm";
+            }
+            document.getElementById("song-feedback").classList.add("hidden");
+            document.getElementById("song-dictionary").classList.add("hidden");
+            
+            songPlayer.pause();
+            songPlayer.currentTime = 0;
+            document.getElementById("custom-play-icon").className = "fas fa-play";
+
+            initLyricPuzzle();
+            resetRealImaginary();
+            changeScreen("screen-welcome");
+        }
+
+        // CONFETTI EFFECTS ENGINE FOR GAME COMPLETIONS
+        function triggerConfetti() {
+            const canvas = document.getElementById("confetti-canvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            let width = canvas.width = canvas.parentElement.clientWidth;
+            let height = canvas.height = canvas.parentElement.clientHeight;
+
+            let particles = [];
+            const colors = ["#b45309", "#f59e0b", "#14b8a6", "#3b82f6", "#ef4444"];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height - height,
+                    r: Math.random() * 6 + 4,
+                    d: Math.random() * height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5,
+                    tiltAngleIncremental: Math.random() * 0.07 + 0.02,
+                    tiltAngle: 0
+                });
+            }
+
+            let animationFrameId;
+            function drawConfetti() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach((p, index) => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                    p.x += Math.sin(p.tiltAngle);
+                    p.tilt = Math.sin(p.tiltAngle - index / 3) * 15;
+
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+
+                    if (p.y > height) {
+                        particles[index] = {
+                            x: Math.random() * width,
+                            y: -20,
+                            r: p.r,
+                            d: p.d,
+                            color: p.color,
+                            tilt: p.tilt,
+                            tiltAngleIncremental: p.tiltAngleIncremental,
+                            tiltAngle: p.tiltAngle
+                        };
+                    }
+                });
+
+                animationFrameId = requestAnimationFrame(drawConfetti);
+            }
+
+            drawConfetti();
+
+            setTimeout(() => {
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, width, height);
+            }, 6000); // 6 seconds
+        }
+    </script>
+</body>
+</html>
