@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Çanakkale Boğazı: İki Kıtanın Kilidi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,700&display=swap&subset=latin,latin-ext" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Montserrat', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    },
+                    colors: {
+                        ocean: {
+                            50: '#f0f9ff', 100: '#e0f2fe', 200: '#bae6fd', 300: '#7dd3fc',
+                            400: '#38bdf8', 500: '#0ea5e9', 600: '#0284c7', 700: '#0369a1',
+                            800: '#075985', 900: '#0c4a6e',
+                        },
+                        bridge: {
+                            400: '#ef4444', 500: '#dc2626', 600: '#b91c1c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Core UI Glass */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .dark .glass-panel {
+            background: rgba(12, 74, 110, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Custom Input Range for Radar */
+        input[type=range].radar-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+            position: relative;
+            z-index: 10;
+        }
+        input[type=range].radar-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #0284c7;
+            border: 4px solid #fff;
+            cursor: pointer;
+            margin-top: -10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            transition: transform 0.1s;
+        }
+        input[type=range].radar-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #dc2626;
+        }
+        input[type=range].radar-slider::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #bae6fd;
+            border-radius: 4px;
+        }
+        .dark input[type=range].radar-slider::-webkit-slider-runnable-track {
+            background: #075985;
+        }
+
+        /* SVG Bridge Build Animations */
+        .build-part {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease-in-out;
+        }
+        .build-part.built {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .draw-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            transition: stroke-dashoffset 2s ease-in-out;
+        }
+        .draw-line.built {
+            stroke-dashoffset: 0;
+        }
+        
+        /* Moving Car & Ship Animations */
+        @keyframes driveCar {
+            0% { transform: translateX(-150px); }
+            100% { transform: translateX(850px); }
+        }
+        .car-anim {
+            visibility: hidden;
+        }
+        .car-anim.active {
+            visibility: visible;
+            animation: driveCar 6s linear infinite;
+        }
+
+        @keyframes sailShip {
+            0% { transform: translateX(850px); }
+            100% { transform: translateX(-200px); }
+        }
+        .ship-anim {
+            visibility: hidden;
+        }
+        .ship-anim.active {
+            visibility: visible;
+            animation: sailShip 18s linear infinite;
+        }
+
+        /* Confetti */
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-ocean-50 via-white to-ocean-100 dark:from-ocean-900 dark:via-slate-900 dark:to-ocean-800 min-h-screen w-screen text-slate-800 dark:text-slate-100 font-sans transition-colors duration-300 overflow-x-hidden flex flex-col justify-between">
+
+    <header class="w-full py-4 px-4 md:px-8 flex justify-between items-center z-40 relative border-b border-ocean-200/50 dark:border-ocean-800/50 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-white dark:bg-slate-800 rounded-xl shadow-md p-1 border border-ocean-100 dark:border-ocean-700 pointer-events-auto">
+                <object data="orjinal.svg" type="image/svg+xml" class="w-full h-full pointer-events-none" id="logo-svg">
+                    <svg viewBox="0 0 100 100" class="w-10 h-10 text-ocean-600 fill-current">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="8"/>
+                        <path d="M50,15 L15,85 L50,70 L85,85 Z" />
+                    </svg>
+                </object>
+            </div>
+            <div>
+                <h1 class="text-lg md:text-xl font-black text-ocean-800 dark:text-ocean-200 tracking-tight font-serif">ÇANAKKALE BOĞAZI</h1>
+                <p class="text-[9px] text-ocean-600 dark:text-ocean-400 font-bold tracking-widest uppercase">Kıtaların Kilidi</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 md:gap-4">
+            <button onclick="toggleMute()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-ocean-600 hover:scale-110 transition-transform" title="Sesi Aç/Kapat">
+                <i class="fas fa-volume-up text-lg" id="sound-icon"></i>
+            </button>
+            <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-full bg-white dark:bg-slate-800 shadow-md flex items-center justify-center text-amber-500 hover:scale-110 transition-transform" title="Gece/Gündüz">
+                <i class="fas fa-sun dark:hidden text-lg"></i>
+                <i class="fas fa-moon hidden dark:block text-slate-300 text-lg"></i>
+            </button>
+            <a href="https://memleketim.github.io/17/index.html" class="px-4 py-2 bg-bridge-500 hover:bg-bridge-600 text-white font-bold rounded-lg shadow-md transition-all text-xs flex items-center gap-2">
+                <i class="fas fa-map-marked-alt"></i>
+                <span class="hidden md:inline">Haritaya Dön</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center w-full max-w-6xl mx-auto z-10 relative">
+        <div class="absolute top-20 left-10 text-ocean-200 dark:text-ocean-800/30 text-9xl opacity-20 pointer-events-none"><i class="fas fa-water"></i></div>
+        <div class="absolute bottom-20 right-10 text-ocean-200 dark:text-ocean-800/30 text-9xl opacity-20 pointer-events-none"><i class="fas fa-ship"></i></div>
+
+        <div id="screen-welcome" class="w-full md:w-[90%] rounded-[2rem] shadow-2xl relative flex flex-col justify-center items-center text-center overflow-hidden my-6 border border-slate-200 dark:border-slate-700" style="background-image: url('arkabogaz.png'); background-size: cover; background-position: center; min-height: 65vh;">
+            <div class="absolute inset-0 bg-white/70 dark:bg-slate-900/80 backdrop-blur-[4px] z-0 transition-colors duration-300"></div>
+            <div class="relative z-10 p-8 md:p-12 flex flex-col items-center">
+                <div class="w-20 h-20 bg-ocean-100/90 dark:bg-ocean-800/90 text-ocean-600 dark:text-ocean-300 rounded-full flex items-center justify-center text-4xl mb-6 shadow-lg backdrop-blur-sm border-2 border-white dark:border-slate-700">
+                    <i class="fas fa-anchor"></i>
+                </div>
+                <h2 class="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 leading-tight font-serif drop-shadow-sm">
+                    Çanakkale Boğazı: <br><span class="text-ocean-700 dark:text-ocean-400">İki Kıtayı Birleştiren Düğüm</span>
+                </h2>
+                <p class="text-sm md:text-base text-slate-800 dark:text-slate-200 max-w-2xl mx-auto mb-8 leading-relaxed font-medium">
+                    Asya ile Avrupa'yı birbirinden ayıran, Karadeniz'in dünyaya açılan tek kapısı olan ve şanlı tarihimizin izlerini taşıyan Çanakkale Boğazı'nın sırlarını keşfetmeye yardsın ve dünyanın en uzun asma köprüsünü kendi ellerinle inşa etmeye hazır mısın?
+                </p>
+
+                <div class="w-full max-w-lg mb-8 bg-gradient-to-r from-ocean-500/20 via-bridge-500/20 to-ocean-500/20 border border-ocean-500/30 p-3 rounded-2xl shadow-sm hover:shadow-md transition-all group backdrop-blur-md">
+                    <a href="https://drive.google.com/file/d/1NkyQ3_bhLhugAU5YhPR5x8ZifGmBmCYO/view" target="_blank" class="flex items-center justify-center gap-2 text-ocean-900 dark:text-ocean-100 hover:text-bridge-600 dark:hover:text-bridge-400 font-bold text-xs md:text-sm transition-colors">
+                        <span class="flex h-3 w-3 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-bridge-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-bridge-500"></span>
+                        </span>
+                        <span>Elif Ünsal'ın çalışmasının tamamına ulaşmak için tıklayınız.</span>
+                        <i class="fas fa-external-link-alt text-xs group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform"></i>
+                    </a>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                    <button onclick="startGame()" class="flex-1 px-6 py-4 bg-ocean-600 hover:bg-ocean-700 active:scale-95 text-white font-black rounded-2xl shadow-xl hover:shadow-ocean-600/30 transition-all text-lg flex items-center justify-center gap-3">
+                        <i class="fas fa-ship"></i>
+                        <span>Keşfe Başla!</span>
+                    </button>
+                    <button onclick="speakWelcome()" class="flex-1 px-6 py-4 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-700 active:scale-95 text-slate-800 dark:text-slate-200 font-bold rounded-2xl shadow-lg transition-all text-sm flex items-center justify-center gap-2 border border-slate-300 dark:border-slate-600 backdrop-blur-sm">
+                        <i class="fas fa-headphones"></i>
+                        <span>Beni Dinle</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-radar" class="hidden w-[90%] max-w-4xl glass-panel rounded-[2rem] p-6 md:p-8 shadow-2xl relative flex flex-col my-6">
+            <div class="text-center mb-6">
+                <span class="px-3 py-1 bg-ocean-100 dark:bg-ocean-900/50 text-ocean-700 dark:text-ocean-300 text-[10px] font-black rounded-full uppercase tracking-widest">Bölüm 1: Keşif Radarı</span>
+                <h3 class="text-2xl font-black text-slate-800 dark:text-white mt-3 font-serif">Boğazın Sırlarını Çöz</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">Radardaki düğmeyi sağa doğru kaydırarak farklı bilgileri görüntüle.</p>
+            </div>
+
+            <div class="w-full bg-slate-50/80 dark:bg-slate-800/50 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 mb-6 flex flex-col md:flex-row items-center gap-8 min-h-[250px]">
+                <div class="w-full md:w-1/3 flex justify-center items-center">
+                    <div id="radar-visual-container" class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white dark:bg-slate-900 flex items-center justify-center shadow-inner border-4 border-white dark:border-slate-700 transition-all duration-500 relative overflow-hidden group">
+                        </div>
+                </div>
+
+                <div class="w-full md:w-2/3">
+                    <div class="flex items-center gap-3 mb-3">
+                        <h4 id="radar-title" class="text-xl md:text-2xl font-bold text-ocean-700 dark:text-ocean-300 font-serif">Coğrafi Yapı</h4>
+                        <button onclick="speakRadar()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-ocean-500 hover:text-white transition-colors shadow-sm">
+                            <i class="fas fa-volume-up text-xs"></i>
+                        </button>
+                    </div>
+                    <p id="radar-text" class="text-sm md:text-base text-slate-700 dark:text-slate-300 leading-relaxed min-h-[100px] font-medium">
+                        Çanakkale Boğazı, Asya ile Avrupa kıtalarını birbirinden ayıran ve Adalar Denizi'ni Marmara Denizi'ne bağlayan eşsiz bir doğal su yoludur. Şehri, Avrupa yakasında Gelibolu, Asya yakasında Biga Yarımadası olarak ikiye böler.
+                    </p>
+                </div>
+            </div>
+
+            <div class="w-full px-4 mb-6 relative mt-4">
+                <div class="flex justify-between text-[10px] md:text-xs font-bold text-slate-500 absolute -top-5 w-full pr-8">
+                    <span>Coğrafya</span>
+                    <span>Ticaret</span>
+                    <span>Tarih</span>
+                    <span>Köprü</span>
+                </div>
+                <input type="range" id="radar-slider" class="radar-slider" min="1" max="4" step="1" value="1" oninput="updateRadar(this.value)">
+            </div>
+
+            <div class="flex justify-end mt-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <button id="btn-to-quiz" onclick="startBuildGame()" class="hidden px-6 py-3.5 bg-ocean-600 hover:bg-ocean-700 text-white font-bold rounded-xl text-sm flex items-center gap-2 shadow-lg hover:shadow-ocean-500/50 transition-all animate-bounce">
+                    <span>Köprü İnşasına Başla</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-quiz" class="hidden w-[90%] max-w-4xl glass-panel rounded-[2rem] p-6 md:p-8 shadow-2xl relative flex flex-col my-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <span class="px-3 py-1 bg-bridge-100 dark:bg-bridge-900/50 text-bridge-700 dark:text-bridge-300 text-[10px] font-black rounded-full uppercase tracking-widest">Bölüm 2: Mühendislik Görevi</span>
+                    <h3 class="text-xl md:text-2xl font-black text-slate-800 dark:text-white mt-2 font-serif">1915 Çanakkale Köprüsü'nü İnşa Et!</h3>
+                </div>
+                <button onclick="speakQuiz()" class="w-10 h-10 shrink-0 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-ocean-600 dark:text-ocean-400 border border-slate-200 dark:border-slate-700 shadow-sm hover:scale-105 transition-transform">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+            </div>
+
+            <div class="w-full h-48 md:h-64 bg-ocean-50 dark:bg-ocean-950/50 rounded-2xl border-2 border-ocean-100 dark:border-ocean-800 mb-8 relative overflow-hidden flex items-end justify-center shadow-inner">
+                
+                <div class="absolute top-4 left-10 text-white/50 text-3xl animate-pulse"><i class="fas fa-cloud"></i></div>
+                <div class="absolute top-10 right-20 text-white/50 text-4xl animate-pulse" style="animation-delay: 1s;"><i class="fas fa-cloud"></i></div>
+                
+                <svg viewBox="0 0 800 300" class="w-full h-full preserve-3d">
+                    <rect x="0" y="250" width="800" height="50" fill="#0284c7" class="opacity-80"/>
+                    <path d="M0 250 Q 100 240, 200 250 T 400 250 T 600 250 T 800 250" fill="none" stroke="#bae6fd" stroke-width="2" class="opacity-50"/>
+
+                    <g id="svg-part-5" class="ship-anim">
+                        <g transform="translate(0, 210) scale(0.5)">
+                            <polygon points="20,40 180,40 190,70 10,70" fill="#1e293b"/>
+                            <rect x="140" y="10" width="30" height="30" fill="#cbd5e1"/>
+                            <rect x="150" y="-10" width="10" height="20" fill="#ef4444"/>
+                            <rect x="30" y="20" width="25" height="20" fill="#2563eb"/>
+                            <rect x="60" y="20" width="25" height="20" fill="#eab308"/>
+                            <rect x="90" y="20" width="25" height="20" fill="#e11d48"/>
+                            <path d="M190 70 Q 200 65, 210 70" fill="none" stroke="#bae6fd" stroke-width="2"/>
+                        </g>
+                    </g>
+
+                    <g id="svg-part-1" class="build-part">
+                        <rect x="180" y="230" width="40" height="20" fill="#64748b" rx="2"/>
+                        <rect x="580" y="230" width="40" height="20" fill="#64748b" rx="2"/>
+                    </g>
+
+                    <g id="svg-part-2" class="build-part">
+                        <rect x="190" y="50" width="8" height="180" fill="#dc2626"/>
+                        <rect x="202" y="50" width="8" height="180" fill="#dc2626"/>
+                        <rect x="190" y="80" width="20" height="4" fill="#ffffff"/>
+                        <rect x="190" y="150" width="20" height="4" fill="#ffffff"/>
+
+                        <rect x="590" y="50" width="8" height="180" fill="#dc2626"/>
+                        <rect x="602" y="50" width="8" height="180" fill="#dc2626"/>
+                        <rect x="590" y="80" width="20" height="4" fill="#ffffff"/>
+                        <rect x="590" y="150" width="20" height="4" fill="#ffffff"/>
+                    </g>
+
+                    <path id="svg-part-3" d="M -50 180 Q 75 50, 200 50 Q 400 240, 600 50 Q 725 50, 850 180" fill="none" stroke="#94a3b8" stroke-width="4" class="draw-line"/>
+
+                    <rect id="svg-part-4" x="0" y="180" width="800" height="8" fill="#334155" class="build-part"/>
+                    
+                    <g id="svg-part-4-hangers" class="build-part opacity-50">
+                        <line x1="50" y1="120" x2="50" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="100" y1="90" x2="100" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="150" y1="65" x2="150" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="250" y1="85" x2="250" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="300" y1="125" x2="300" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="350" y1="160" x2="350" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="450" y1="160" x2="450" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="500" y1="125" x2="500" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="550" y1="85" x2="550" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="650" y1="65" x2="650" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="700" y1="90" x2="700" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                        <line x1="750" y1="120" x2="750" y2="180" stroke="#94a3b8" stroke-width="1"/>
+                    </g>
+
+                    <g id="car-1" class="car-anim" style="animation-delay: 0s;">
+                        <g transform="translate(0, 157) scale(0.2)">
+                            <rect x="10" y="60" width="140" height="40" rx="15" fill="#e11d48"/>
+                            <path d="M10 60 L25 30 Q30 25 40 25 L95 25 Q105 25 110 30 L130 60 Z" fill="#fb7185"/>
+                            <rect x="30" y="40" width="35" height="15" fill="#bae6fd"/>
+                            <rect x="75" y="40" width="30" height="15" fill="#bae6fd"/>
+                            <circle cx="40" cy="100" r="15" fill="#1e293b"/>
+                            <circle cx="40" cy="100" r="7" fill="#94a3b8"/>
+                            <circle cx="120" cy="100" r="15" fill="#1e293b"/>
+                            <circle cx="120" cy="100" r="7" fill="#94a3b8"/>
+                            <rect x="140" y="70" width="10" height="10" rx="2" fill="#fbbf24" opacity="0.8"/>
+                        </g>
+                    </g>
+                    
+                    <g id="car-2" class="car-anim" style="animation-delay: 2s;">
+                        <g transform="translate(0, 157) scale(0.2)">
+                            <rect x="10" y="60" width="140" height="40" rx="15" fill="#2563eb"/>
+                            <path d="M10 60 L25 30 Q30 25 40 25 L95 25 Q105 25 110 30 L130 60 Z" fill="#60a5fa"/>
+                            <rect x="30" y="40" width="35" height="15" fill="#bae6fd"/>
+                            <rect x="75" y="40" width="30" height="15" fill="#bae6fd"/>
+                            <circle cx="40" cy="100" r="15" fill="#1e293b"/>
+                            <circle cx="40" cy="100" r="7" fill="#94a3b8"/>
+                            <circle cx="120" cy="100" r="15" fill="#1e293b"/>
+                            <circle cx="120" cy="100" r="7" fill="#94a3b8"/>
+                            <rect x="140" y="70" width="10" height="10" rx="2" fill="#fbbf24" opacity="0.8"/>
+                        </g>
+                    </g>
+
+                    <g id="car-3" class="car-anim" style="animation-delay: 4s;">
+                        <g transform="translate(0, 157) scale(0.2)">
+                            <rect x="10" y="60" width="140" height="40" rx="15" fill="#eab308"/>
+                            <path d="M10 60 L25 30 Q30 25 40 25 L95 25 Q105 25 110 30 L130 60 Z" fill="#fde047"/>
+                            <rect x="30" y="40" width="35" height="15" fill="#bae6fd"/>
+                            <rect x="75" y="40" width="30" height="15" fill="#bae6fd"/>
+                            <circle cx="40" cy="100" r="15" fill="#1e293b"/>
+                            <circle cx="40" cy="100" r="7" fill="#94a3b8"/>
+                            <circle cx="120" cy="100" r="15" fill="#1e293b"/>
+                            <circle cx="120" cy="100" r="7" fill="#94a3b8"/>
+                            <rect x="140" y="70" width="10" height="10" rx="2" fill="#fbbf24" opacity="0.8"/>
+                        </g>
+                    </g>
+
+                </svg>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 md:p-8 border border-slate-200 dark:border-slate-700 shadow-sm relative">
+                <div class="absolute -top-3 left-6 bg-bridge-500 text-white text-[10px] md:text-xs font-bold px-4 py-1 rounded-full shadow-md">
+                    Soru <span id="quiz-progress-text">1</span> / 5
+                </div>
+                
+                <h4 id="quiz-question" class="text-base md:text-lg font-bold text-slate-800 dark:text-slate-100 mb-6 mt-2 leading-relaxed font-serif">
+                    Soru yükleniyor...
+                </h4>
+
+                <div class="flex flex-col gap-3">
+                    <button id="btn-ans-a" onclick="checkAnswer('A')" class="w-full text-left px-5 py-4 bg-slate-50 hover:bg-ocean-50 dark:bg-slate-700/50 dark:hover:bg-ocean-900/50 border-2 border-slate-200 dark:border-slate-600 hover:border-ocean-400 rounded-xl font-medium text-sm md:text-base text-slate-700 dark:text-slate-200 transition-all flex items-center gap-4">
+                        <span class="w-8 h-8 shrink-0 rounded bg-white dark:bg-slate-600 flex items-center justify-center font-bold text-ocean-600 dark:text-ocean-300 shadow-sm">A</span>
+                        <span id="quiz-text-a">Seçenek A</span>
+                    </button>
+                    <button id="btn-ans-b" onclick="checkAnswer('B')" class="w-full text-left px-5 py-4 bg-slate-50 hover:bg-ocean-50 dark:bg-slate-700/50 dark:hover:bg-ocean-900/50 border-2 border-slate-200 dark:border-slate-600 hover:border-ocean-400 rounded-xl font-medium text-sm md:text-base text-slate-700 dark:text-slate-200 transition-all flex items-center gap-4">
+                        <span class="w-8 h-8 shrink-0 rounded bg-white dark:bg-slate-600 flex items-center justify-center font-bold text-ocean-600 dark:text-ocean-300 shadow-sm">B</span>
+                        <span id="quiz-text-b">Seçenek B</span>
+                    </button>
+                </div>
+                
+                <div id="quiz-feedback" class="hidden mt-5 p-4 rounded-xl text-sm font-bold flex items-center gap-3 border shadow-inner"></div>
+            </div>
+        </div>
+
+        <div id="screen-end" class="hidden w-[90%] max-w-3xl glass-panel rounded-[2rem] p-6 md:p-10 shadow-2xl relative flex flex-col justify-center items-center text-center overflow-hidden my-6 border border-slate-200 dark:border-slate-700">
+            <canvas id="confetti-canvas"></canvas>
+            
+            <div class="relative z-10 w-full flex flex-col items-center">
+                <div class="w-full aspect-video max-w-2xl mx-auto mb-6 relative rounded-xl overflow-hidden shadow-2xl border-2 border-white dark:border-slate-800 bg-black">
+                    <video id="end-video" src="kopru.mp4" controls autoplay loop playsinline class="w-full h-full object-contain"></video>
+                </div>
+                
+                <span class="px-5 py-2 bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs font-black rounded-full uppercase tracking-widest mb-4 inline-block shadow-sm">MÜKEMMEL İŞ!</span>
+                <h3 class="text-3xl md:text-4xl font-black text-slate-800 dark:text-white mb-4 font-serif">Gerdanlık Tamamlandı</h3>
+                <p class="text-base text-slate-700 dark:text-slate-300 max-w-xl mx-auto mb-8 leading-relaxed font-medium">
+                    Çanakkale Boğazı'nın önemini harika kavradın ve dünyanın en uzun asma köprüsünü başarıyla inşa ettin. Türkiye'nin bu kilit noktası artık senin sayende daha güvenli ve birbirine bağlı!
+                </p>
+
+                <div class="flex flex-col sm:flex-row gap-4 justify-center w-full max-w-sm mx-auto">
+                    <button onclick="resetGame()" class="flex-1 px-6 py-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold rounded-xl text-sm border-2 border-slate-200 dark:border-slate-600 flex items-center justify-center gap-2 transition-colors shadow-sm">
+                        <i class="fas fa-redo"></i>
+                        <span>Tekrar Oyna</span>
+                    </button>
+                    <a href="https://memleketim.github.io/17/index.html" class="flex-1 px-6 py-4 bg-bridge-500 hover:bg-bridge-600 text-white font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-bridge-500/30 transition-all">
+                        <i class="fas fa-map-marked-alt text-lg"></i>
+                        <span>Haritaya Dön</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="w-full bg-slate-900/95 backdrop-blur-md text-slate-400 text-xs py-3 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center gap-4 border-t border-slate-800 z-30">
+        <div class="flex items-center gap-2 font-medium">
+            <span class="text-ocean-400 flex items-center gap-2"><i class="fas fa-satellite-dish animate-pulse"></i> Akıllı Ses Sistemi</span>
+            <span class="hidden md:inline text-slate-600">|</span>
+            <span id="audio-status-text" class="text-[10px] text-slate-400 truncate">Sistem Hazır</span>
+        </div>
+
+        <div class="text-[10px] text-slate-500 font-semibold tracking-widest uppercase">
+            &copy; 2026 Çanakkale Boğazı - Türkçe ve Türk Kültürü
+        </div>
+    </footer>
+
+    <script>
+        // ==========================================
+        // DATA MODELS
+        // ==========================================
+        const radarData = {
+            1: {
+                title: "Coğrafi Düğüm Noktası",
+                image: "cografi.png",
+                text: "Çanakkale Boğazı, Asya ile Avrupa kıtalarını birbirinden ayırır. Şehri; Avrupa yakasındaki Gelibolu Yarımadası ve Asya yakasındaki Biga Yarımadası olarak tam ortadan ikiye böler.",
+                audioFile: "yonergebogaz2.mp3"
+            },
+            2: {
+                title: "Küresel Ticaret Geçidi",
+                image: "kuresel.png",
+                text: "Karadeniz'e kıyısı olan ülkelerin okyanuslara ulaşması için tek doğal kapıdır. Ayrıca 1936 Montrö Boğazlar Sözleşmesi ile askeri ve ticari gemilerin geçişi uluslararası bir kuralla Türkiye'nin kontrolündedir.",
+                audioFile: "yonergebogaz3.mp3"
+            },
+            3: {
+                title: "Tarih ve Güvenlik",
+                image: "tarih.png",
+                text: "I. Dünya Savaşı'ndaki 'Çanakkale Geçilmez' destanı burada yazılmıştır. Boğazın iki yakası bugün şehitliklerle doludur ve kontrolünün Türkiye'de olması ülkemiz için çok büyük bir güvenlik güvencesidir.",
+                audioFile: "yonergebogaz4.mp3"
+            },
+            4: {
+                title: "1915 Çanakkale Köprüsü",
+                image: "kopru1915.png",
+                text: "Yüzyıllarca feribotla geçilen bu zorlu su yolu, artık köprü ile 6 dakikada geçiliyor. Kırmızı-beyaz kuleleri Türk bayrağını, 318 metre boyu 18 Mart'ı, 2023 metre açıklığı ise Cumhuriyetin 100. yılını simgeler.",
+                audioFile: "yonergebogaz5.mp3"
+            }
+        };
+
+        const quizData = [
+            {
+                q: "1915 Çanakkale Köprüsü'nün Asya ve Avrupa kuleleri arasındaki '2.023 metre' olan uzunluğu neyi simgelemektedir?",
+                a: "Türkiye Cumhuriyeti'nin 100. yılını",
+                b: "Köprünün toplam ağırlığını",
+                correct: "A",
+                buildId: "svg-part-1",
+                explanation: "Doğru! Dünyanın en uzun asma köprüsü olan bu yapı, Cumhuriyetimizin 100. yılına adanmıştır.",
+                audioFile: "yonergedogru1.mp3"
+            },
+            {
+                q: "Köprünün kırmızı beyaz kulelerinin uzunluğu '318 metredir'. Bu rakam hangi şanlı tarihimizi sembolize eder?",
+                a: "29 Ekim Cumhuriyet Bayramını",
+                b: "18 Mart Çanakkale Deniz Zaferini",
+                correct: "B",
+                buildId: "svg-part-2",
+                explanation: "Harika! 318 rakamı, 3. ayın 18'ini yani 18 Mart Çanakkale Zaferi'ni temsil eder. (Kuleler inşa edildi!)",
+                audioFile: "yonergedogru2.mp3"
+            },
+            {
+                q: "Çanakkale Boğazı'ndan hangi gemilerin geçeceğini belirleyen ve Türkiye'ye büyük güç veren uluslararası antlaşma hangisidir?",
+                a: "Montrö Boğazlar Sözleşmesi",
+                b: "Lozan Barış Antlaşması",
+                correct: "A",
+                buildId: "svg-part-3",
+                explanation: "Doğru bildin. 1936'da imzalanan Montrö sözleşmesi bölgenin güvenliğini sağlar. (Ana halatlar çekildi!)",
+                audioFile: "yonergedogru3.mp3"
+            },
+            {
+                q: "Köprünün kulelerinde kullanılan 'kırmızı ve beyaz' renkler neyi temsil etmektedir?",
+                a: "Denizi ve Bulutları",
+                b: "Türk Bayrağını",
+                correct: "B",
+                buildId: "svg-part-4",
+                explanation: "Çok doğru! Rengini şanlı Türk bayrağından alır. (Araç yolu yerleştirildi ve geçişler başladı!)",
+                audioFile: "yonergedogru4.mp3"
+            },
+            {
+                q: "Karadeniz'e kıyısı olan bir ülkenin gemisi, açık okyanuslara ulaşmak için İstanbul ve Çanakkale Boğazı'nı kullanmak zorunda mıdır?",
+                a: "Evet, bu boğazlar tek doğal çıkış kapısıdır.",
+                b: "Hayır, istedikleri başka denizlerden gidebilirler.",
+                correct: "A",
+                buildId: "svg-part-5",
+                explanation: "Mükemmel! Boğazlarımız Karadeniz'in dünyaya açılan tek doğal kapısıdır. (Kargo gemisi geçiş yapıyor!)",
+                audioFile: "yonergedogru5.mp3"
+            }
+        ];
+
+        // ==========================================
+        // STATE & AUDIO VARIABLES
+        // ==========================================
+        let currentScreen = "screen-welcome";
+        let isMuted = false;
+        
+        let synth = window.speechSynthesis;
+        let currentUtterance = null;
+        let currentAudioFileObj = null;
+
+        let quizIndex = 0;
+        let radarIndex = 1;
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        // ==========================================
+        // SMART AUDIO SYSTEM
+        // ==========================================
+        function stopAllAudio() {
+            if (synth) synth.cancel();
+            if (currentAudioFileObj) {
+                currentAudioFileObj.pause();
+                currentAudioFileObj.currentTime = 0;
+            }
+        }
+
+        function playAudioOrSpeak(fileName, fallbackText) {
+            if (isMuted) return;
+            stopAllAudio();
+            
+            const statusText = document.getElementById("audio-status-text");
+
+            if (fileName) {
+                currentAudioFileObj = new Audio(fileName);
+                currentAudioFileObj.onplay = () => { statusText.innerText = "MP3 Çalınıyor..."; };
+                currentAudioFileObj.onended = () => { statusText.innerText = "Sistem Hazır"; };
+                
+                currentAudioFileObj.onerror = () => {
+                    console.warn(`[Audio] ${fileName} bulunamadı. Yapay Zeka devreye giriyor.`);
+                    speakTextOnly(fallbackText);
+                };
+                
+                currentAudioFileObj.play().catch(e => {
+                    console.warn(`[Audio] Oynatma hatası (${fileName}). Yapay Zeka devreye giriyor.`, e);
+                    speakTextOnly(fallbackText);
+                });
+            } else {
+                speakTextOnly(fallbackText);
+            }
+        }
+
+        function speakTextOnly(text) {
+            if (isMuted || !('speechSynthesis' in window)) return;
+            
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.lang = 'tr-TR';
+            currentUtterance.rate = 1.0;
+            currentUtterance.pitch = 1.0;
+            
+            const voices = synth.getVoices();
+            const trVoice = voices.find(v => v.lang.includes('tr'));
+            if (trVoice) currentUtterance.voice = trVoice;
+
+            currentUtterance.onstart = () => { document.getElementById("audio-status-text").innerText = "Yapay Zeka Seslendiriyor..."; };
+            currentUtterance.onend = () => { document.getElementById("audio-status-text").innerText = "Sistem Hazır"; };
+            
+            synth.speak(currentUtterance);
+        }
+
+        function playTone(freq, type, duration, vol=0.1) {
+            if(isMuted) return;
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playClickFX() { playTone(600, 'sine', 0.1, 0.05); }
+        function playCorrectFX() { 
+            playTone(600, 'sine', 0.1, 0.1); 
+            setTimeout(()=>playTone(900, 'sine', 0.2, 0.1), 100); 
+        }
+        function playWrongFX() { 
+            playTone(300, 'sawtooth', 0.3, 0.1); 
+            setTimeout(()=>playTone(250, 'sawtooth', 0.4, 0.1), 150); 
+        }
+        function playWinFX() {
+            const notes = [440, 554, 659, 880];
+            notes.forEach((freq, i) => setTimeout(() => playTone(freq, 'square', 0.2, 0.1), i * 150));
+        }
+
+        // ==========================================
+        // CORE FUNCTIONS
+        // ==========================================
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle("dark");
+            playClickFX();
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const icon = document.getElementById("sound-icon");
+            if(isMuted) {
+                icon.className = "fas fa-volume-mute text-slate-400 text-lg";
+                stopAllAudio();
+                document.getElementById("audio-status-text").innerText = "Sistem Sessizde";
+            } else {
+                icon.className = "fas fa-volume-up text-ocean-600 dark:text-ocean-400 text-lg";
+                document.getElementById("audio-status-text").innerText = "Sistem Aktif";
+                playClickFX();
+            }
+        }
+
+        function switchScreen(screenId) {
+            stopAllAudio();
+            ["screen-welcome", "screen-radar", "screen-quiz", "screen-end"].forEach(id => {
+                document.getElementById(id).classList.add("hidden");
+            });
+            document.getElementById(screenId).classList.remove("hidden");
+            currentScreen = screenId;
+        }
+
+        function speakWelcome() {
+            playClickFX();
+            const text = "Çanakkale Boğazı: İki Kıtayı Birleştiren Düğüm. Asya ile Avrupa'yı birbirinden ayıran, Karadeniz'in dünyaya açılan tek kapısı olan ve şanlı tarihimizin izlerini taşıyan Çanakkale Boğazı'nın sırlarını keşfetmeye hazır mısın?";
+            playAudioOrSpeak("yonergebogaz1.mp3", text);
+        }
+
+        function startGame() {
+            playClickFX();
+            switchScreen("screen-radar");
+            updateRadar(1);
+            document.getElementById("radar-slider").value = 1;
+            const text = "Aşama 1: Keşif Radarı. Çubuğu sağa kaydırarak Boğaz'ın özelliklerini oku ve dinle.";
+            playAudioOrSpeak("yonergeasama1.mp3", text);
+        }
+
+        function updateRadar(val) {
+            radarIndex = parseInt(val);
+            const data = radarData[radarIndex];
+            
+            const container = document.getElementById("radar-visual-container");
+            container.innerHTML = `<img src="${data.image}" alt="${data.title}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23bae6fd\\'/><text x=\\'50\\' y=\\'55\\' font-family=\\'sans-serif\\' font-size=\\'20\\' text-anchor=\\'middle\\' fill=\\'%230284c7\\'>Görsel</text></svg>'">`;
+            
+            document.getElementById("radar-title").innerText = data.title;
+            document.getElementById("radar-text").innerText = data.text;
+
+            if(radarIndex === 4) {
+                document.getElementById("btn-to-quiz").classList.remove("hidden");
+            }
+        }
+
+        function speakRadar() {
+            playClickFX();
+            const data = radarData[radarIndex];
+            playAudioOrSpeak(data.audioFile, data.title + ". " + data.text);
+        }
+
+        function startBuildGame() {
+            playClickFX();
+            switchScreen("screen-quiz");
+            quizIndex = 0;
+            resetBridgeSVG();
+            loadQuizQuestion();
+            const text = "Aşama 2: Mühendislik Görevi. Soruları doğru cevaplayarak dünyanın en uzun asma köprüsünü parçalarını yerleştirerek inşa et!";
+            playAudioOrSpeak("yonergeasama2.mp3", text);
+        }
+
+        function resetBridgeSVG() {
+            ["svg-part-1", "svg-part-2", "svg-part-3", "svg-part-4", "svg-part-4-hangers"].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.remove("built");
+            });
+            document.getElementById("car-1").classList.remove("active");
+            document.getElementById("car-2").classList.remove("active");
+            document.getElementById("car-3").classList.remove("active");
+            document.getElementById("svg-part-5").classList.remove("active");
+        }
+
+        function loadQuizQuestion() {
+            const data = quizData[quizIndex];
+            document.getElementById("quiz-progress-text").innerText = quizIndex + 1;
+            document.getElementById("quiz-question").innerText = data.q;
+            document.getElementById("quiz-text-a").innerText = data.a;
+            document.getElementById("quiz-text-b").innerText = data.b;
+            
+            ["btn-ans-a", "btn-ans-b"].forEach(id => {
+                const btn = document.getElementById(id);
+                btn.disabled = false;
+                btn.className = "w-full text-left px-5 py-4 bg-slate-50 hover:bg-ocean-50 dark:bg-slate-700/50 dark:hover:bg-ocean-900/50 border-2 border-slate-200 dark:border-slate-600 hover:border-ocean-400 rounded-xl font-medium text-sm md:text-base text-slate-700 dark:text-slate-200 transition-all flex items-center gap-4 cursor-pointer";
+            });
+            document.getElementById("quiz-feedback").classList.add("hidden");
+        }
+
+        function speakQuiz() {
+            playClickFX();
+            const data = quizData[quizIndex];
+            playAudioOrSpeak(null, data.q + " A şıkkı: " + data.a + ". B şıkkı: " + data.b);
+        }
+
+        function checkAnswer(selected) {
+            document.getElementById("btn-ans-a").disabled = true;
+            document.getElementById("btn-ans-b").disabled = true;
+
+            const data = quizData[quizIndex];
+            const isCorrect = selected === data.correct;
+            const btnId = selected === 'A' ? 'btn-ans-a' : 'btn-ans-b';
+            const feedback = document.getElementById("quiz-feedback");
+
+            if (isCorrect) {
+                playCorrectFX();
+                document.getElementById(btnId).classList.add("border-emerald-500", "bg-emerald-50", "dark:bg-emerald-900/40");
+                
+                feedback.innerHTML = `<i class="fas fa-check-circle text-lg"></i> <span>${data.explanation}</span>`;
+                feedback.className = "mt-5 p-4 rounded-xl text-sm font-bold flex items-center gap-3 border shadow-inner bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/50 dark:text-emerald-300 dark:border-emerald-700 transition-all";
+                
+                triggerBuildSVG(data.buildId);
+                playAudioOrSpeak(data.audioFile, data.explanation);
+
+                setTimeout(() => {
+                    quizIndex++;
+                    if (quizIndex < quizData.length) {
+                        loadQuizQuestion();
+                    } else {
+                        endGame();
+                    }
+                }, 4000);
+
+            } else {
+                playWrongFX();
+                document.getElementById(btnId).classList.add("border-red-500", "bg-red-50", "dark:bg-red-900/40");
+                
+                feedback.innerHTML = `<i class="fas fa-times-circle text-lg"></i> <span>Yanlış cevap. Lütfen tekrar dene!</span>`;
+                feedback.className = "mt-5 p-4 rounded-xl text-sm font-bold flex items-center gap-3 border shadow-inner bg-red-100 text-red-800 border-red-300 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700 transition-all";
+                
+                playAudioOrSpeak("yonergeyanlis.mp3", "Bu yanlış oldu. Lütfen tekrar düşün.");
+
+                setTimeout(() => {
+                    document.getElementById(btnId).classList.remove("border-red-500", "bg-red-50", "dark:bg-red-900/40");
+                    document.getElementById("btn-ans-a").disabled = false;
+                    document.getElementById("btn-ans-b").disabled = false;
+                    feedback.classList.add("hidden");
+                }, 2500);
+            }
+        }
+
+        function triggerBuildSVG(buildId) {
+            const el = document.getElementById(buildId);
+            if(el) {
+                if (buildId === "svg-part-4") {
+                    el.classList.add("built");
+                    setTimeout(()=> {
+                        document.getElementById("svg-part-4-hangers").classList.add("built");
+                    }, 500);
+                    setTimeout(()=> {
+                        document.getElementById("car-1").classList.add("active");
+                        document.getElementById("car-2").classList.add("active");
+                        document.getElementById("car-3").classList.add("active");
+                    }, 1000);
+                } else if (buildId === "svg-part-5") {
+                    el.classList.add("active");
+                } else {
+                    el.classList.add("built");
+                }
+            }
+        }
+
+        function endGame() {
+            switchScreen("screen-end");
+            playWinFX();
+            triggerConfetti();
+            
+            const videoEl = document.getElementById("end-video");
+            if(videoEl) videoEl.play().catch(e => console.log("Video otomatik oynatılamadı."));
+
+            const text = "Mükemmel iş! Çanakkale Boğazı'nın önemini anladın ve dünyanın en uzun asma köprüsünü başarıyla inşa ettin. Tebrikler!";
+            playAudioOrSpeak("yonergeasama3.mp3", text);
+        }
+
+        function resetGame() {
+            playClickFX();
+            switchScreen("screen-welcome");
+            
+            const videoEl = document.getElementById("end-video");
+            if(videoEl) {
+                videoEl.pause();
+                videoEl.currentTime = 0;
+            }
+        }
+
+        function triggerConfetti() {
+            const canvas = document.getElementById("confetti-canvas");
+            if (!canvas) return;
+            const ctx = canvas.getContext("2d");
+            let width = canvas.width = canvas.parentElement.clientWidth;
+            let height = canvas.height = canvas.parentElement.clientHeight;
+
+            let particles = [];
+            const colors = ["#0ea5e9", "#ef4444", "#ffffff", "#10b981", "#f59e0b"];
+
+            for (let i = 0; i < 150; i++) {
+                particles.push({
+                    x: Math.random() * width, y: Math.random() * height - height,
+                    r: Math.random() * 6 + 4, d: Math.random() * height,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    tilt: Math.random() * 10 - 5, tiltAngleIncremental: Math.random() * 0.07 + 0.02, tiltAngle: 0
+                });
+            }
+
+            let animationFrameId;
+            function drawConfetti() {
+                ctx.clearRect(0, 0, width, height);
+                particles.forEach((p, index) => {
+                    p.tiltAngle += p.tiltAngleIncremental;
+                    p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+                    p.x += Math.sin(p.tiltAngle);
+                    p.tilt = Math.sin(p.tiltAngle - index / 3) * 15;
+
+                    ctx.beginPath();
+                    ctx.lineWidth = p.r;
+                    ctx.strokeStyle = p.color;
+                    ctx.moveTo(p.x + p.tilt + p.r / 2, p.y);
+                    ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 2);
+                    ctx.stroke();
+
+                    if (p.y > height) {
+                        particles[index] = {
+                            x: Math.random() * width, y: -20, r: p.r, d: p.d, color: p.color,
+                            tilt: p.tilt, tiltAngleIncremental: p.tiltAngleIncremental, tiltAngle: p.tiltAngle
+                        };
+                    }
+                });
+                animationFrameId = requestAnimationFrame(drawConfetti);
+            }
+            drawConfetti();
+            
+            setTimeout(() => {
+                cancelAnimationFrame(animationFrameId);
+                ctx.clearRect(0, 0, width, height);
+            }, 6000);
+        }
+        
+        window.speechSynthesis.onvoiceschanged = function() {};
+    </script>
+</body>
+</html>
