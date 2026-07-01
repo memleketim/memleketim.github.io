@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kartalkaya Kelime Macerası</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; touch-action: none; }
+  body { font-family: 'Montserrat', sans-serif; background: #1a1a2e; overflow: hidden; color: #fff; }
+  #gameCanvas { display: block; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+  
+  /* Sabit Logo */
+  .logo-container {
+    position: absolute; top: 20px; left: 20px; width: 120px; z-index: 1000;
+    pointer-events: none; /* Altındaki elementlere tıklamayı engellemez */
+  }
+  .logo-container img { width: 100%; height: auto; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4)); }
+
+  /* Gelişmiş Giriş Ekranı */
+  .menu-screen {
+    position: absolute; inset: 0; display: flex; flex-direction: row; align-items: center; justify-content: center;
+    background: linear-gradient(rgba(26, 26, 46, 0.8), rgba(26, 26, 46, 0.95)), url('arkaplankartal.png') center/cover;
+    z-index: 100; transition: opacity 0.5s; padding: 40px; gap: 40px;
+  }
+  .menu-screen.hidden { opacity: 0; pointer-events: none; }
+  
+  .menu-left { flex: 1; max-width: 600px; display: flex; flex-direction: column; gap: 20px; }
+  .menu-right { flex: 1; max-width: 400px; display: flex; flex-direction: column; align-items: center; gap: 20px; background: rgba(0,0,0,0.4); padding: 30px; border-radius: 20px; border: 2px solid #3498db; }
+
+  .title { font-size: 46px; color: #fff; text-shadow: 0 4px 10px rgba(0,0,0,0.6); font-weight: 800; line-height: 1.1; }
+  
+  .info-box {
+    background: rgba(255, 255, 255, 0.1); border: 2px solid #3498db; border-radius: 15px;
+    padding: 25px; backdrop-filter: blur(5px);
+  }
+  .info-box h2 { color: #f1c40f; margin-bottom: 15px; font-size: 26px; }
+  .info-box p { font-size: 16px; line-height: 1.6; margin-bottom: 15px; color: #ecf0f1; }
+  .info-box .highlight { color: #2ecc71; font-weight: 700; }
+  
+  .audio-btn {
+    background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 10px;
+    font-family: inherit; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
+    pointer-events: auto;
+  }
+  .audio-btn:hover { background: #2980b9; }
+
+  .link-text { display: inline-block; color: #2ecc71; text-decoration: none; font-weight: 600; font-size: 14px; pointer-events: auto; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 8px;}
+  .link-text:hover { color: #27ae60; text-decoration: underline; }
+
+  /* Karakter Seçimi */
+  .char-preview-container { position: relative; width: 250px; height: 250px; border-radius: 50%; border: 4px solid #f1c40f; overflow: hidden; background: #87CEEB; }
+  #charPreviewCanvas { width: 100%; height: 100%; display: block; }
+  .nav-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: #e74c3c; color: white; border: none; border-radius: 50%;
+    width: 40px; height: 40px; font-size: 20px; font-weight: bold; cursor: pointer; pointer-events: auto;
+  }
+  .nav-btn.left { left: -20px; }
+  .nav-btn.right { right: -20px; }
+  .char-name { font-size: 24px; font-weight: 800; color: #f1c40f; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+  .go-btn {
+    padding: 18px 50px; background: #e74c3c; color: white; border: none; border-radius: 50px;
+    font-size: 24px; font-weight: 800; cursor: pointer; box-shadow: 0 6px 0 #c0392b; font-family: 'Montserrat', sans-serif; pointer-events: auto; width: 100%; transition: transform 0.1s;
+  }
+  .go-btn:active { transform: translateY(6px); box-shadow: none; }
+
+  /* Oyun İçi Arayüz (HUD) */
+  .hud { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s; z-index: 50; }
+  .hud.active { opacity: 1; }
+  
+  .hud-top-right { position: absolute; top: 20px; right: 20px; text-align: right; }
+  .score-box { background: rgba(0,0,0,0.6); padding: 10px 20px; border-radius: 20px; font-size: 26px; font-weight: 800; margin-bottom: 10px; border: 2px solid #fff; }
+  .combo-box { color: #f1c40f; font-size: 22px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+  .lives-box { font-size: 30px; margin-top: 5px; letter-spacing: 5px; }
+
+  .word-prompt {
+    position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+    background: #e74c3c; padding: 20px 50px; border-radius: 20px; border: 4px solid #fff;
+    font-size: 32px; font-weight: 800; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    display: none; color: #fff; line-height: 1.3;
+  }
+  .word-prompt.show { display: block; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } }
+
+  .feedback { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: 800; -webkit-text-stroke: 3px #000; opacity: 0; }
+  .feedback.show { animation: pop 1s forwards; }
+  @keyframes pop { 0% { opacity: 0; transform: translate(-50%, -30%) scale(0.5); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -80%) scale(0.8); } }
+
+  /* Bitiş Ekranları */
+  .overlay-screen {
+    position: absolute; inset: 0; background: rgba(26, 26, 46, 0.95); z-index: 200;
+    display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: auto;
+  }
+  .overlay-screen.show { display: flex; }
+  .overlay-screen h2 { font-size: 50px; margin-bottom: 20px; font-weight: 800; }
+  .overlay-screen p { font-size: 26px; margin-bottom: 30px; }
+  
+  #confettiCanvas { position: absolute; inset: 0; pointer-events: none; z-index: 199; display: none; }
+  #confettiCanvas.show { display: block; }
+
+  @media (max-width: 900px) {
+    .menu-screen { flex-direction: column; overflow-y: auto; padding: 20px; padding-top: 80px; }
+    .title { font-size: 32px; }
+    .info-box p { font-size: 14px; }
+    .word-prompt { font-size: 20px; padding: 15px 20px; width: 90%; }
+    .score-box { font-size: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="logo-container">
+  <img src="orjinal.svg" alt="Proje Logosu" onerror="this.style.display='none'">
+</div>
+
+<!-- Ses Dosyaları -->
+<audio id="bgAudio" loop preload="auto"><source src="kartalkaya.mp3" type="audio/mpeg"></audio>
+<audio id="voiceAudio" preload="auto"><source src="yonergekartal.mp3" type="audio/mpeg"></audio>
+
+<canvas id="gameCanvas"></canvas>
+<canvas id="confettiCanvas"></canvas>
+
+<!-- Giriş Ekranı -->
+<div class="menu-screen" id="menuScreen">
+  <div class="menu-left">
+    <div class="title">Bolu Kartalkaya<br>Kelime Macerası</div>
+    <div class="info-box">
+      <h2>Köroğlu Dağları'na Hoş Geldin!</h2>
+      <p>Çam ormanlarıyla kaplı, Türkiye'nin gözde kış sporları merkezi <b>Bolu Kartalkaya'nın</b> zirvelerinden süzülmeye hazır mısın?</p>
+      <p>Karların üzerinde kayarken karşına üzerinde kelimeler olan dev kapılar çıkacak. Ekranda beliren kelimenin <span class="highlight">Zıt Anlamlısını</span> (anlamca tam karşıtı olan kelimeyi) bul ve o kapıdan geçerek puanları topla!</p>
+      <button class="audio-btn" onclick="document.getElementById('voiceAudio').play()">🔊 Yönergeyi Dinle</button>
+      <p style="font-size: 14px; color: #bdc3c7; margin-top: 15px;">Hedef: 20 Kelime | 3 Can Hakkı | Kombo Puan Sistemi</p>
+      <a href="https://drive.google.com/file/d/1-7jvJCl3qBjisXXz4NqDZPrGlBfJ5fJB/view" target="_blank" class="link-text">Aylin Dinç'in çalışmasının tamamına ulaşmak için tıklayınız.</a>
+    </div>
+  </div>
+  
+  <div class="menu-right">
+    <div class="char-name" id="charName">KIZIL TİLKİ</div>
+    <div style="position: relative;">
+      <button class="nav-btn left" onclick="changeChar(-1)">◀</button>
+      <div class="char-preview-container">
+        <canvas id="charPreviewCanvas"></canvas>
+      </div>
+      <button class="nav-btn right" onclick="changeChar(1)">▶</button>
+    </div>
+    <button class="go-btn" id="startBtn">MACERAYA BAŞLA</button>
+  </div>
+</div>
+
+<!-- Oyun İçi Arayüz -->
+<div class="hud" id="hud">
+  <div class="hud-top-right">
+    <div class="score-box">SKOR: <span id="scoreVal">0</span></div>
+    <div class="combo-box" id="comboVal">KOMBO x1</div>
+    <div class="lives-box" id="livesVal">❤️❤️❤️</div>
+  </div>
+  <div class="word-prompt" id="wordPrompt"></div>
+  <div class="feedback" id="feedbackMsg"></div>
+</div>
+
+<!-- Oyun Sonu (Kaybetme) -->
+<div class="overlay-screen" id="gameOverScreen">
+  <h2 style="color: #e74c3c;">OYUN BİTTİ!</h2>
+  <p>Yanlış kapılardan geçtin.</p>
+  <p>Skorun: <span id="finalScore1" style="color: #f1c40f; font-weight: bold;">0</span></p>
+  <button class="go-btn" onclick="location.reload()" style="max-width: 300px;">TEKRAR DENE</button>
+</div>
+
+<!-- Oyun Sonu (Kazanma) -->
+<div class="overlay-screen" id="winScreen">
+  <h2 style="color: #2ecc71;">TEBRİKLER! GÖREV TAMAMLANDI!</h2>
+  <p>20 kelimenin tamamını başardın!</p>
+  <p>Muhteşem Skorun: <span id="finalScore2" style="color: #f1c40f; font-weight: bold;">0</span></p>
+  <a href="https://memleketim.github.io/14/index.html" class="go-btn" style="text-decoration: none; display: inline-block; max-width: 350px;">ANASAYFAYA DÖN</a>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+// --- Kelime Havuzu ---
+const baseWordPairs = [
+  ['Sıcak','Soğuk'], ['Büyük','Küçük'], ['Hızlı','Yavaş'], ['Güzel','Çirkin'],
+  ['Uzun','Kısa'], ['Yeni','Eski'], ['Kolay','Zor'], ['Açık','Kapalı'],
+  ['Zengin','Fakir'], ['Doğru','Yanlış'], ['İyi','Kötü'], ['Dolu','Boş'],
+  ['Ağır','Hafif'], ['Aydınlık','Karanlık'], ['Geniş','Dar'], ['Kalın','İnce'],
+  ['Gece','Gündüz'], ['Tatlı','Acı'], ['Şişman','Zayıf'], ['Tembel','Çalışkan'],
+  ['Cesur','Korkak'], ['Taze','Bayat'], ['Neşeli','Üzgün'], ['Temiz','Kirli'],
+  ['Pahalı','Ucuz'], ['Sert','Yumuşak']
+];
+const allWords = baseWordPairs.flatMap(p => p);
+let availablePairs = [];
+
+// --- Oyun Değişkenleri ---
+let scene, camera, renderer;
+let prevScene, prevCamera, prevRenderer, prevModel;
+let player, board;
+let gameActive = false, score = 0, lives = 3, combo = 0, correctCount = 0;
+const WIN_TARGET = 20;
+
+let currentSpeed = 1.0, targetSpeed = 1.0; 
+
+// Çevre Unsurları
+let trees = [], mountains = [], npcs = [], snowParticles, teleferik;
+let gates = [];
+let nextGateZ = -250;
+
+// Kontroller
+let isDragging = false, startX = 0, playerBaseX = 0;
+const keys = { arrowleft: false, arrowright: false, a: false, d: false };
+
+// Karakterler
+const chars = [
+  { name: 'KIZIL TİLKİ', body: 0xe74c3c, board: 0xf1c40f },
+  { name: 'GECE ŞAHİNİ', body: 0x34495e, board: 0xe74c3c },
+  { name: 'KAR LEOPARI', body: 0xffffff, board: 0x3498db }
+];
+let charIdx = 0;
+
+// Ses Efektleri
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSFX(type) {
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  
+  if(type === 'correct') {
+    osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+  } else if(type === 'wrong') {
+    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.4, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.4);
+  } else if(type === 'win') {
+    osc.type = 'square'; osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+    osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(800, audioCtx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.6);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+  }
+}
+
+init();
+
+function init() {
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x87CEEB);
+  scene.fog = new THREE.Fog(0x87CEEB, 60, 350);
+
+  camera = new THREE.PerspectiveCamera(70, window.innerWidth/window.innerHeight, 0.1, 500);
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('gameCanvas'), antialias: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  const sun = new THREE.DirectionalLight(0xffffff, 0.6);
+  sun.position.set(20, 50, 20);
+  scene.add(sun);
+
+  setupPreview();
+  setupEnvironment();
+
+  // Kontroller
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight; camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // Klavye Kontrolleri
+  document.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = true; });
+  document.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key.toLowerCase())) keys[e.key.toLowerCase()] = false; });
+
+  // Fare ve Dokunmatik (Mobil) Kontroller
+  const dragStart = x => { if(!gameActive) return; isDragging = true; startX = x; playerBaseX = player.position.x; };
+  const dragMove = x => {
+    if(!isDragging || !gameActive) return;
+    const dx = x - startX;
+    // Hassasiyeti artırdık, rahat dönüş için
+    player.position.x = Math.max(-14, Math.min(14, playerBaseX + (dx * 0.05))); 
+  };
+  const dragEnd = () => isDragging = false;
+
+  document.addEventListener('mousedown', e => dragStart(e.clientX));
+  document.addEventListener('mousemove', e => dragMove(e.clientX));
+  document.addEventListener('mouseup', dragEnd);
+  
+  document.addEventListener('touchstart', e => dragStart(e.touches[0].clientX), {passive:false});
+  document.addEventListener('touchmove', e => { if(isDragging) e.preventDefault(); dragMove(e.touches[0].clientX); }, {passive:false});
+  document.addEventListener('touchend', dragEnd);
+
+  document.getElementById('startBtn').addEventListener('click', startGame);
+
+  animate();
+}
+
+function createModel(bColor, bdColor) {
+  const g = new THREE.Group();
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1.4, 0.6), new THREE.MeshLambertMaterial({color: bColor}));
+  body.position.y = 1.2; g.add(body);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.6), new THREE.MeshLambertMaterial({color: 0xffe0bd}));
+  head.position.y = 2.3; g.add(head);
+  const brd = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 2.8), new THREE.MeshLambertMaterial({color: bdColor}));
+  brd.position.y = 0.2; g.add(brd);
+  return { group: g, board: brd };
+}
+
+// Menüdeki Dönen Karakter Önizlemesi
+function setupPreview() {
+  const cvs = document.getElementById('charPreviewCanvas');
+  prevScene = new THREE.Scene();
+  prevScene.background = new THREE.Color(0x87CEEB);
+  prevCamera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+  prevCamera.position.set(0, 2, 6); prevCamera.lookAt(0, 1, 0);
+  prevRenderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true });
+  prevRenderer.setSize(250, 250);
+  prevScene.add(new THREE.AmbientLight(0xffffff, 0.8));
+  updatePreview();
+}
+
+window.changeChar = function(dir) {
+  charIdx = (charIdx + dir + chars.length) % chars.length;
+  updatePreview();
+}
+
+function updatePreview() {
+  if (prevModel) prevScene.remove(prevModel.group);
+  prevModel = createModel(chars[charIdx].body, chars[charIdx].board);
+  prevScene.add(prevModel.group);
+  document.getElementById('charName').textContent = chars[charIdx].name;
+}
+
+// Sınırsız Çevre Elemanları
+function setupEnvironment() {
+  // Çok uzun bir zemin oluştur
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 20000), new THREE.MeshLambertMaterial({color: 0xf4f4f4}));
+  ground.rotation.x = -Math.PI/2; ground.position.z = -8000; scene.add(ground);
+
+  // Arka Plan Dağları (Kaybolmaması için sürekli sarmalanacak)
+  const mountainGeo = new THREE.ConeGeometry(40, 80, 4);
+  const mountainMat = new THREE.MeshLambertMaterial({color: 0xddeeff});
+  for(let i=0; i<20; i++) {
+    const m = new THREE.Mesh(mountainGeo, mountainMat);
+    const side = Math.random() > 0.5 ? 1 : -1;
+    m.position.set(side * (60 + Math.random()*40), 10, -Math.random()*2000);
+    scene.add(m); mountains.push(m);
+  }
+
+  // Ağaçlar
+  const treeGeo = new THREE.ConeGeometry(2, 7, 5);
+  const treeMat = new THREE.MeshLambertMaterial({color: 0x27ae60});
+  for(let i=0; i<100; i++) {
+    const t = new THREE.Mesh(treeGeo, treeMat);
+    const side = Math.random() > 0.5 ? 1 : -1;
+    t.position.set(side * (18 + Math.random()*40), 3.5, -Math.random()*1500);
+    scene.add(t); trees.push(t);
+  }
+
+  // Teleferik Sistemi
+  teleferik = new THREE.Group();
+  const cable = new THREE.Mesh(new THREE.BoxGeometry(200, 0.1, 0.1), new THREE.MeshBasicMaterial({color: 0x555}));
+  cable.position.y = 30; teleferik.add(cable);
+  const car = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 4), new THREE.MeshLambertMaterial({color: 0x2980b9}));
+  car.position.set(30, 27, 0); teleferik.add(car);
+  teleferik.position.z = -300; teleferik.userData = { car: car, dir: -1 };
+  scene.add(teleferik);
+
+  // NPC Kayakçılar
+  for(let i=0; i<5; i++) {
+    const npc = createModel(Math.random()*0xffffff, 0x111111).group;
+    npc.position.set((Math.random()-0.5)*20, 0, -300 - Math.random()*500);
+    scene.add(npc); npcs.push(npc);
+  }
+
+  // Kar Efekti
+  const snowGeo = new THREE.BufferGeometry();
+  const snowPos = [];
+  for(let i=0; i<2000; i++) snowPos.push((Math.random()-0.5)*200, Math.random()*80, -Math.random()*400);
+  snowGeo.setAttribute('position', new THREE.Float32BufferAttribute(snowPos, 3));
+  snowParticles = new THREE.Points(snowGeo, new THREE.PointsMaterial({color: 0xffffff, size: 0.5}));
+  scene.add(snowParticles);
+}
+
+// Kapı Üstü Büyük Metinler (Tümü aynı renk)
+function createTextSprite(txt) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512; canvas.height = 180; // Büyütüldü
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#34495e'; // Kapı tabelası rengi (Ortak renk)
+  ctx.beginPath(); ctx.roundRect(0, 0, 512, 180, 25); ctx.fill();
+  ctx.strokeStyle = '#ecf0f1'; ctx.lineWidth = 10; ctx.stroke();
+  
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 64px Montserrat, sans-serif'; 
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, 256, 90);
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map: tex}));
+  sprite.scale.set(10, 3.5, 1); // 3D sahnede devasa görünsün
+  return sprite;
+}
+
+function spawnGate() {
+  if(availablePairs.length === 0) availablePairs = [...baseWordPairs].sort(() => 0.5 - Math.random());
+  const pair = availablePairs.pop();
+  const qWord = pair[0], aWord = pair[1];
+  
+  let wrongs = allWords.filter(w => w !== aWord && w !== qWord).sort(() => 0.5 - Math.random()).slice(0, 2);
+  const choices = [aWord, ...wrongs].sort(() => 0.5 - Math.random());
+  
+  const g = new THREE.Group();
+  const lanes = [-10, 0, 10]; // Aralarındaki boşluk çok daha fazla
+  let correctX = 0;
+
+  choices.forEach((word, i) => {
+    if(word === aWord) correctX = lanes[i];
+    
+    const sprite = createTextSprite(word);
+    sprite.position.set(lanes[i], 3.5, 0);
+    g.add(sprite);
+
+    // Kapı Direkleri (Daha kalın)
+    const pillarMat = new THREE.MeshLambertMaterial({color: 0xbdc3c7});
+    const p1 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4, 0.4), pillarMat); p1.position.set(lanes[i]-4.5, 2, 0); g.add(p1);
+    const p2 = new THREE.Mesh(new THREE.BoxGeometry(0.4, 4, 0.4), pillarMat); p2.position.set(lanes[i]+4.5, 2, 0); g.add(p2);
+  });
+
+  g.position.set(0, 0, nextGateZ);
+  scene.add(g);
+  gates.push({ group: g, z: nextGateZ, correctX: correctX, passed: false });
+
+  // Ekran uyarısı (Okunması için yeterli zaman verilir)
+  document.getElementById('wordPrompt').innerHTML = `"${qWord}"<br><span style="font-size:24px; font-weight:600;">ZIT ANLAMLISI HANGİSİ?</span>`;
+  document.getElementById('wordPrompt').classList.add('show');
+  
+  // Mermi Zamanı (Bullet Time) Yavaşlaması - Hız büyük oranda düşer
+  targetSpeed = 0.3; 
+
+  nextGateZ -= 350; // Kapılar arası mesafeyi de açtık
+}
+
+function startGame() {
+  document.getElementById('voiceAudio').pause(); // Yönergeyi sustur
+  document.getElementById('bgAudio').play().catch(e=>console.log("Ses politikası"));
+  audioCtx.resume();
+  
+  document.getElementById('menuScreen').classList.add('hidden');
+  document.getElementById('hud').classList.add('active');
+  
+  if(player) scene.remove(player);
+  const pData = createModel(chars[charIdx].body, chars[charIdx].board);
+  player = pData.group; board = pData.board;
+  player.position.set(0, 0, 0); scene.add(player);
+
+  score = 0; lives = 3; combo = 0; correctCount = 0;
+  gameActive = true; currentSpeed = 1.0; targetSpeed = 1.0;
+  availablePairs = [...baseWordPairs].sort(() => 0.5 - Math.random());
+  
+  updateHUD();
+  spawnGate();
+}
+
+function updateHUD() {
+  document.getElementById('scoreVal').textContent = Math.floor(score);
+  document.getElementById('comboVal').textContent = `KOMBO x${combo + 1}`;
+  document.getElementById('livesVal').textContent = '❤️'.repeat(lives) + '🖤'.repeat(3 - lives);
+}
+
+function showFeedback(msg, isOk) {
+  const f = document.getElementById('feedbackMsg');
+  f.textContent = msg; f.style.color = isOk ? '#2ecc71' : '#e74c3c';
+  f.classList.remove('show'); void f.offsetWidth; f.classList.add('show');
+}
+
+function triggerWin() {
+  gameActive = false; playSFX('win');
+  document.getElementById('finalScore2').textContent = Math.floor(score);
+  document.getElementById('winScreen').classList.add('show');
+  document.getElementById('confettiCanvas').classList.add('show');
+  startConfetti();
+}
+
+function updateGame() {
+  if (!gameActive) return;
+
+  // Klavye Kontrolleri (Doğrudan X eksenine etki eder)
+  if(keys.arrowleft || keys.a) player.position.x -= 0.3;
+  if(keys.arrowright || keys.d) player.position.x += 0.3;
+  player.position.x = Math.max(-14, Math.min(14, player.position.x));
+
+  // Hız İnterpolasyonu (Bullet Time)
+  currentSpeed += (targetSpeed - currentSpeed) * 0.05;
+
+  player.position.z -= 2.0 * currentSpeed; 
+  board.rotation.z = - (player.position.x * 0.02); // Eğilme efekti
+
+  // Sınırsız Dünya Sarmalaması (Wrapping)
+  trees.forEach(t => { if(t.position.z > player.position.z + 50) t.position.z -= 1500; });
+  mountains.forEach(m => { if(m.position.z > player.position.z + 100) m.position.z -= 2000; });
+  npcs.forEach(npc => { 
+    npc.position.z -= 1.8 * currentSpeed; // NPC'ler de kayıyor
+    if(npc.position.z > player.position.z + 50) npc.position.z -= (800 + Math.random()*500); 
+  });
+  if(teleferik.position.z > player.position.z + 100) teleferik.position.z -= 1000;
+  teleferik.userData.car.position.x += teleferik.userData.dir * 0.2;
+  if(Math.abs(teleferik.userData.car.position.x) > 60) teleferik.userData.dir *= -1;
+
+  // Kapı Çarpışma Testi
+  gates.forEach(gate => {
+    if (!gate.passed && player.position.z <= gate.z && player.position.z >= gate.z - 4) {
+      gate.passed = true;
+      document.getElementById('wordPrompt').classList.remove('show');
+      
+      const dx = Math.abs(player.position.x - gate.correctX);
+      if (dx < 4.0) { // Tolerans artırıldı (hedef büyük)
+        playSFX('correct'); correctCount++; combo++;
+        score += 100 * (1 + (combo * 0.5));
+        showFeedback("HARİKA!", true);
+        
+        if(correctCount >= WIN_TARGET) { triggerWin(); return; }
+      } else {
+        playSFX('wrong'); lives--; combo = 0;
+        showFeedback("YANLIŞ!", false);
+        if(lives <= 0) {
+          gameActive = false;
+          document.getElementById('finalScore1').textContent = Math.floor(score);
+          document.getElementById('gameOverScreen').classList.add('show');
+          return;
+        }
+      }
+      
+      updateHUD();
+      targetSpeed = 1.3; // Geçtikten sonra hızlıca öne atıl
+      setTimeout(() => { spawnGate(); }, 1200);
+    }
+  });
+
+  // Kamera Takibi
+  camera.position.set(player.position.x * 0.4, 7, player.position.z + 15);
+  camera.lookAt(player.position.x, 2, player.position.z - 10);
+
+  // Kar Taneleri
+  const pos = snowParticles.geometry.attributes.position.array;
+  for(let i=1; i<pos.length; i+=3) {
+    pos[i] -= 0.4 * currentSpeed;
+    if(pos[i] < 0) {
+      pos[i] = 80;
+      pos[i-1] = player.position.x + (Math.random()-0.5)*200;
+      pos[i+1] = player.position.z - Math.random()*200;
+    }
+  }
+  snowParticles.geometry.attributes.position.needsUpdate = true;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+  if(!gameActive && document.getElementById('menuScreen').classList.contains('hidden') === false) {
+    if(prevModel) prevModel.group.rotation.y += 0.01;
+    prevRenderer.render(prevScene, prevCamera);
+  }
+  if(gameActive) updateGame();
+  renderer.render(scene, camera);
+}
+
+// Konfeti
+let confettiCtx, confettiParticles = [];
+function startConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  confettiCtx = canvas.getContext('2d');
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  for(let i=0; i<150; i++) {
+    confettiParticles.push({
+      x: Math.random() * canvas.width, y: Math.random() * canvas.height - canvas.height,
+      r: Math.random() * 6 + 4, dx: Math.random() * 4 - 2, dy: Math.random() * 5 + 2,
+      color: `hsl(${Math.random()*360}, 100%, 50%)`
+    });
+  }
+  requestAnimationFrame(renderConfetti);
+}
+function renderConfetti() {
+  if(!confettiCtx) return;
+  confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+  confettiParticles.forEach(p => {
+    p.x += p.dx; p.y += p.dy;
+    if(p.y > window.innerHeight) { p.y = -10; p.x = Math.random() * window.innerWidth; }
+    confettiCtx.beginPath(); confettiCtx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    confettiCtx.fillStyle = p.color; confettiCtx.fill();
+  });
+  requestAnimationFrame(renderConfetti);
+}
+</script>
+</body>
+</html>
