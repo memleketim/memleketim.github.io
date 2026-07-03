@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Afyon Kalesi: Tarihin Zirvesi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- RENK PALETİ VE TEMEL AYARLAR --- */
+        :root {
+            --primary-blue: #1c2833;
+            --secondary-blue: #2980b9;
+            --accent-gold: #f39c12;
+            --accent-light: #f1c40f;
+            --success-green: #27ae60;
+            --danger-red: #c0392b;
+            --panel-bg: rgba(236, 240, 241, 0.92);
+            --text-dark: #2c3e50;
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'Montserrat', sans-serif; background: #000; color: var(--text-dark); }
+
+        #bg-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); z-index: 0; pointer-events: none; object-fit: cover; opacity: 0.35; filter: contrast(1.2) saturate(1.2); }
+
+        #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1000; }
+        #logo { position: absolute; top: 20px; left: 20px; width: 90px; z-index: 1000; pointer-events: auto; filter: drop-shadow(0 5px 8px rgba(0,0,0,0.5)); transition: transform 0.3s; }
+        #logo:hover { transform: scale(1.05) rotate(-5deg); }
+        .controls { position: absolute; top: 20px; right: 20px; display: flex; gap: 15px; z-index: 1000; pointer-events: auto; }
+        .icon-btn { background: linear-gradient(145deg, #fff, #ecf0f1); border: 3px solid var(--secondary-blue); color: var(--secondary-blue); border-radius: 50%; width: 55px; height: 55px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .icon-btn:hover { background: var(--secondary-blue); color: #fff; transform: scale(1.15) translateY(-5px); box-shadow: 0 10px 20px rgba(41, 128, 185, 0.4); }
+
+        .stage { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.6s ease-in-out; z-index: 10; padding: 20px; }
+        .stage.active { opacity: 1; pointer-events: auto; }
+
+        .panel { background: var(--panel-bg); padding: 40px; border-radius: 25px; max-width: 1000px; width: 95%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); border-top: 8px solid var(--accent-gold); border-bottom: 8px solid var(--secondary-blue); backdrop-filter: blur(12px); max-height: 90vh; overflow-y: auto; position: relative; }
+        h1, h2 { font-family: 'Playfair Display', serif; color: var(--primary-blue); margin-top: 0; font-size: 2.4rem; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+        
+        .banner-animated { background: linear-gradient(120deg, #3498db, #8e44ad); color: #fff; padding: 20px 25px; border-radius: 15px; margin-bottom: 25px; text-align: left; font-weight: 600; font-size: 1.1rem; line-height: 1.6; box-shadow: 0 8px 20px rgba(52, 152, 219, 0.3); position: relative; overflow: hidden; display: flex; align-items: center; gap: 15px; }
+        .banner-animated::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: rotate(30deg); animation: shine 4s infinite linear; pointer-events: none; }
+        @keyframes shine { 0% { transform: translateX(-100%) rotate(30deg); } 100% { transform: translateX(100%) rotate(30deg); } }
+        .banner-icon { font-size: 2rem; animation: bounce 2s infinite ease-in-out; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+        .btn { background: linear-gradient(to bottom, var(--accent-light), var(--accent-gold)); color: #fff; font-weight: 900; padding: 16px 36px; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s; font-size: 1.2rem; text-transform: uppercase; box-shadow: 0 8px 20px rgba(243, 156, 18, 0.4); margin-top: 15px; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-3px) scale(1.02); box-shadow: 0 12px 25px rgba(243, 156, 18, 0.6); }
+        .btn:active { transform: translateY(2px); box-shadow: 0 4px 10px rgba(243, 156, 18, 0.4); }
+        .btn-external { background: transparent; color: var(--secondary-blue); text-decoration: underline; display: inline-block; font-size: 1rem; font-weight: bold; margin-top: 20px; transition: 0.3s; }
+        .btn-external:hover { color: var(--primary-blue); }
+
+        #climb-container { display: flex; width: 100%; height: 60vh; gap: 25px; text-align: left; }
+        #climb-map { width: 45%; height: 100%; background: url('kale.png') no-repeat center center/cover; border-radius: 18px; position: relative; border: 4px solid var(--secondary-blue); box-shadow: inset 0 0 30px rgba(0,0,0,0.6); overflow: hidden; }
+        #climb-task { width: 55%; display: flex; flex-direction: column; gap: 15px; }
+        
+        .map-pt { position: absolute; width: 28px; height: 28px; background: rgba(255,255,255,0.9); border: 4px solid var(--danger-red); border-radius: 50%; transform: translate(-50%, -50%); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .map-pt.reached { background: var(--success-green); border-color: #fff; box-shadow: 0 0 20px var(--success-green); transform: translate(-50%, -50%) scale(1.2); }
+        #pt-1 { left: 65%; bottom: 12%; }
+        #pt-2 { left: 55%; bottom: 28%; }
+        #pt-3 { left: 75%; bottom: 40%; }
+        #pt-4 { left: 50%; bottom: 52%; }
+        #pt-5 { left: 35%; bottom: 65%; }
+        
+        #climber { position: absolute; font-size: 36px; transform: translate(-50%, -100%); transition: all 1s ease-in-out; left: 50%; bottom: 0; z-index: 10; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.6)); }
+        
+        #flag-pole { position: absolute; left: 38%; bottom: 65%; width: 5px; height: 0; background: linear-gradient(to top, #7f8c8d, #bdc3c7); transform: translateX(-50%); transition: height 1.2s ease-in-out; z-index: 5; border-radius: 5px; }
+        #flag-img { position: absolute; top: -10px; left: 0; width: 45px; height: auto; opacity: 0; transition: opacity 0.5s 1s, top 1.2s ease-in-out; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4)); }
+        #flag-pole.raised { height: 70px; }
+        #flag-pole.raised #flag-img { opacity: 1; top: -20px; }
+
+        .word-bank { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; padding: 15px; background: rgba(41, 128, 185, 0.1); border-radius: 15px; border: 2px dashed var(--secondary-blue); }
+        .adj-word { padding: 10px 20px; background: var(--secondary-blue); color: #fff; border-radius: 8px; cursor: grab; font-weight: 700; box-shadow: 0 4px 6px rgba(0,0,0,0.2); transition: 0.2s; }
+        .adj-word:active { transform: scale(0.9); cursor: grabbing; }
+        .adj-word.used { visibility: hidden; opacity: 0; }
+        .sentence-box { background: #fff; padding: 20px; border-radius: 12px; border-left: 6px solid var(--accent-gold); font-size: 1.15rem; margin-bottom: 10px; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .sentence-box.active { display: block; animation: slideIn 0.5s forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        .drop-zone { display: inline-block; width: 130px; height: 40px; border: 3px dashed #bdc3c7; border-radius: 8px; vertical-align: middle; background: #fdfefe; transition: 0.3s; text-align: center; line-height: 36px; font-weight: 800; color: var(--secondary-blue); margin: 0 5px; }
+        .drop-zone.correct { border-color: var(--success-green); background: #e8f8f5; color: var(--success-green); box-shadow: 0 0 15px rgba(39, 174, 96, 0.3); }
+
+        .quiz-opts { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+        .opt-btn { background: #fff; border: 3px solid #bdc3c7; padding: 16px; border-radius: 12px; cursor: pointer; font-size: 1.1rem; font-weight: 700; transition: 0.2s; color: var(--primary-blue); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .opt-btn:hover { border-color: var(--secondary-blue); transform: scale(1.02); }
+        .opt-btn.correct { background: var(--success-green); color: #fff; border-color: var(--success-green); animation: pulseCorrect 1s; }
+        .opt-btn.wrong { background: var(--danger-red); color: #fff; border-color: var(--danger-red); animation: shake 0.4s; }
+        @keyframes pulseCorrect { 0% { transform: scale(1); } 50% { transform: scale(1.05); box-shadow: 0 0 20px var(--success-green); } 100% { transform: scale(1); } }
+
+        .mic-btn { width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(145deg, #e74c3c, #c0392b); border: 4px solid #fff; font-size: 2.5rem; cursor: pointer; color: white; box-shadow: 0 10px 20px rgba(192, 57, 43, 0.4); transition: 0.3s; margin: 25px auto; display: flex; align-items: center; justify-content: center; }
+        .mic-btn.listening { animation: pulse-mic 1.2s infinite; background: linear-gradient(145deg, #2ecc71, #27ae60); }
+        @keyframes pulse-mic { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7); } 70% { transform: scale(1.1); box-shadow: 0 0 0 20px rgba(39, 174, 96, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); } }
+        .blank-word { display: inline-block; border-bottom: 3px solid var(--accent-gold); color: var(--accent-gold); font-weight: 900; min-width: 100px; text-align: center; padding-bottom: 5px; }
+        .blank-word.filled { border-color: var(--success-green); color: var(--success-green); text-transform: uppercase; }
+
+        .syl-container { display: flex; flex-direction: column; align-items: center; gap: 25px; margin-top: 30px; }
+        .syl-inputs { display: flex; gap: 15px; align-items: center; background: #fff; padding: 20px; border-radius: 20px; box-shadow: inset 0 5px 15px rgba(0,0,0,0.1); border: 2px solid #bdc3c7; }
+        .syl-input { width: 80px; height: 70px; font-size: 1.8rem; text-align: center; border: 3px solid var(--secondary-blue); border-radius: 12px; font-weight: 900; font-family: 'Montserrat', sans-serif; text-transform: uppercase; color: var(--dark-blue); background: #f8f9fa; outline: none; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .syl-input:focus { border-color: var(--accent-gold); transform: translateY(-5px); box-shadow: 0 10px 15px rgba(243, 156, 18, 0.2); }
+        .syl-dash { font-size: 2.5rem; font-weight: 900; color: #7f8c8d; }
+        .syl-input.error { border-color: var(--danger-red); background: #fadbd8; color: var(--danger-red); animation: shake 0.4s; }
+        .syl-input.correct { border-color: var(--success-green); background: #d5f5e3; color: var(--success-green); }
+
+        /* YENİ MEKANİK 5: KRİPTO-SEMBOL SIRALAMASI */
+        #crypto-game { position: relative; width: 100%; height: 450px; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); border-radius: 20px; border: 4px solid #e94560; overflow: hidden; box-shadow: inset 0 0 50px rgba(233, 69, 96, 0.3), 0 10px 30px rgba(0,0,0,0.5); }
+        #crypto-bg { position: absolute; width: 100%; height: 100%; top: 0; left: 0; opacity: 0.15; pointer-events: none; background-image: repeating-linear-gradient(45deg, #e94560 0, #e94560 1px, transparent 1px, transparent 10px); animation: cryptoBg 20s linear infinite; }
+        @keyframes cryptoBg { 0% { transform: translate(0, 0); } 100% { transform: translate(20px, 20px); } }
+        
+        .crypto-symbol { position: absolute; font-size: 80px; cursor: pointer; transition: 0.2s; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.7)); user-select: none; animation: float 3s ease-in-out infinite; }
+        .crypto-symbol:hover { transform: scale(1.2) rotate(10deg); filter: drop-shadow(0 8px 20px #e94560); }
+        .crypto-symbol.symbol-found { animation: symbolPop 0.6s ease-out forwards; }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-20px); } }
+        @keyframes symbolPop { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2) translateY(-100px); opacity: 0; } }
+        @keyframes explode { 0% { transform: translate(0, 0); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)); opacity: 0; } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+
+        #sequence-display { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.1); padding: 15px 30px; border-radius: 12px; color: #fff; font-weight: bold; font-size: 1.2rem; border: 2px solid #e94560; backdrop-filter: blur(5px); z-index: 10; }
+
+        .emblem { width: 110px; height: 110px; background: linear-gradient(135deg, #34495e, #2c3e50); border: 3px solid var(--accent-gold); border-radius: 15px; color: #fff; font-family: 'Cinzel', serif; font-size: 1.1rem; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: grab; box-shadow: 0 8px 15px rgba(0,0,0,0.3); transition: 0.2s; position: relative; }
+        .emblem::after { content: '🏺'; position: absolute; top: 5px; right: 5px; font-size: 1rem; opacity: 0.5; }
+        .emblem:active { transform: scale(0.9); }
+        .timeline-track { display: flex; gap: 15px; background: #bdc3c7; padding: 20px; border-radius: 20px; border: 4px solid var(--primary-blue); position: relative; }
+        .timeline-track::before { content: ''; position: absolute; top: 50%; left: 10px; right: 10px; height: 4px; background: var(--primary-blue); z-index: 0; }
+        .time-slot { width: 120px; height: 120px; background: #ecf0f1; border: 4px dashed #7f8c8d; border-radius: 15px; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #7f8c8d; font-weight: 900; font-size: 1.5rem; transition: 0.3s; }
+        .time-slot.correct { border: 4px solid var(--success-green); background: #e8f8f5; box-shadow: 0 0 20px var(--success-green); color: transparent; }
+
+        iframe { border-radius: 15px; border: 4px solid var(--secondary-blue); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+
+        @media(max-width: 768px) {
+            #climb-container { flex-direction: column; height: auto; }
+            #climb-map { width: 100%; height: 280px; }
+            #climb-task { width: 100%; }
+            .syl-input { width: 55px; height: 60px; font-size: 1.4rem; }
+            .timeline-track { flex-wrap: wrap; justify-content: center; }
+            .crypto-symbol { font-size: 60px; }
+            #crypto-game { height: 350px; }
+        }
+    </style>
+</head>
+<body>
+
+    <video id="bg-video" src="dron.mp4" autoplay loop muted playsinline></video>
+
+    <div id="ui-layer">
+        <img id="logo" src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+        <div class="controls">
+            <button class="icon-btn" id="btn-sound" title="Sesi Aç/Kapat">🔇</button>
+        </div>
+    </div>
+
+    <div id="stage-0" class="stage active">
+        <div class="panel">
+            <h1>Afyon Kalesi'ne Yolculuk</h1>
+            <div class="banner-animated">
+                <span class="banner-icon">📜</span>
+                <span>Önemli: Oyuna başlamadan önce kalenin tarihini anlatan bu kısa videoyu dikkatlice izle. Sorular bu videodan gelecek!</span>
+            </div>
+            <iframe id="intro-video" width="100%" height="315" src="https://www.youtube.com/embed/AElAmu95g2g?start=0&end=63&enablejsapi=1" frameborder="0" allowfullscreen></iframe>
+            <br>
+            <button class="btn" onclick="showStage(1)">Videoyu İzledim, Maceraya Başla!</button>
+            <br>
+            <a href="https://drive.google.com/file/d/1p5bPf2sugOD_BZNFy5asFnRHLBdOQ-_k/view" target="_blank" class="btn-external">Demirhan Yılmaz'nın çalışmasının tamamına ulaşmak için tıklayınız.</a>
+        </div>
+    </div>
+
+    <div id="stage-1" class="stage">
+        <div class="panel" style="max-width: 1050px;">
+            <h2>1. Aşama: Zirveye Tırmanış</h2>
+            <div class="banner-animated" style="background: linear-gradient(120deg, #e67e22, #d35400);">
+                <span class="banner-icon">🧗</span>
+                <span>Yukarıdaki kelimeleri sürükleyerek (veya tıklayarak) cümledeki doğru boşluklara bırak. Her doğru cevap seni kalede bir adım yukarı taşıyacak!</span>
+            </div>
+            
+            <div id="climb-container">
+                <div id="climb-map">
+                    <div class="map-pt" id="pt-1"></div>
+                    <div class="map-pt" id="pt-2"></div>
+                    <div class="map-pt" id="pt-3"></div>
+                    <div class="map-pt" id="pt-4"></div>
+                    <div class="map-pt" id="pt-5"></div>
+                    <div id="flag-pole">
+                        <img src="bayrak.png" id="flag-img" alt="Türk Bayrağı" onerror="this.style.display='none'">
+                    </div>
+                    <div id="climber">🧗</div>
+                </div>
+                
+                <div id="climb-task">
+                    <div class="word-bank" id="adj-bank">
+                        <div class="adj-word" draggable="true" data-word="volkanik">volkanik</div>
+                        <div class="adj-word" draggable="true" data-word="sarp">sarp</div>
+                        <div class="adj-word" draggable="true" data-word="yüksek">yüksek</div>
+                        <div class="adj-word" draggable="true" data-word="büyük">büyük</div>
+                        <div class="adj-word" draggable="true" data-word="görkemli">görkemli</div>
+                    </div>
+                    
+                    <div class="sentence-box active" id="sent-1">
+                        Afyon Kalesi, oldukça <div class="drop-zone" data-ans="sarp"></div> kayalıklar üzerine inşa edilmiştir.
+                    </div>
+                    <div class="sentence-box" id="sent-2">
+                        Yerden 226 metre <div class="drop-zone" data-ans="yüksek"></div> olan bu kale, tüm şehri görür.
+                    </div>
+                    <div class="sentence-box" id="sent-3">
+                        Kalenin oturduğu zemin <div class="drop-zone" data-ans="volkanik"></div> bir kaya kütlesidir.
+                    </div>
+                    <div class="sentence-box" id="sent-4">
+                        Kalenin içinde su ihtiyacını karşılamak için 4 adet <div class="drop-zone" data-ans="büyük"></div> sarnıç bulunur.
+                    </div>
+                    <div class="sentence-box" id="sent-5">
+                        Birçok medeniyete ev sahipliği yapmış bu <div class="drop-zone" data-ans="görkemli"></div> yapı günümüzde hala ayaktadır.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-2" class="stage">
+        <div class="panel">
+            <h2>2. Aşama: Tarih Sınavı</h2>
+            <div class="banner-animated" style="background: linear-gradient(120deg, #16a085, #27ae60);">
+                <span class="banner-icon">🛡️</span>
+                <span>İzlediğin videodaki bilgilere göre aşağıdaki soruyu dikkatlice oku ve doğru şıkkı seç.</span>
+            </div>
+            <h3 style="color:var(--dark-blue); font-size: 1.6rem; margin: 30px 0;">Afyonkarahisar Kalesi, MÖ. 1350 yılında Hapanuva adıyla hangi medeniyet zamanında kullanılmıştır?</h3>
+            <div class="quiz-opts" id="quiz-1">
+                <div class="opt-btn" onclick="checkQuiz(this, false)">A) Lidyalılar</div>
+                <div class="opt-btn" onclick="checkQuiz(this, true)">B) Hititler (II. Murşil)</div>
+                <div class="opt-btn" onclick="checkQuiz(this, false)">C) Romalılar</div>
+                <div class="opt-btn" onclick="checkQuiz(this, false)">D) Frigler</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-3" class="stage">
+        <div class="panel">
+            <h2>3. Aşama: Geçmişin Sesi</h2>
+            <div class="banner-animated" style="background: linear-gradient(120deg, #c0392b, #e74c3c);">
+                <span class="banner-icon">🎙️</span>
+                <span>Aşağıdaki cümleyi oku. Boşluğa gelmesi gereken kelimeyi bul ve mikrofon ikonuna tıklayarak yüksek sesle söyle!</span>
+            </div>
+            
+            <div id="mic-area" style="padding: 20px; background: #fff; border-radius: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1);">
+                <p style="font-size: 1.4rem; font-weight: 700; color: var(--primary-blue); line-height: 1.8;">
+                    "Kalenin zirvesine ulaşmak için kayalara oyulmuş tam 570 <span class="blank-word" id="mic-blank">_____</span> çıkmak gerekir."
+                </p>
+                <button class="mic-btn" id="btn-mic" title="Bas ve Konuş">🎤</button>
+                <p id="mic-status" style="font-size:1rem; color:#7f8c8d; font-weight:bold;">Konuşmak için mikrofona tıkla.</p>
+                
+                <div id="mic-fallback" style="display:none; margin-top: 20px; border-top: 2px dashed #ccc; padding-top: 20px;">
+                    <p style="font-size: 0.9rem; color: var(--danger-red);">Mikrofon sorunu mu yaşıyorsun? Klavyenle yazabilirsin:</p>
+                    <input type="text" id="mic-input" placeholder="Eksik kelimeyi yaz..." style="padding:12px; border-radius:8px; border:2px solid var(--secondary-blue); outline:none; text-transform: lowercase; font-size: 1.1rem; font-weight: bold;">
+                    <button class="btn" style="padding:12px 25px; margin-top:0; border-radius: 8px;" onclick="checkMicText()">Onayla</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-4" class="stage">
+        <div class="panel">
+            <h2>4. Aşama: Şifreyi Hecele</h2>
+            <div class="banner-animated" style="background: linear-gradient(120deg, #8e44ad, #9b59b6);">
+                <span class="banner-icon">🔤</span>
+                <span>Hititler döneminde kaleye verilen <b>HAPANUVA</b> kelimesi nasıl hecelenir? Klavyeni kullanarak kelimeyi parçalara ayır ve aşağıdaki boşluklara sırayla yaz.</span>
+            </div>
+            
+            <div class="syl-container">
+                <h3 style="letter-spacing: 8px; color: var(--secondary-blue); font-size: 2.2rem; margin-bottom: 0; background: #fff; padding: 10px 30px; border-radius: 10px; border: 2px dashed var(--secondary-blue);">HAPANUVA</h3>
+                <div class="syl-inputs">
+                    <input type="text" class="syl-input" id="syl-1" maxlength="8" autocomplete="off" placeholder="1">
+                    <span class="syl-dash">-</span>
+                    <input type="text" class="syl-input" id="syl-2" maxlength="8" autocomplete="off" placeholder="2">
+                    <span class="syl-dash">-</span>
+                    <input type="text" class="syl-input" id="syl-3" maxlength="8" autocomplete="off" placeholder="3">
+                    <span class="syl-dash">-</span>
+                    <input type="text" class="syl-input" id="syl-4" maxlength="8" autocomplete="off" placeholder="4">
+                </div>
+                <button class="btn" onclick="checkSyllables()">Heceleri Doğrula</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-5" class="stage">
+        <div class="panel">
+            <h2>5. Aşama: Şifreli Kod Haritası 🗺️</h2>
+            <div class="banner-animated" style="background: linear-gradient(120deg, #8b0000, #ff4500);">
+                <span class="banner-icon">🎯</span>
+                <span>Kalede gizlenmiş 5 kripto-sembolü bulup doğru sırayla tıkla! Sıra: Kılıç → Taç → Zil → Kitap → Hazine</span>
+            </div>
+            <div id="crypto-game">
+                <div id="crypto-bg"></div>
+                <div class="crypto-symbol" id="crypto-1" data-id="1" style="top: 20%; left: 15%;">🗡️</div>
+                <div class="crypto-symbol" id="crypto-2" data-id="2" style="top: 15%; left: 75%;">👑</div>
+                <div class="crypto-symbol" id="crypto-3" data-id="3" style="top: 60%; left: 10%;">🔔</div>
+                <div class="crypto-symbol" id="crypto-4" data-id="4" style="top: 70%; left: 85%;">📖</div>
+                <div class="crypto-symbol" id="crypto-5" data-id="5" style="top: 45%; left: 50%; transform: translateX(-50%);">💎</div>
+                <div id="sequence-display">Sıra: <span id="sequence-text">🗡️ 👑 🔔 📖 💎</span></div>
+            </div>
+            <div style="margin-top: 25px; display: flex; gap: 20px; align-items: center;">
+                <div style="flex: 1; background: #ecf0f1; height: 12px; border-radius: 10px; overflow: hidden;">
+                    <div id="progress-bar" style="height: 100%; background: linear-gradient(to right, #27ae60, #2ecc71); width: 0%; transition: width 0.4s ease;"></div>
+                </div>
+                <span id="progress-text" style="font-weight: bold; color: var(--secondary-blue); min-width: 40px;">0/5</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-6" class="stage">
+        <div class="panel">
+            <h2>6. Aşama: Zaman Kristalleri</h2>
+            <div class="banner-animated" style="background: linear-gradient(120deg, #d35400, #f39c12);">
+                <span class="banner-icon">⏳</span>
+                <span>Kalenin hakimiyetini elinde tutmuş medeniyetleri kronolojik sıraya göre (eskiden yeniye) zaman çizelgesine yerleştir.</span>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 20px;">
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                    <div class="emblem" draggable="true" data-period="selcuklu">SELÇUKLU</div>
+                    <div class="emblem" draggable="true" data-period="hitit">HİTİT</div>
+                    <div class="emblem" draggable="true" data-period="osmanli">OSMANLI</div>
+                    <div class="emblem" draggable="true" data-period="frig">FRİG</div>
+                </div>
+                
+                <div class="timeline-track">
+                    <div class="time-slot" id="slot-1" data-correct="hitit">1.</div>
+                    <div class="time-slot" id="slot-2" data-correct="frig">2.</div>
+                    <div class="time-slot" id="slot-3" data-correct="selcuklu">3.</div>
+                    <div class="time-slot" id="slot-4" data-correct="osmanli">4.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="stage-7" class="stage">
+        <div class="panel">
+            <h1 style="color:var(--accent-gold); font-size: 3.5rem; text-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);">GÖREV TAMAMLANDI!</h1>
+            <div class="banner-animated" style="background: linear-gradient(120deg, #27ae60, #2ecc71); justify-content: center; font-size: 1.3rem;">
+                <span class="banner-icon">🏆</span>
+                <span>Tebrikler! Afyon Kalesi'nin sarp kayalıklarını aştın, tarihi şifrelerini çözdün ve şanlı Türk Bayrağını zirvede dalgalandırdın.</span>
+            </div>
+            <button class="btn" style="font-size: 1.5rem; padding: 20px 50px;" onclick="window.location.href='https://memleketim.github.io/03/index.html'">Haritaya Dön</button>
+        </div>
+    </div>
+
+    <script>
+        /* --- SES MOTORU VE YZ TTS --- */
+        let currentStage = 0;
+        let audioCtx = null;
+        let bgm = new Audio('sesler/kale_fon.mp3'); bgm.loop = true;
+        let isMuted = true;
+        let currentVoiceAudio = null;
+
+        const yonergeMetinleri = [
+            "Afyon Kalesi'ne hoş geldin! Oyuna başlamadan önce kalenin tarihini anlatan bu kısa videoyu dikkatlice izle. Sorular bu videodan gelecek!",
+            "1. Aşama: Zirveye Tırmanış. Yukarıdaki kelimeleri sürükleyerek cümledeki doğru boşluklara bırak. Her doğru kelime seni kalede bir adım yukarı taşıyacak!",
+            "2. Aşama: Tarih Sınavı. İzlediğin videoya göre karşına çıkan bu soruyu dikkatlice okuyup doğru cevapla.",
+            "3. Aşama: Geçmişin Sesi. Ekranda okuduğun cümlede boş bırakılan yere gelmesi gereken kelimeyi bul ve mikrofona söyle.",
+            "4. Aşama: Şifreyi Hecele. Hititler döneminde kaleye Hapanuva denirdi. Bu kelimeyi klavyenle 4 parçaya ayır ve heceleyerek yaz.",
+            "5. Aşama: Şifreli Kod Haritası. Kalede gizlenmiş 5 kripto-sembolü bulup doğru sırayla tıkla!",
+            "6. Aşama: Zaman Kristalleri. Kaleye hakim olmuş medeniyetleri kronolojik sıraya göre zaman çizelgesine yerleştir.",
+            "Görev Tamamlandı! Afyon Kalesi'nin sırlarını çözdün. Tebrikler!"
+        ];
+
+        function playSound(type) {
+            if(isMuted || !audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            
+            if(type === 'pop') { osc.type = 'square'; osc.frequency.setValueAtTime(300, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+            else if(type === 'success') { osc.type = 'sine'; osc.frequency.setValueAtTime(600, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+            else if(type === 'error') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3); osc.start(); osc.stop(audioCtx.currentTime + 0.3); }
+            else if(type === 'magic') { osc.type = 'triangle'; osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.linearRampToValueAtTime(800, audioCtx.currentTime + 0.5); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6); osc.start(); osc.stop(audioCtx.currentTime + 0.6); }
+        }
+
+        function playVoiceover(stageIdx) {
+            if(isMuted) return;
+            if(currentVoiceAudio) { currentVoiceAudio.pause(); currentVoiceAudio.currentTime = 0; }
+            if('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            currentVoiceAudio = new Audio(`sesler/yonerge_${stageIdx}.mp3`);
+            let playPromise = currentVoiceAudio.play();
+            if(playPromise !== undefined) {
+                playPromise.catch(error => {
+                    if('speechSynthesis' in window) {
+                        const utterance = new SpeechSynthesisUtterance(yonergeMetinleri[stageIdx]);
+                        utterance.lang = 'tr-TR';
+                        window.speechSynthesis.speak(utterance);
+                    }
+                });
+            }
+        }
+
+        document.getElementById('btn-sound').onclick = function() {
+            isMuted = !isMuted;
+            this.innerText = isMuted ? '🔇' : '🔊';
+            if(!isMuted) { 
+                if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+                if(currentStage > 0 && currentStage < 7) bgm.play().catch(e=>{});
+                playVoiceover(currentStage);
+            } else {
+                bgm.pause();
+                if(currentVoiceAudio) currentVoiceAudio.pause();
+                if('speechSynthesis' in window) window.speechSynthesis.cancel();
+            }
+        };
+
+        function showStage(n) {
+            currentStage = n;
+            document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+            document.getElementById('stage-'+n).classList.add('active');
+            
+            if(n === 0 || n === 7) bgm.pause();
+            else { if(!isMuted) bgm.play().catch(e=>{}); if(n > 1) playSound('magic'); }
+
+            playVoiceover(n);
+            if(n===1) initS1(); if(n===3) initS3(); if(n===4) initS4(); if(n===5) initS5(); if(n===6) initS6();
+        }
+
+        /* --- S1: KALE TIRMANIŞI (Sürükle Bırak) --- */
+        let currentClimbStep = 1;
+        function initS1() {
+            const words = document.querySelectorAll('.adj-word');
+            const drops = document.querySelectorAll('.drop-zone');
+            let draggedWord = null;
+
+            words.forEach(w => {
+                w.ondragstart = (e) => { draggedWord = w; };
+                w.onclick = () => { draggedWord = w; document.querySelectorAll('.adj-word').forEach(x=>x.style.opacity=1); w.style.opacity=0.5; playSound('pop'); };
+            });
+
+            drops.forEach(zone => {
+                zone.ondragover = (e) => e.preventDefault();
+                zone.ondrop = (e) => handleDrop(zone);
+                zone.onclick = () => { if(draggedWord) handleDrop(zone); };
+            });
+
+            function handleDrop(zone) {
+                if(!draggedWord || zone.classList.contains('correct')) return;
+                const correctAns = zone.getAttribute('data-ans');
+                const userAns = draggedWord.getAttribute('data-word');
+                
+                if(correctAns === userAns) {
+                    playSound('success');
+                    zone.innerText = userAns.toUpperCase();
+                    zone.classList.add('correct');
+                    draggedWord.classList.add('used');
+                    
+                    document.getElementById('pt-'+currentClimbStep).classList.add('reached');
+                    const pt = document.getElementById('pt-'+currentClimbStep);
+                    const climber = document.getElementById('climber');
+                    climber.style.left = pt.style.left;
+                    climber.style.bottom = pt.style.bottom;
+                    
+                    if(currentClimbStep < 5) {
+                        document.getElementById('sent-'+currentClimbStep).classList.remove('active');
+                        currentClimbStep++;
+                        document.getElementById('sent-'+currentClimbStep).classList.add('active');
+                    } else {
+                        setTimeout(() => {
+                            playSound('magic');
+                            document.getElementById('flag-pole').classList.add('raised');
+                            setTimeout(() => showStage(2), 2500);
+                        }, 1000);
+                    }
+                } else {
+                    playSound('error');
+                    draggedWord.style.opacity = 1;
+                }
+                draggedWord = null;
+            }
+        }
+
+        /* --- S2: VİDEO QUIZ --- */
+        function checkQuiz(btn, isCorrect) {
+            if(isCorrect) {
+                playSound('success');
+                btn.classList.add('correct');
+                setTimeout(() => showStage(3), 1500);
+            } else {
+                playSound('error');
+                btn.classList.add('wrong');
+                setTimeout(() => btn.classList.remove('wrong'), 1000);
+            }
+        }
+
+        /* --- S3: MİKROFON --- */
+        let micStage = 1;
+        const micQuestions = [
+            { t: "Kalenin zirvesine ulaşmak için kayalara oyulmuş tam 570 <span class='blank-word' id='mic-blank'>_____</span> çıkmak gerekir.", ans: "basamak" },
+            { t: "Surları Selçuklu zamanında Mimar Bedrettin <span class='blank-word' id='mic-blank'>_____</span> tarafından onarılmıştır.", ans: "gevhertaş", ansAlt: "gevhertas" },
+            { t: "Osmanlı Sultanı II. Selim'in emriyle <span class='blank-word' id='mic-blank'>_____</span> Bey tarafından burçları tekrar onarılmıştır.", ans: "mahmut" }
+        ];
+
+        function initS3() {
+            const btn = document.getElementById('btn-mic');
+            const fallback = document.getElementById('mic-fallback');
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            btn.onclick = () => {
+                playSound('pop');
+                if(SpeechRecognition) {
+                    const rec = new SpeechRecognition();
+                    rec.lang = 'tr-TR';
+                    rec.onstart = () => { btn.classList.add('listening'); };
+                    rec.onresult = (e) => checkMicAns(e.results[0][0].transcript.toLowerCase());
+                    rec.onerror = () => { btn.classList.remove('listening'); fallback.style.display = 'block'; };
+                    rec.onend = () => { btn.classList.remove('listening'); };
+                    rec.start();
+                } else {
+                    fallback.style.display = 'block';
+                }
+            };
+        }
+
+        function checkMicText() { checkMicAns(document.getElementById('mic-input').value.toLowerCase()); }
+
+        function checkMicAns(val) {
+            const currentAns = micQuestions[micStage-1].ans;
+            const currentAnsAlt = micQuestions[micStage-1].ansAlt;
+            
+            if(val.includes(currentAns) || (currentAnsAlt && val.includes(currentAnsAlt))) {
+                playSound('success');
+                document.getElementById('mic-blank').innerText = currentAns.toUpperCase();
+                document.getElementById('mic-blank').classList.add('filled');
+                document.getElementById('mic-input').value = '';
+                document.getElementById('mic-fallback').style.display = 'none';
+                
+                setTimeout(() => {
+                    micStage++;
+                    if(micStage <= 3) {
+                        document.querySelector('#mic-area p').innerHTML = micQuestions[micStage-1].t;
+                    } else {
+                        showStage(4);
+                    }
+                }, 1500);
+            } else {
+                playSound('error');
+                document.getElementById('mic-fallback').style.display = 'block';
+            }
+        }
+
+        /* --- S4: HECELEME (HAPANUVA) --- */
+        function initS4() {
+            document.querySelectorAll('.syl-input').forEach((inp) => {
+                inp.onfocus = () => { inp.classList.remove('error'); inp.classList.remove('correct'); playSound('pop'); };
+            });
+        }
+
+        function checkSyllables() {
+            const s1 = document.getElementById('syl-1');
+            const s2 = document.getElementById('syl-2');
+            const s3 = document.getElementById('syl-3');
+            const s4 = document.getElementById('syl-4');
+
+            const val1 = s1.value.trim().toUpperCase();
+            const val2 = s2.value.trim().toUpperCase();
+            const val3 = s3.value.trim().toUpperCase();
+            const val4 = s4.value.trim().toUpperCase();
+
+            let allCorrect = true;
+
+            if(val1 === 'HA') { s1.classList.add('correct'); } else { s1.classList.add('error'); allCorrect = false; }
+            if(val2 === 'PA') { s2.classList.add('correct'); } else { s2.classList.add('error'); allCorrect = false; }
+            if(val3 === 'NU') { s3.classList.add('correct'); } else { s3.classList.add('error'); allCorrect = false; }
+            if(val4 === 'VA') { s4.classList.add('correct'); } else { s4.classList.add('error'); allCorrect = false; }
+
+            if(allCorrect) {
+                playSound('magic');
+                setTimeout(() => showStage(5), 1500);
+            } else {
+                playSound('error');
+            }
+        }
+
+        /* --- S5: KARAHİSAR KALESİ SEMBOL SIRALAMASI --- */
+        let correctSequence = [1, 2, 3, 4, 5];
+        let currentSequence = [];
+        let symbolsFound = 0;
+
+        function initS5() {
+            currentSequence = [];
+            symbolsFound = 0;
+            updateProgressBar();
+            
+            document.querySelectorAll('.crypto-symbol').forEach((symbol, idx) => {
+                symbol.style.animationDelay = (idx * 0.2) + 's';
+                symbol.onclick = () => clickSymbol(symbol);
+            });
+        }
+
+        function clickSymbol(el) {
+            const id = parseInt(el.getAttribute('data-id'));
+            const expectedId = correctSequence[currentSequence.length];
+            
+            if(id === expectedId) {
+                playSound('success');
+                currentSequence.push(id);
+                el.classList.add('symbol-found');
+                el.style.pointerEvents = 'none';
+                symbolsFound++;
+                
+                createExplosion(el);
+                updateSequenceDisplay();
+                updateProgressBar();
+                
+                if(currentSequence.length === 5) {
+                    playSound('magic');
+                    setTimeout(() => {
+                        document.getElementById('crypto-game').style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                        document.getElementById('crypto-bg').style.opacity = '0.3';
+                        setTimeout(() => showStage(6), 1500);
+                    }, 1000);
+                }
+            } else {
+                playSound('error');
+                el.style.animation = 'shake 0.4s';
+                setTimeout(() => { el.style.animation = 'float 3s ease-in-out infinite'; el.style.animationDelay = '0s'; }, 400);
+            }
+        }
+
+        function updateSequenceDisplay() {
+            const emojis = ['🗡️', '👑', '🔔', '📖', '💎'];
+            let display = '';
+            for(let i = 0; i < 5; i++) {
+                if(i < currentSequence.length) {
+                    display += '<span style="color: #2ecc71;">' + emojis[i] + '</span> ';
+                } else {
+                    display += '<span style="opacity: 0.3;">' + emojis[i] + '</span> ';
+                }
+            }
+            document.getElementById('sequence-text').innerHTML = display;
+        }
+
+        function updateProgressBar() {
+            const percent = (symbolsFound / 5) * 100;
+            document.getElementById('progress-bar').style.width = percent + '%';
+            document.getElementById('progress-text').innerText = symbolsFound + '/5';
+        }
+
+        function createExplosion(el) {
+            const rect = el.getBoundingClientRect();
+            for(let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.style.position = 'fixed';
+                particle.style.left = rect.left + 'px';
+                particle.style.top = rect.top + 'px';
+                particle.style.fontSize = '24px';
+                particle.style.pointerEvents = 'none';
+                particle.style.zIndex = '1001';
+                particle.innerHTML = '✨';
+                particle.style.animation = 'explode 0.8s ease-out forwards';
+                const angle = (i / 8) * Math.PI * 2;
+                particle.style.setProperty('--tx', Math.cos(angle) * 100 + 'px');
+                particle.style.setProperty('--ty', Math.sin(angle) * 100 + 'px');
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+
+        /* --- S6: TARİH SIRALAMASI --- */
+        let emblemsPlaced = 0;
+        function initS6() {
+            const emblems = document.querySelectorAll('.emblem');
+            const slots = document.querySelectorAll('.time-slot');
+            let draggedEmblem = null;
+
+            emblems.forEach(e => {
+                e.ondragstart = () => { draggedEmblem = e; playSound('pop'); };
+                e.onclick = () => { draggedEmblem = e; emblems.forEach(x=>x.style.transform='scale(1)'); e.style.transform='scale(0.9)'; playSound('pop'); };
+            });
+
+            slots.forEach(slot => {
+                slot.ondragover = (e) => e.preventDefault();
+                slot.ondrop = () => dropEmblem(slot);
+                slot.onclick = () => { if(draggedEmblem) dropEmblem(slot); };
+            });
+
+            function dropEmblem(slot) {
+                if(!draggedEmblem || slot.classList.contains('correct')) return;
+                const expected = slot.getAttribute('data-correct');
+                const provided = draggedEmblem.getAttribute('data-period');
+
+                if(expected === provided) {
+                    playSound('success');
+                    slot.innerHTML = '';
+                    draggedEmblem.style.position = 'static';
+                    draggedEmblem.style.width = '100%';
+                    draggedEmblem.style.height = '100%';
+                    draggedEmblem.style.transform = 'none';
+                    slot.appendChild(draggedEmblem);
+                    slot.classList.add('correct');
+                    draggedEmblem.setAttribute('draggable', 'false');
+                    draggedEmblem = null;
+                    emblemsPlaced++;
+                    if(emblemsPlaced === 4) {
+                        setTimeout(() => showStage(7), 1500);
+                    }
+                } else {
+                    playSound('error');
+                    draggedEmblem.style.transform = 'scale(1)';
+                    draggedEmblem = null;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

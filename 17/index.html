@@ -3,29 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa 17</title>
+    <title>Çanakkale'nin Kültürel Zenginlikleri</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0; padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            /* Kurumsal Arka Plan Geri Getirildi */
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
         }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+
+        .container {
+            max-width: 1200px; width: 95%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        a:hover {
-            background-color: #2980b9;
+
+        h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+
+        .instructions {
+            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
+            background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
+        .map-container {
+            position: relative; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: white; padding: 15px;
+            max-width: 600px; margin: 0 auto;
+        }
+
+        .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
+
+        .quiz-point {
+            position: absolute; width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px); border: 2px solid white;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5;
+        }
+
+        .quiz-point:hover { transform: scale(1.2); z-index: 10; background: rgba(255, 255, 255, 0.5); }
+
+        .quiz-point-icon {
+            width: 85px; height: 85px; object-fit: contain;
+            animation: bounce 1.2s infinite alternate;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+        .tooltip {
+            position: absolute; background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;
+            top: -40px; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+        }
+        .quiz-point:hover .tooltip { opacity: 1; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; max-width: 550px; width: 90%; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+        .modal-content h2 { color: #e67e22; margin-bottom: 15px; font-size: 1.8em; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .modal-content p { color: #444; line-height: 1.7; text-align: justify; font-size: 1.1em; margin-bottom: 25px; }
+        
+        .btn { padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+        
+        .btn-ana-sayfa {
+            position: absolute; top: 0; right: 0; padding: 8px 20px;
+            background: #5c67f2; color: white; text-decoration: none;
+            border-radius: 8px; font-size: 14px; font-weight: 600;
+            transition: 0.3s; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .btn-ana-sayfa:hover { background: #4a54e1; transform: scale(1.05); }
+
+        .btn-primary { background: linear-gradient(45deg, #e67e22, #d35400); color: white; border: none; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4); }
+        .btn-secondary { background: #eee; color: #555; border: none; margin-left: 10px; }
+
+        /* Koordinatlar - Çanakkale Haritası Üzerinde Dağılım */
+        #p1 { top: 25%; left: 32%; } /* 18 Mart / Gelibolu Yarımadası */
+        #p2 { top: 70%; left: 35%; } /* Peynir / Ezine civarı */
+        #p3 { top: 50%; left: 15%; } /* Gökçeada - Bozcaada arası deniz/kıyı */
+        #p4 { top: 55%; left: 45%; } /* Truva Antik Kenti (Sağa kaydırıldı) */
+        #p5 { top: 45%; left: 75%; } /* Aynalı Çarşı (Sağa kaydırıldı) */
+        #p6 { top: 30%; left: 55%; } /* Çanakkale Boğazı (Sağa kaydırıldı) */
     </style>
 </head>
 <body>
-    <h1>Bu sayfa henüz tasarım aşamasında: 17</h1>
-    <a href="http://memleketim.github.io/">Anasayfaya Dön</a>
+
+<div class="container">
+    <div style="width: 100%; position: relative;">
+        <h1>Çanakkale'nin Kültürel Zenginlikleri</h1>
+        <a href="https://memleketim.github.io" class="btn-ana-sayfa">Ana Sayfa</a>
+    </div>
+
+    <div class="instructions">Haritadaki ikonlara tıklayarak Çanakkale'nin destansı tarihini ve kültürel hazinelerini keşfedebilirsiniz. 🌊</div>
+
+    <div class="map-container">
+        <img src="map.png" alt="Çanakkale Haritası" class="map-image">
+
+        <div class="quiz-point" id="p1" 
+             data-title="🎖️ 18 Mart Çanakkale Zaferi" 
+             data-description="Türk tarihinin en şanlı destanlarından biri olan Çanakkale Zaferi, bağımsızlık uğruna verilen eşsiz bir mücadelenin simgesidir. 'Çanakkale Geçilmez' nidasıyla yazılan bu kahramanlık öyküsü, Gelibolu Yarımadası'ndaki şehitlikler, anıtlar ve siperlerle günümüzde de yaşatılmaktadır. Bu kutsal topraklar, vatan sevgisinin ve dayanışmanın en büyük kanıtı olarak ziyaretçilerini derinden etkiler."
+             data-link="1.html">
+            <div class="tooltip">Çanakkale Zaferi</div>
+            <img src="1.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p2" 
+             data-title="🧀 Peynir ve Yöresel Lezzetler" 
+             data-description="Çanakkale'nin bereketli toprakları ve rüzgarlı doğası, eşsiz gastronomi kültürünün temelini oluşturur. Ünü sınırları aşan meşhur Ezine peyniri, zeytinyağlıları, taze deniz ürünleri ve peynir helvası, damaklarda unutulmaz tatlar bırakır. Yöresel otlarla harmanlanan geleneksel lezzetler, hem göze hem de mideye hitap eden zengin sofralar sunarak bölgenin kültürel çeşitliliğini yansıtır."
+             data-link="2.html">
+            <div class="tooltip">Yöresel Lezzetler</div>
+            <img src="2.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p3" 
+             data-title="🏝️ Gökçeada - Bozcaada - Gelibolu" 
+             data-description="Kuzey Ege'nin incileri Gökçeada ve Bozcaada, tarihi Rum köyleri, bağları, rüzgar sörfüne uygun plajları ve taş evleriyle huzur dolu bir kaçış noktasıdır. Tarihin kalbinin attığı Gelibolu Yarımadası ise milli park statüsüyle hem doğanın hem de şanlı geçmişin izlerini taşır. Bu üçlü rota, denizin maviliğiyle yeşilin ve köklü bir tarihin kusursuz uyumunu bir araya getiren eşsiz bir serüvendir."
+             data-link="3.html">
+            <div class="tooltip">Adalar ve Gelibolu</div>
+            <img src="3.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p4" 
+             data-title="🐎 Truva Antik Kenti" 
+             data-description="Homeros'un İlyada Destanı'na konu olan, tarihin en ünlü savaşlarından birine ev sahipliği yapmış Truva Antik Kenti, UNESCO Dünya Mirası Listesi'nde yer alır. Dokuz farklı yerleşim katmanıyla binlerce yıllık geçmişi aydınlatan bu efsanevi şehir, meşhur Truva Atı ve kazı alanlarıyla mitoloji ve arkeoloji tutkunlarını büyüleyici bir zaman yolculuğuna çıkarır."
+             data-link="4.html">
+            <div class="tooltip">Truva Antik Kenti</div>
+            <img src="4.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p5" 
+             data-title="🪞 Aynalı Çarşı" 
+             data-description="Türkülere konu olan tarihi Aynalı Çarşı, Çanakkale'nin kalbinde, kültürel ve ticari hayatın nabzının attığı otantik bir mekandır. 1890 yılında inşa edilen yapı, kapısındaki aynalar ve içindeki hediyelik eşya dükkanlarıyla nostaljik bir atmosfere sahiptir. Çanakkale Savaşı döneminin hüznünü ve günümüzün canlılığını bir arada sunan çarşı, şehrin ruhunu hissetmek için ideal bir duraktır."
+             data-link="5.html">
+            <div class="tooltip">Aynalı Çarşı</div>
+            <img src="5.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p6" 
+             data-title="🌊 Çanakkale Boğazı" 
+             data-description="Asya ve Avrupa kıtalarını birbirinden ayıran Çanakkale Boğazı, eşsiz manzarası ve stratejik önemiyle tarih boyunca medeniyetlerin odak noktası olmuştur. Masmavi sularında süzülen gemiler ve kıyılarına dizilmiş tarihi kalelerle büyüleyici bir silüet çizer. İki yaka arasında süzülen martılar eşliğinde yapılan vapur yolculukları, Ege'nin esintisini ve şehrin huzur veren ritmini hissettirir."
+             data-link="6.html">
+            <div class="tooltip">Çanakkale Boğazı</div>
+            <img src="6.png" class="quiz-point-icon">
+        </div>
+    </div>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div class="modal-buttons">
+            <a href="#" id="activityLinkBtn" class="btn btn-primary">Etkinliğe Git</a>
+            <button class="btn btn-secondary" id="closeModalBtn">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const quizPoints = document.querySelectorAll('.quiz-point');
+    const modal = document.getElementById('infoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const activityLinkBtn = document.getElementById('activityLinkBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    quizPoints.forEach(point => {
+        point.addEventListener('click', function() {
+            modalTitle.textContent = this.getAttribute('data-title');
+            modalText.textContent = this.getAttribute('data-description');
+            activityLinkBtn.href = this.getAttribute('data-link');
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+</script>
+
 </body>
 </html>

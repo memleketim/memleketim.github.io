@@ -3,29 +3,212 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa 03</title>
+    <title>Afyonkarahisar'ın Kültürel Zenginlikleri</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0; padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
         }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
+
+        .container {
+            max-width: 1200px; width: 95%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+
+        .instructions {
+            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
+            background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .map-container {
+            position: relative; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: white; padding: 15px;
+            max-width: 600px; margin: 0 auto;
+        }
+
+        .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
+
+        .quiz-point {
+            position: absolute; width: 70px; height: 70px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px); border: 2px solid white;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5;
+        }
+
+        .quiz-point:hover { transform: scale(1.2); z-index: 10; background: rgba(255, 255, 255, 0.5); }
+
+        .quiz-point-icon {
+            width: 85px; height: 85px; object-fit: contain;
+            animation: bounce 1.2s infinite alternate;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+        .tooltip {
+            position: absolute; background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;
+            top: -40px; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+        }
+        .quiz-point:hover .tooltip { opacity: 1; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; max-width: 550px; width: 90%; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+        .modal-content h2 { color: #e67e22; margin-bottom: 15px; font-size: 1.8em; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .modal-content p { color: #444; line-height: 1.7; text-align: justify; font-size: 1.1em; margin-bottom: 25px; }
+        
+        .btn { padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+        
+        /* Sağ Üst Ana Sayfa Butonu Stili */
+        .btn-ana-sayfa {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 8px 20px;
+            background: #5c67f2;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        a:hover {
-            background-color: #2980b9;
-        }
+        .btn-ana-sayfa:hover { background: #4a54e1; transform: scale(1.05); }
+
+        .btn-primary { background: linear-gradient(45deg, #e67e22, #d35400); color: white; border: none; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(230, 126, 34, 0.4); }
+        .btn-secondary { background: #eee; color: #555; border: none; margin-left: 10px; }
+
+        /* Koordinatlar - Afyonkarahisar Haritası Üzerinde Dağılım */
+        #p1 { top: 15%; left: 65%; } /* Kocatepe (Sağ orta kısım) */
+        #p2 { top: 48%; left: 45%; } /* Afyon Kalesi (Tam merkez, yazının altı) */
+        #p3 { top: 38%; left: 58%; } /* Gastronomi (Sağ alt, Isparta sınırına yakın iç kısım) */
+        #p4 { top: 22%; left: 48%; } /* Frigya (Üst orta, Eskişehir sınırı) */
+        #p5 { top: 55%; left: 32%; } /* Camiler (Sol orta kısım) */
+        #p6 { top: 32%; left: 25%; } /* Termal Turizm (Sol üst, Uşak/Kütahya tarafı) */
+        #p7 { top: 72%; left: 22%; } /* Ahşap ve Mermer (Sol alt, Denizli bacağına doğru güvenli bölge) */
     </style>
 </head>
 <body>
-    <h1>Bu sayfa henüz tasarım aşamasında: 03</h1>
-    <a href="http://memleketim.github.io/">Anasayfaya Dön</a>
+
+<div class="container">
+    <div style="width: 100%; position: relative;">
+        <h1>Afyonkarahisar'ın Kültürel Zenginlikleri</h1>
+        <a href="https://memleketim.github.io" class="btn-ana-sayfa">Ana Sayfa</a>
+    </div>
+
+    <div class="instructions">Haritadaki ikonlara tıklayarak Afyonkarahisar'ın tarihi ve kültürel hazinelerini keşfedebilirsiniz. 🏰</div>
+
+    <div class="map-container">
+        <img src="map.png" alt="Afyonkarahisar Haritası" class="map-image">
+
+        <div class="quiz-point" id="p1" 
+             data-title="🇹🇷 Kocatepe" 
+             data-description="Zaferin Başlangıç Noktası Afyonkarahisar'ın en önemli simgelerinden biri olan Kocatepe, Türkiye Cumhuriyeti'nin kuruluş temellerinin atıldığı, Büyük Taarruz'un bizzat sevk ve idare edildiği tarihi bir zirvedir. 1874 rakımlı bu tepede, Gazi Mustafa Kemal Atatürk'ün orduları yönettiği siperler ve bu tarihi anı ölümsüzleştiren abidevi bir anıt bulunmaktadır. Şehrin kurtuluş ruhunu temsil eden bu bölge, Milli Mücadele döneminin en stratejik noktasıdır."
+             data-link="1.html">
+            <div class="tooltip">Kocatepe</div>
+            <img src="1.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p2" 
+             data-title="🏰 Afyon Kalesi" 
+             data-description="Şehir merkezinde, yaklaşık 226 metre yükseklikteki volkanik bir kaya kütlesi üzerinde yükselen Afyon Kalesi, Hitit döneminden itibaren şehre muhafızlık yapmış kadim bir yapıdır. Sarp kayalıkları ve tarihi surlarıyla dikkat çeken bu kale, ziyaretçilerine panoramik bir şehir manzarası sunmaktadır. Ulaşımı oldukça dik basamaklarla sağlanan bu tarihi yapı, hem askeri hem de kültürel açıdan şehrin en görkemli sembolü olarak varlığını sürdürmektedir."
+             data-link="2.html">
+            <div class="tooltip">Afyon Kalesi</div>
+            <img src="2.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p3" 
+             data-title="🥘 Gastronomi: Tescilli Lezzet Mirası" 
+             data-description="UNESCO tescilli bir gastronomi şehri olan Afyonkarahisar; coğrafi işaretli sucuğu, lokumu, haşhaşı ve kaymağıyla dünya mutfağında çok özel bir yere sahiptir. Katmer, bükme, erişte çorbası ve ekmek kadayıfı gibi geleneksel lezzetler, şehrin zengin mutfak kültürünün temel taşlarını oluşturmaktadır. Yüzyıllardır süregelen tariflerle hazırlanan bu yiyecekler, şehrin hem yerel ekonomisini hem de sosyal dokusunu büyük bir titizlikle beslemektedir."
+             data-link="3.html">
+            <div class="tooltip">Gastronomi</div>
+            <img src="3.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p4" 
+             data-title="🏺 Frigya" 
+             data-description="Ayazini (Metropolis) bölgesi başta olmak üzere, Afyonkarahisar'ın geniş coğrafyasına yayılan Frigya mirası, devasa kaya mezarları ve dini yapılarla doludur. Frig Yolu üzerindeki bu yerleşim alanlarında bulunan kaya kiliseleri ve antik yerleşimler, binlerce yıllık medeniyetlerin sanatsal ve mimari becerilerini günümüze taşımaktadır. Bu eşsiz açık hava müzesi, Anadolu'nun kadim tarihini, kültürel derinliğini keşfetmek ve peri bacalarının büyüsüne kapılmak isteyenler için paha biçilemez bir rotadır."
+             data-link="4.html">
+            <div class="tooltip">Frigya</div>
+            <img src="4.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p5" 
+             data-title="🕌 Camiler" 
+             data-description="Şehrin manevi kimliğini temsil eden tarihi camiler (Mevlevi, İmaret, Ulu Cami vb.), Selçuklu ve Osmanlı mimarisinin en zarif örneklerini barındırmaktadır. Özellikle ahşap direkli yapılar ve taş işçiliğiyle ön plana çıkan mabetler, Taşhan Çarşısı gibi ticari alanlarla iç içe geçerek tarihi bir merkez oluşturmaktadır. Bu yapılar sadece ibadethane değil, aynı zamanda şehrin asırlık tarihini, geleneksel Türk-İslam sanatını ve vakıf kültürünü anlatan yaşayan birer kültür mirasıdır."
+             data-link="5.html">
+            <div class="tooltip">Tarihi Camiler</div>
+            <img src="5.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p6" 
+             data-title="💧 Termal Turizm" 
+             data-description="Şifalı Suların Merkezi 'Termalin Başkenti' olarak kabul edilen Afyonkarahisar, sahip olduğu yüksek mineralli jeotermal kaynaklarıyla dünya çapında tanınan bir sağlık ve turizm merkezidir. Şehirdeki lüks termal oteller ve tarihi hamam kültürü, hem şifa arayanlara hem de dinlenmek isteyen misafirlere geleneksel ve modern olanakları bir arada sunmaktadır. Binlerce yıldır insanlığa hizmet eden bu sıcak ve şifalı sular, şehrin turizm potansiyelinin en güçlü damarlarından biridir."
+             data-link="6.html">
+            <div class="tooltip">Termal Turizm</div>
+            <img src="6.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p7" 
+             data-title="🏠 Ahşap ve Mermer 🪨" 
+             data-description="Afyonkarahisar, dünyanın en kaliteli mermer yataklarına ev sahipliği yaparak antik çağlardan bu yana küresel mimariye 'Afyon Beyazı' ile yön vermektedir. Şehrin kale eteklerinde yer alan tarihi mahallelerdeki cumbalı odun evleri ise, ahşap işçiliğinin en zarif örneklerini ve geleneksel Türk konak mimarisini temsil etmektedir. Mermerin asaletini ve ahşabın sıcaklığını birleştiren bu doku, Afyon'un hem sanayi hem de estetik kimliğini tanımlayan en önemli unsurdur."
+             data-link="7.html">
+            <div class="tooltip">Ahşap ve Mermer</div>
+            <img src="7.png" class="quiz-point-icon">
+        </div>
+    </div>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div class="modal-buttons">
+            <a href="#" id="activityLinkBtn" class="btn btn-primary">Etkinliğe Git</a>
+            <button class="btn btn-secondary" id="closeModalBtn">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const quizPoints = document.querySelectorAll('.quiz-point');
+    const modal = document.getElementById('infoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const activityLinkBtn = document.getElementById('activityLinkBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    quizPoints.forEach(point => {
+        point.addEventListener('click', function() {
+            modalTitle.textContent = this.getAttribute('data-title');
+            modalText.textContent = this.getAttribute('data-description');
+            activityLinkBtn.href = this.getAttribute('data-link');
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+</script>
+
 </body>
 </html>

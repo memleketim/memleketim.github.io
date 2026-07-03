@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Afyonkarahisar – Tarihi Konaklar ve Mermer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<style>
+/* ─── RESET & BASE ─────────────────────────────── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --gold:   #C9A84C;
+  --gold2:  #E8C97A;
+  --cream:  #F5EDD8;
+  --rust:   #8B3A2F;
+  --slate:  #2A2D35;
+  --marble: #EAE6DC;
+  --teal:   #2E7D6E;
+  --ink:    #1A1C22;
+  --shadow: rgba(0,0,0,0.55);
+}
+html, body {
+  width:100%; height:100%; overflow:hidden;
+  background:#0e0e12;
+  font-family:'Lora', Georgia, serif;
+  color:var(--cream);
+}
+
+/* ─── BACKGROUND ────────────────────────────────── */
+#bg {
+  position:fixed; inset:0; z-index:0;
+  background: url('arka.png') center/cover no-repeat;
+}
+
+/* ─── LOGO ──────────────────────────────────────── */
+#logo {
+  position:fixed; top:14px; left:16px; z-index:9999;
+  width:52px; height:52px;
+}
+#logo img { width:100%; height:100%; object-fit:contain; }
+
+/* ─── THEME & SOUND CONTROLS ────────────────────── */
+#controls {
+  position:fixed; top:10px; right:14px; z-index:9999;
+  display:flex; gap:8px;
+}
+.ctrl-btn {
+  background:rgba(201,168,76,.15);
+  border:1px solid rgba(201,168,76,.4);
+  color:var(--gold2);
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:18px;
+  backdrop-filter:blur(6px);
+  transition:background .2s;
+}
+.ctrl-btn:hover { background:rgba(201,168,76,.35); }
+
+/* ─── SCREENS ───────────────────────────────────── */
+.screen {
+  position:fixed; inset:0; z-index:10;
+  display:flex; flex-direction:column;
+  justify-content:center; align-items:center;
+  padding:20px;
+  opacity:0; pointer-events:none;
+  transition: opacity .6s ease;
+}
+.screen.active { opacity:1; pointer-events:all; }
+
+/* ─── SCREEN 1: COVER ───────────────────────────── */
+#s1 {
+  text-align:center;
+}
+.cover-ornament {
+  font-size:clamp(32px,6vw,72px);
+  color:var(--gold);
+  letter-spacing:.15em;
+  margin-bottom:10px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+.cover-title {
+  font-family:'Cinzel', serif;
+  font-size:clamp(22px,4.5vw,64px);
+  font-weight:800;
+  color:var(--cream);
+  line-height:1.15;
+  letter-spacing:.06em;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+.cover-subtitle {
+  font-family:'Cinzel', serif;
+  font-size:clamp(13px,2vw,22px);
+  color:var(--gold);
+  margin:10px 0 6px;
+  letter-spacing:.2em;
+  font-weight:600;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+}
+.cover-divider {
+  width:200px; height:2px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin:16px auto;
+}
+.cover-info {
+  font-family:'Lora', serif;
+  font-style:italic;
+  font-size:clamp(12px,1.5vw,17px);
+  color:rgba(245,237,216,.9);
+  margin-bottom:28px;
+  max-width:560px;
+  line-height:1.7;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.4);
+  padding: 15px;
+  border-radius: 8px;
+}
+.btn-primary {
+  display:inline-block;
+  background: linear-gradient(135deg, var(--gold) 0%, #a07830 100%);
+  color:#1a1000;
+  font-family:'Cinzel', serif;
+  font-weight:700;
+  font-size:clamp(12px,1.4vw,16px);
+  letter-spacing:.12em;
+  padding:14px 34px;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+  text-decoration:none;
+  margin:8px;
+  transition:transform .15s, box-shadow .15s;
+  box-shadow:0 4px 18px rgba(201,168,76,.35);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 28px rgba(201,168,76,.5); }
+.btn-secondary {
+  display:inline-block;
+  background:rgba(0,0,0,0.6);
+  color:var(--gold2);
+  font-family:'Montserrat', sans-serif;
+  font-size:clamp(12px,1.3vw,15px);
+  letter-spacing:.1em;
+  padding:12px 30px;
+  border:1px solid rgba(201,168,76,.5);
+  border-radius:4px;
+  cursor:pointer;
+  text-decoration:none;
+  margin:8px;
+  transition:background .2s, border-color .2s;
+}
+.btn-secondary:hover { background:rgba(201,168,76,.2); border-color:var(--gold); }
+
+/* ─── PHASE HEADER ──────────────────────────────── */
+.phase-header {
+  text-align:center;
+  margin-bottom:18px;
+}
+.phase-label {
+  font-family:'Cinzel', serif;
+  font-size:clamp(10px,1.2vw,13px);
+  letter-spacing:.3em;
+  color:var(--gold);
+  text-transform:uppercase;
+  margin-bottom:6px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+}
+.phase-title {
+  font-family:'Cinzel', serif;
+  font-size:clamp(18px,3vw,38px);
+  font-weight:700;
+  color:var(--cream);
+  text-shadow:0 2px 14px rgba(0,0,0,0.8);
+}
+.phase-desc {
+  font-family:'Lora', serif;
+  font-style:italic;
+  font-size:clamp(12px,1.4vw,16px);
+  color:rgba(245,237,216,.95);
+  max-width:680px;
+  text-align:center;
+  line-height:1.75;
+  margin:10px auto 0;
+  background: rgba(0,0,0,0.6);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid rgba(201,168,76,.2);
+}
+
+/* ─── VIDEO EMBED ───────────────────────────────── */
+.video-wrap {
+  width:min(560px,90vw);
+  aspect-ratio:16/9;
+  border:2px solid rgba(201,168,76,.3);
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 8px 30px rgba(0,0,0,.6);
+  margin:14px 0;
+}
+.video-wrap iframe { width:100%; height:100%; border:none; }
+
+/* ─── PANEL CARD ────────────────────────────────── */
+.panel {
+  background:rgba(26,28,34,.82);
+  border:1px solid rgba(201,168,76,.22);
+  border-radius:12px;
+  backdrop-filter:blur(10px);
+  padding:24px 28px;
+  max-width:900px;
+  width:100%;
+}
+
+/* ─── SCREEN 2: FARK BUL ────────────────────────── */
+#s2 { overflow-y:auto; justify-content:flex-start; padding:80px 16px 30px; }
+#s2-intro { max-width:720px; text-align:center; }
+#s2-game {
+  display:none;
+  width:100%; max-width:1200px;
+  height:calc(100vh - 90px);
+  flex-direction:row;
+  gap:12px;
+  padding:0 10px;
+  margin-top:8px;
+}
+#s2-game.visible { display:flex; }
+
+/* left sidebar */
+#s2-sidebar {
+  width:180px;
+  min-width:140px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.sidebar-card {
+  background:rgba(26,28,34,.9);
+  border:1px solid rgba(201,168,76,.25);
+  border-radius:10px;
+  padding:14px 10px;
+  font-size:clamp(11px,1.1vw,13px);
+  color:rgba(245,237,216,.85);
+  line-height:1.65;
+}
+.sidebar-card h3 {
+  font-family:'Cinzel', serif;
+  font-size:clamp(11px,1.1vw,13px);
+  color:var(--gold);
+  margin-bottom:8px;
+  letter-spacing:.08em;
+}
+#paint-palette {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  align-items:center;
+}
+.paint-circle {
+  width:44px; height:44px;
+  border-radius:50%;
+  cursor:pointer;
+  border:3px solid transparent;
+  transition:transform .15s, border-color .2s;
+  box-shadow:0 3px 10px rgba(0,0,0,.5);
+}
+.paint-circle:hover { transform:scale(1.15); }
+.paint-circle.selected { border-color:#fff; transform:scale(1.2); }
+
+/* main image area */
+#s2-main {
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+#diff-canvas-wrap {
+  position:relative;
+  flex:1;
+  background:rgba(0,0,0,.4);
+  border:2px solid rgba(201,168,76,.25);
+  border-radius:10px;
+  overflow:hidden;
+}
+#diff-canvas-wrap canvas {
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  cursor:crosshair;
+}
+#diff-img {
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
+  user-select:none;
+}
+#canvas-overlay {
+  position:absolute;
+  inset:0;
+  cursor:crosshair;
+}
+#s2-action-bar {
+  display:flex;
+  gap:10px;
+  justify-content:flex-end;
+}
+
+/* ─── SOLUTION MODAL ────────────────────────────── */
+#modal-bg {
+  position:fixed; inset:0; z-index:8000;
+  background:rgba(0,0,0,.85);
+  display:none;
+  justify-content:center; align-items:center;
+  padding:20px;
+}
+#modal-bg.open { display:flex; }
+.modal {
+  background:var(--ink);
+  border:2px solid rgba(201,168,76,.4);
+  border-radius:14px;
+  max-width:700px;
+  width:100%;
+  padding:28px 24px;
+  text-align:center;
+}
+.modal h2 {
+  font-family:'Cinzel', serif;
+  color:var(--gold);
+  font-size:clamp(16px,2.5vw,28px);
+  margin-bottom:12px;
+}
+.modal img {
+  width:100%;
+  border-radius:8px;
+  margin:12px 0;
+  border:2px solid rgba(201,168,76,.3);
+}
+.modal p {
+  font-family:'Lora', serif;
+  font-style:italic;
+  color:rgba(245,237,216,.85);
+  font-size:clamp(13px,1.5vw,16px);
+  margin-bottom:14px;
+}
+#score-input {
+  width:80px;
+  text-align:center;
+  font-size:22px;
+  font-family:'Cinzel', serif;
+  background:rgba(201,168,76,.1);
+  border:2px solid var(--gold);
+  border-radius:8px;
+  color:var(--gold2);
+  padding:8px;
+  margin:8px;
+}
+#score-feedback {
+  font-family:'Cinzel', serif;
+  font-size:clamp(14px,2vw,20px);
+  margin:10px 0;
+  min-height:28px;
+}
+
+/* ─── SCREEN 3: MERMER ───────────────────────────── */
+#s3 { overflow-y:auto; justify-content:flex-start; padding:80px 16px 30px; }
+#s3-intro { max-width:720px; text-align:center; }
+#s3-game { display:none; width:100%; max-width:1100px; }
+#s3-game.visible { display:block; }
+
+/* audio player */
+#audio-player-wrap {
+  background:rgba(26,28,34,.9);
+  border:1px solid rgba(201,168,76,.3);
+  border-radius:10px;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin:14px 0;
+}
+#audio-player-wrap .ap-icon { font-size:26px; }
+#ap-label { font-family:'Montserrat', sans-serif; font-size:13px; color:var(--gold2); flex:1; }
+#ap-progress {
+  flex:2;
+  height:6px;
+  appearance:none;
+  background:rgba(201,168,76,.2);
+  border-radius:3px;
+  accent-color:var(--gold);
+}
+.ap-btn {
+  background:rgba(201,168,76,.18);
+  border:1px solid rgba(201,168,76,.4);
+  color:var(--gold2);
+  padding:7px 14px;
+  border-radius:6px;
+  cursor:pointer;
+  font-size:15px;
+  transition:background .2s;
+}
+.ap-btn:hover { background:rgba(201,168,76,.35); }
+
+/* Kelime oyunu (sürükle-bırak) embed */
+#word-game-wrap {
+  position:relative;
+  width:100%;
+  height:min(70vh, 520px);
+  background:#111;
+  border-radius:10px;
+  overflow:hidden;
+  border:2px solid rgba(201,168,76,.25);
+}
+#word-game-board {
+  display:flex;
+  width:100%;
+  height:100%;
+  transition:opacity .5s;
+}
+.letter-box {
+  flex:1;
+  height:100%;
+  cursor:grab;
+  touch-action:none;
+  border-right:2px solid rgba(0,0,0,.3);
+}
+.letter-box:last-child { border-right:none; }
+.letter-box:active { cursor:grabbing; }
+.letter-box img { width:100%; height:100%; object-fit:cover; pointer-events:none; }
+.sortable-ghost { opacity:.3; transform:scale(.95); }
+#wg-banner {
+  position:absolute;
+  top:-100px; left:50%;
+  transform:translateX(-50%);
+  background:linear-gradient(135deg,#28a745,#218838);
+  color:#fff;
+  padding:16px 48px;
+  font-size:clamp(16px,3vw,28px);
+  font-weight:bold;
+  border-radius:0 0 16px 16px;
+  z-index:100;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);
+  border:2px solid #fff; border-top:none;
+  transition:top .5s cubic-bezier(.175,.885,.32,1.275);
+  font-family:'Cinzel', serif;
+}
+#wg-banner.show { top:0; }
+#wg-final {
+  position:absolute; inset:0;
+  background: url('mermer.png') center/cover no-repeat;
+  color:gold;
+  display:none;
+  flex-direction:column;
+  justify-content:center; align-items:center;
+  font-size:clamp(18px,4vw,42px);
+  z-index:200;
+  font-family:'Cinzel', serif;
+  text-align:center;
+  text-shadow: 0 2px 15px rgba(0,0,0,0.9);
+}
+
+/* ─── PROGRESS BAR ──────────────────────────────── */
+#progress-bar-wrap {
+  position:fixed;
+  bottom:0; left:0; right:0;
+  height:5px;
+  background:rgba(255,255,255,.07);
+  z-index:9000;
+}
+#progress-bar {
+  height:100%;
+  background:linear-gradient(90deg, var(--rust), var(--gold), var(--teal));
+  width:0%;
+  transition:width .5s ease;
+}
+
+/* ─── FINAL SCREEN ──────────────────────────────── */
+#s-final {
+  text-align:center;
+}
+
+/* ─── SCROLLBAR ─────────────────────────────────── */
+::-webkit-scrollbar { width:6px; }
+::-webkit-scrollbar-track { background:rgba(255,255,255,.04); }
+::-webkit-scrollbar-thumb { background:rgba(201,168,76,.3); border-radius:3px; }
+
+/* ─── RESPONSIVE ────────────────────────────────── */
+@media (max-width:640px) {
+  #s2-game { flex-direction:column; height:auto; min-height:calc(100vh - 90px); }
+  #s2-sidebar { width:100%; flex-direction:row; flex-wrap:wrap; }
+  #paint-palette { flex-direction:row; flex-wrap:wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div id="bg"></div>
+
+<!-- Logo -->
+<div id="logo">
+  <img src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+</div>
+
+<!-- Controls: sound only -->
+<div id="controls">
+  <button class="ctrl-btn" id="btn-sound" title="Ses Aç/Kapat">🔊</button>
+</div>
+
+<!-- Progress bar -->
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<!-- Yönerge ve Oyun Ses Dosyaları -->
+<audio id="voice-s2" src="sesler/yonerge_s2.mp3" preload="auto"></audio>
+<audio id="voice-s3" src="sesler/yonerge_s3.mp3" preload="auto"></audio>
+<audio id="sound-draw" src="sesler/cizim.mp3" preload="auto"></audio>
+<audio id="word-bal" src="sesler/bal.mp3" preload="auto"></audio>
+<audio id="word-seker" src="sesler/seker.mp3" preload="auto"></audio>
+<audio id="word-menekse" src="sesler/menekse.mp3" preload="auto"></audio>
+<audio id="word-kaplanpostu" src="sesler/kaplanpostu.mp3" preload="auto"></audio>
+
+<!-- ══════════════════════════════════════════
+     EKRAN 1 — KAPAK
+══════════════════════════════════════════ -->
+<div class="screen active" id="s1">
+  <div class="cover-ornament">❖</div>
+  <h1 class="cover-title">Afyonkarahisar<br>Tarihi Konaklar<br><span style="color:var(--gold)">ve Mermer</span></h1>
+  <div class="cover-divider"></div>
+  <div class="cover-subtitle">Keşfet · Öğren · Yaşat</div>
+  <p class="cover-info">
+    Bu interaktif eğitim serüveninde seni Afyonkarahisar'ın kadim taşları, ahşap konakları ve dünyanın en değerli mermerleri karşılıyor.<br>
+    Üç aşamalı bir yolculuğa hazır mısın?
+  </p>
+  <br>
+  <a href="https://drive.google.com/file/d/1p5bPf2sugOD_BZNFy5asFnRHLBdOQ-_k/view" target="_blank" class="btn-secondary">
+    📄 Demirhan Yılmaz'nın çalışmasının tamamına ulaşmak için tıklayınız.
+  </a>
+  <br><br>
+  <button class="btn-primary" onclick="goTo(2)">🏛️ Serüvene Başla</button>
+  <br>
+  <a href="https://memleketim.github.io/03/index.html" class="btn-secondary" style="font-size:12px;">🗺 Haritaya Dön</a>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EKRAN 2 — TARİHİ KONAKLAR / FARK BUL
+══════════════════════════════════════════ -->
+<div class="screen" id="s2">
+
+  <!-- 2A: Intro -->
+  <div id="s2-intro">
+    <div class="phase-label">Aşama 1 / 2</div>
+    <div class="phase-title">Tarihi Afyon Konakları</div>
+    <div class="cover-divider" style="width:120px"></div>
+
+    <div class="video-wrap">
+      <iframe id="konakVideo"
+        src="https://www.youtube.com/embed/85LURjHyuDg?si=85vKnouQiwp1L8aO&enablejsapi=1"
+        title="Tarihi Afyonkarahisar Konakları"
+        allowfullscreen allow="autoplay">
+      </iframe>
+    </div>
+
+    <p class="phase-desc">
+      Afyonkarahisar Kalesi'nin eteklerinde yükselen bu tarihi konaklar, Osmanlı sivil mimarisinin en güzel örneklerindendir.
+      Cumbalı cepheleri, ahşap kapıları ve dar Arnavut kaldırımlı sokakları ile sizi geçmişe taşır.<br><br>
+      Şimdi sıra sende! Aşağıda iki resim arasındaki <strong style="color:var(--gold)">7 farkı</strong> bul ve istediğin renkle işaretle.
+    </p>
+    <br>
+    <button class="btn-primary" onclick="startDiffGame()">🔍 Farkı Bul Oyununu Başlat</button>
+  </div>
+
+  <!-- 2B: Game -->
+  <div id="s2-game">
+    <div id="s2-sidebar">
+      <div class="sidebar-card">
+        <h3>📋 Yönerge</h3>
+        Resimlerdeki <strong>7 farkı</strong> bul.<br>Bir renk seç ve fareyle/dokunuşla farkların üzerini işaretle.<br><br>
+        Bitince <em>"Çözümü Göster"</em> butonuna tıkla.
+      </div>
+      <div class="sidebar-card">
+        <h3>🎨 Boyalar</h3>
+        <div id="paint-palette">
+          <div class="paint-circle selected" style="background:#E74C3C" data-color="#E74C3C" onclick="selectColor(this)"></div>
+          <div class="paint-circle" style="background:#3498DB" data-color="#3498DB" onclick="selectColor(this)"></div>
+          <div class="paint-circle" style="background:#2ECC71" data-color="#2ECC71" onclick="selectColor(this)"></div>
+          <div class="paint-circle" style="background:#F1C40F" data-color="#F1C40F" onclick="selectColor(this)"></div>
+          <div class="paint-circle" style="background:#9B59B6" data-color="#9B59B6" onclick="selectColor(this)"></div>
+        </div>
+      </div>
+      <div class="sidebar-card" style="text-align:center">
+        <div id="mark-count" style="font-family:'Cinzel',serif;font-size:22px;color:var(--gold)">0 / 7</div>
+        <div style="font-size:12px;margin-top:4px;color:rgba(245,237,216,.6)">İşaretlenen</div>
+      </div>
+    </div>
+
+    <div id="s2-main">
+      <div id="diff-canvas-wrap">
+        <img id="diff-img" src="bul.png" alt="Fark Bul" draggable="false"
+             onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%22400%22><rect width=%22800%22 height=%22400%22 fill=%22%23222%22/><text x=%22400%22 y=%22200%22 fill=%22%23C9A84C%22 font-size=%2224%22 text-anchor=%22middle%22>bul.png buraya gelecek</text></svg>'">
+        <canvas id="canvas-overlay"></canvas>
+      </div>
+      <div id="s2-action-bar">
+        <button class="btn-secondary" onclick="clearCanvas()" style="font-size:13px">🗑 Temizle</button>
+        <button class="btn-primary" onclick="showSolution()" style="padding:10px 22px">✅ Çözümü Göster</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SOLUTION MODAL
+══════════════════════════════════════════ -->
+<div id="modal-bg">
+  <div class="modal">
+    <h2>🔑 Çözüm</h2>
+    <img src="cozum.png" alt="Çözüm"
+         onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22600%22 height=%22300%22><rect width=%22600%22 height=%22300%22 fill=%22%23222%22/><text x=%22300%22 y=%22150%22 fill=%22%23C9A84C%22 font-size=%2220%22 text-anchor=%22middle%22>cozum.png buraya gelecek</text></svg>'">
+    <p>Peki sen kaç tanesini doğru buldun? (0-7 arası yaz)</p>
+    <br>
+    <input type="number" id="score-input" min="0" max="7" placeholder="?">
+    <br>
+    <button class="btn-primary" onclick="checkScore()" style="margin-top:10px">Tamam ✓</button>
+    <div id="score-feedback"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EKRAN 3 — MERMER / DİNLE-BUL
+══════════════════════════════════════════ -->
+<div class="screen" id="s3">
+
+  <!-- 3A: Intro -->
+  <div id="s3-intro">
+    <div class="phase-label">Aşama 2 / 2</div>
+    <div class="phase-title">Afyon Mermeri</div>
+    <div class="cover-divider" style="width:120px"></div>
+
+    <div class="video-wrap">
+      <iframe id="mermerVideo"
+        src="https://www.youtube.com/embed/-m0K-IAopX8?si=YtYGLCnfPwtDFlGC&enablejsapi=1"
+        title="Afyonkarahisar Mermeri"
+        allowfullscreen allow="autoplay">
+      </iframe>
+    </div>
+
+    <p class="phase-desc">
+      Antik Dokimeion'dan çıkarılan Afyon Mermeri; Roma'dan Vatikan'a, Efes'ten dünya müzelerine uzanan bir zarafet ve sağlamlık sembolüdür.
+      Kristalize yapısı, bal ve kaplan postu desenleriyle eşsiz bir taştır.<br><br>
+      Şimdi sıra sende: <strong style="color:var(--gold)">Ses dosyasını</strong> dikkatle dinle, içinde geçen kelimeleri sürükleyerek doğru sıraya diz!
+    </p>
+    <br>
+    <button class="btn-primary" onclick="startWordGame()">🎵 Dinle &amp; Bul Oyununu Başlat</button>
+  </div>
+
+  <!-- 3B: Game -->
+  <div id="s3-game">
+
+    <!-- Audio Player -->
+    <div id="audio-player-wrap">
+      <span class="ap-icon">🎵</span>
+      <span id="ap-label">Dikkatle dinle!</span>
+      <input type="range" id="ap-progress" min="0" max="100" value="0" oninput="seekAudio(this.value)">
+      <button class="ap-btn" id="ap-play-btn" onclick="toggleAudio()">▶ Oynat</button>
+    </div>
+    <audio id="mermer-audio" preload="auto">
+      <source src="sesler/mermer.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- Word Game -->
+    <div id="word-game-wrap">
+      <div id="wg-banner">TEBRİKLER! 🎉</div>
+      <div id="word-game-board"></div>
+      <div id="wg-final">
+        <div>🏆 TÜM KELİMELERİ BULDUN!</div>
+        <div style="font-size:clamp(13px,2vw,18px);color:#fff;margin-top:12px;text-shadow:0 2px 8px #000;">Afyon mermerini artık tanıyorsun!</div>
+        <button class="btn-primary" style="margin-top:24px" onclick="goTo('final')">🏁 Oyunu Tamamla</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     EKRAN FINAL
+══════════════════════════════════════════ -->
+<div class="screen" id="s-final">
+  <div class="cover-ornament" style="font-size:60px">🏆</div>
+  <div class="phase-title" style="font-size:clamp(22px,4vw,52px)">Tebrikler!</div>
+  <div class="cover-divider"></div>
+  <p class="phase-desc" style="color:var(--gold2)">
+    Afyonkarahisar'ın tarihi konakları ve eşsiz mermerini keşfettin.<br>
+    Bu güzel şehrin kültürel mirasını taşımaya devam et!
+  </p>
+  <br>
+  <a href="https://drive.google.com/file/d/1p5bPf2sugOD_BZNFy5asFnRHLBdOQ-_k/view" target="_blank" class="btn-primary">
+    📄 Çalışmanın Tamamını Gör
+  </a>
+  <br>
+  <a href="https://memleketim.github.io/03/index.html" class="btn-secondary" style="margin-top:10px">🗺 Haritaya Dön</a>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+/* ─── NAVİGASYON VE SESLENDİRME ─── */
+const screens = { 1:'s1', 2:'s2', 3:'s3', final:'s-final' };
+let currentScreen = 1;
+const progressMap = { 1:0, 2:33, 3:66, final:100 };
+
+function stopInstruction() {
+  if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  const v2 = document.getElementById('voice-s2');
+  const v3 = document.getElementById('voice-s3');
+  if(v2) { v2.pause(); v2.currentTime = 0; }
+  if(v3) { v3.pause(); v3.currentTime = 0; }
+}
+
+function playInstruction(id, text) {
+  if (!soundOn) return;
+  const audioEl = document.getElementById(id);
+  if (audioEl) {
+    audioEl.play().catch(e => {
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'tr-TR';
+        window.speechSynthesis.speak(utterance);
+      }
+    });
+  }
+}
+
+function goTo(id) {
+  stopInstruction();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(screens[id] || id);
+  if (el) el.classList.add('active');
+  currentScreen = id;
+  const pb = progressMap[id] ?? 0;
+  document.getElementById('progress-bar').style.width = pb + '%';
+
+  // Yönerge seslendirmesini tetikle
+  if (id === 2) {
+    setTimeout(() => playInstruction('voice-s2', "Afyonkarahisar Kalesi'nin eteklerinde yükselen bu tarihi konaklar, Osmanlı sivil mimarisinin en güzel örneklerindendir. Cumbalı cepheleri, ahşap kapıları ve dar Arnavut kaldırımlı sokakları ile sizi geçmişe taşır. Şimdi sıra sende! Aşağıda iki resim arasındaki 7 farkı bul ve istediğin renkle işaretle."), 500);
+  } else if (id === 3) {
+    setTimeout(() => playInstruction('voice-s3', "Antik Dokimeion'dan çıkarılan Afyon Mermeri; Roma'dan Vatikan'a, Efes'ten dünya müzelerine uzanan bir zarafet ve sağlamlık sembolüdür. Kristalize yapısı, bal ve kaplan postu desenleriyle eşsiz bir taştır. Şimdi sıra sende: Ses dosyasını dikkatle dinle, içinde geçen kelimeleri sürükleyerek doğru sıraya diz!"), 500);
+  }
+}
+
+/* ─── SES KONTROL ─── */
+let soundOn = true;
+document.getElementById('btn-sound').onclick = () => {
+  soundOn = !soundOn;
+  document.getElementById('btn-sound').textContent = soundOn ? '🔊' : '🔇';
+  if (!soundOn) {
+    stopInstruction();
+    const mermerAudio = document.getElementById('mermer-audio');
+    if(mermerAudio) mermerAudio.pause();
+    const apBtn = document.getElementById('ap-play-btn');
+    if(apBtn) apBtn.textContent = '▶ Oynat';
+  }
+};
+
+/* ─── ÇİZİM SESİ FONKSİYONU ─── */
+function playDrawSound() {
+  if (!soundOn) return;
+  const snd = document.getElementById('sound-draw');
+  if (snd && snd.paused) {
+    snd.play().catch(()=>{});
+  }
+}
+
+/* ─── FARK BUL (Ekran 2) ─── */
+let selectedColor = '#E74C3C';
+let markCount = 0;
+let isDrawing = false;
+let canvas, ctx, img;
+
+function selectColor(el) {
+  document.querySelectorAll('.paint-circle').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+
+function startDiffGame() {
+  document.getElementById('s2-intro').style.display = 'none';
+  const game = document.getElementById('s2-game');
+  game.classList.add('visible');
+  setTimeout(initCanvas, 100);
+}
+
+function initCanvas() {
+  canvas = document.getElementById('canvas-overlay');
+  const wrap = document.getElementById('diff-canvas-wrap');
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  ctx = canvas.getContext('2d');
+
+  canvas.addEventListener('mousedown', startDraw);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDraw);
+  canvas.addEventListener('mouseleave', stopDraw);
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); const t=e.touches[0]; startDraw({clientX:t.clientX,clientY:t.clientY}); }, {passive:false});
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); const t=e.touches[0]; draw({clientX:t.clientX,clientY:t.clientY}); }, {passive:false});
+  canvas.addEventListener('touchend', stopDraw);
+}
+
+function getPos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function startDraw(e) {
+  isDrawing = true;
+  playDrawSound();
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.arc(pos.x, pos.y, 18, 0, Math.PI*2);
+  ctx.fillStyle = selectedColor + 'AA';
+  ctx.fill();
+  ctx.strokeStyle = selectedColor;
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  markCount = Math.min(markCount+1, 7);
+  document.getElementById('mark-count').textContent = markCount + ' / 7';
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  playDrawSound();
+  const pos = getPos(e);
+  ctx.beginPath();
+  ctx.arc(pos.x, pos.y, 14, 0, Math.PI*2);
+  ctx.fillStyle = selectedColor + '66';
+  ctx.fill();
+}
+
+function stopDraw() { isDrawing = false; }
+
+function clearCanvas() {
+  if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  markCount = 0;
+  document.getElementById('mark-count').textContent = '0 / 7';
+}
+
+function showSolution() {
+  document.getElementById('modal-bg').classList.add('open');
+}
+
+function checkScore() {
+  const v = parseInt(document.getElementById('score-input').value);
+  const fb = document.getElementById('score-feedback');
+  if (isNaN(v) || v < 0 || v > 7) {
+    fb.style.color = '#e74c3c';
+    fb.textContent = 'Lütfen 0-7 arasında bir sayı gir.';
+    return;
+  }
+  if (v === 7) {
+    fb.style.color = '#2ecc71';
+    fb.textContent = '🌟 Harika! 7/7 tam puan!';
+  } else if (v >= 5) {
+    fb.style.color = '#f1c40f';
+    fb.textContent = '👍 Güzel! ' + v + '/7 doğru buldun!';
+  } else if (v === 4) {
+    fb.style.color = '#e67e22';
+    fb.textContent = '🙂 İyi yoldasın! ' + v + '/7';
+  } else {
+    fb.style.color = '#e74c3c';
+    fb.textContent = '💪 İstersen tekrar deneyelim! ' + v + '/7';
+    setTimeout(() => {
+      document.getElementById('modal-bg').classList.remove('open');
+      document.getElementById('score-input').value = '';
+      fb.textContent = '';
+      clearCanvas();
+      markCount = 0;
+      document.getElementById('mark-count').textContent = '0 / 7';
+    }, 2000);
+    return;
+  }
+  setTimeout(() => {
+    document.getElementById('modal-bg').classList.remove('open');
+    document.getElementById('score-input').value = '';
+    fb.textContent = '';
+    goTo(3);
+  }, 2000);
+}
+
+/* ─── MERMER AUDIO ─── */
+const audioEl = document.getElementById('mermer-audio');
+const apBtn = document.getElementById('ap-play-btn');
+const apProg = document.getElementById('ap-progress');
+
+audioEl.addEventListener('timeupdate', () => {
+  if (audioEl.duration) {
+    apProg.value = (audioEl.currentTime / audioEl.duration) * 100;
+  }
+});
+audioEl.addEventListener('ended', () => { apBtn.textContent = '▶ Oynat'; });
+audioEl.addEventListener('error', () => {
+  document.getElementById('ap-label').textContent = 'Mermer ses dosyası yüklenemedi – oyun devam ediyor.';
+});
+
+function toggleAudio() {
+  if (!soundOn) return;
+  if (audioEl.paused) {
+    audioEl.play().then(() => apBtn.textContent = '⏸ Durdur').catch(() => {});
+  } else {
+    audioEl.pause();
+    apBtn.textContent = '▶ Oynat';
+  }
+}
+
+function seekAudio(val) {
+  if (audioEl.duration) audioEl.currentTime = (val/100)*audioEl.duration;
+}
+
+/* ─── KELIME OYUNU (Sürükle-Bırak) ─── */
+const levels = [
+  { folder:'bal', target:['B','A','L'], pieces:[{src:'B.png',letter:'B'},{src:'A.png',letter:'A'},{src:'L.png',letter:'L'}], wordText:'BAL', audioId:'word-bal' },
+  { folder:'seker', target:['Ş','E','K','E','R'], pieces:[{src:'Ş.png',letter:'Ş'},{src:'E1.png',letter:'E'},{src:'K.png',letter:'K'},{src:'E2.png',letter:'E'},{src:'R.png',letter:'R'}], wordText:'ŞEKER', audioId:'word-seker' },
+  { folder:'menekse', target:['M','E','N','E','K','Ş','E'], pieces:[{src:'M.png',letter:'M'},{src:'E1.png',letter:'E'},{src:'N.png',letter:'N'},{src:'E2.png',letter:'E'},{src:'K.png',letter:'K'},{src:'Ş.png',letter:'Ş'},{src:'E3.png',letter:'E'}], wordText:'MENEKŞE', audioId:'word-menekse' },
+  { folder:'kaplanpostu', target:['K','A','P','L','A','N','P','O','S','T','U'], pieces:[{src:'K.png',letter:'K'},{src:'A1.png',letter:'A'},{src:'P1.png',letter:'P'},{src:'L.png',letter:'L'},{src:'A2.png',letter:'A'},{src:'N.png',letter:'N'},{src:'P2.png',letter:'P'},{src:'O.png',letter:'O'},{src:'S.png',letter:'S'},{src:'T.png',letter:'T'},{src:'U.png',letter:'U'}], wordText:'KAPLAN POSTU', audioId:'word-kaplanpostu' }
+];
+
+let currentLevelIndex = 0;
+let sortableInstance = null;
+let audioCtx = null;
+
+function initAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+}
+
+function playDropSound() {
+  if (!audioCtx || !soundOn) return;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.connect(g); g.connect(audioCtx.destination);
+  o.type='sine'; o.frequency.setValueAtTime(300,audioCtx.currentTime);
+  o.frequency.exponentialRampToValueAtTime(600,audioCtx.currentTime+.05);
+  g.gain.setValueAtTime(1.0,audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+.1);
+  o.start(); o.stop(audioCtx.currentTime+.1);
+}
+
+function playWinSound() {
+  if (!audioCtx || !soundOn) return;
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>{
+    const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.type='triangle'; o.frequency.value=f;
+    g.gain.setValueAtTime(0,audioCtx.currentTime+i*.1);
+    g.gain.linearRampToValueAtTime(.8,audioCtx.currentTime+i*.1+.02);
+    g.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+i*.1+.3);
+    o.start(audioCtx.currentTime+i*.1); o.stop(audioCtx.currentTime+i*.1+.3);
+  });
+}
+
+function shuffleArray(arr) {
+  for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}
+}
+
+function loadLevel(idx) {
+  const board = document.getElementById('word-game-board');
+  board.innerHTML = '';
+  board.style.opacity = 1;
+  board.style.pointerEvents = 'auto';
+  const lv = levels[idx];
+  const pieces = [...lv.pieces];
+  shuffleArray(pieces);
+  pieces.forEach(p=>{
+    const box = document.createElement('div');
+    box.className = 'letter-box';
+    box.dataset.letter = p.letter;
+    const img = document.createElement('img');
+    img.src = `${lv.folder}/${p.src}`;
+    img.alt = p.letter;
+    box.appendChild(img);
+    board.appendChild(box);
+  });
+  if (sortableInstance) sortableInstance.destroy();
+  sortableInstance = Sortable.create(board, {
+    animation:150,
+    ghostClass:'sortable-ghost',
+    onStart: initAudioCtx,
+    onEnd: () => { playDropSound(); checkWinCondition(); }
+  });
+}
+
+function checkWinCondition() {
+  const board = document.getElementById('word-game-board');
+  const lv = levels[currentLevelIndex];
+  const order = Array.from(board.children).map(b=>b.dataset.letter);
+  const win = order.every((v,i)=>v===lv.target[i]);
+  if (!win) return;
+  board.style.pointerEvents = 'none';
+  playWinSound();
+  if (typeof confetti !== 'undefined') confetti({particleCount:120,spread:70,origin:{y:.6}});
+  const banner = document.getElementById('wg-banner');
+  banner.classList.add('show');
+  
+  // Kelimeyi seslendirme mekanizması (Kendi sesin veya sistem TTS)
+  setTimeout(() => {
+    if (soundOn) {
+      const wAudio = document.getElementById(lv.audioId);
+      if (wAudio) {
+        wAudio.play().catch(e => {
+          if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(lv.wordText);
+            utterance.lang = 'tr-TR';
+            window.speechSynthesis.speak(utterance);
+          }
+        });
+      }
+    }
+  }, 700);
+
+  setTimeout(()=>{
+    banner.classList.remove('show');
+    board.style.opacity = 0;
+    setTimeout(()=>{
+      currentLevelIndex++;
+      if (currentLevelIndex < levels.length) {
+        loadLevel(currentLevelIndex);
+      } else {
+        document.getElementById('wg-final').style.display = 'flex';
+      }
+    },500);
+  },3000);
+}
+
+function startWordGame() {
+  document.getElementById('s3-intro').style.display = 'none';
+  const game = document.getElementById('s3-game');
+  game.classList.add('visible');
+  setTimeout(()=>{ currentLevelIndex=0; loadLevel(0); },200);
+}
+
+/* ─── MOBILE AUDIO INIT ─── */
+document.body.addEventListener('touchstart', initAudioCtx, {once:true});
+document.body.addEventListener('mousedown', initAudioCtx, {once:true});
+</script>
+</body>
+</html>

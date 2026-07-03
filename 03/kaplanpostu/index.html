@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kaplanpostu Oyunu</title>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
+        }
+
+        #game-board {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .letter-box {
+            flex: 1;
+            height: 100%;
+            cursor: grab;
+            touch-action: none; /* Dokunmatik ekranlarda varsayılan kaydırmayı kesin olarak engeller */
+        }
+
+        .letter-box:active {
+            cursor: grabbing;
+        }
+
+        .letter-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none; /* Can alıcı nokta: Tarayıcının resmi sürüklemesini engeller */
+        }
+
+        .sortable-ghost {
+            opacity: 0.3;
+        }
+
+        /* Kazanma Ekranı Stilleri */
+        #win-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(34, 139, 34, 0.9);
+            color: white;
+            padding: 30px 50px;
+            font-size: 3vw;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 3px solid #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-board"></div>
+    
+    <div id="win-message">
+        <h1>TEBRİKLER! 🎉</h1>
+        <p>KAPLANPOSTU tamamlandı.</p>
+    </div>
+
+    <script>
+        // Dosya isimleri ve temsil ettikleri harfler
+        // A1 ve A2 aynı 'A' değerini, P1 ve P2 aynı 'P' değerini taşıyor.
+        const pieces = [
+            { src: 'K.png', letter: 'K' },
+            { src: 'A1.png', letter: 'A' },
+            { src: 'P1.png', letter: 'P' },
+            { src: 'L.png', letter: 'L' },
+            { src: 'A2.png', letter: 'A' },
+            { src: 'N.png', letter: 'N' },
+            { src: 'P2.png', letter: 'P' },
+            { src: 'O.png', letter: 'O' },
+            { src: 'S.png', letter: 'S' },
+            { src: 'T.png', letter: 'T' },
+            { src: 'U.png', letter: 'U' }
+        ];
+
+        // Diziyi rastgele karıştır
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        shuffleArray(pieces);
+
+        const board = document.getElementById('game-board');
+        
+        // Karıştırılmış parçaları ekrana yerleştir
+        pieces.forEach(piece => {
+            const box = document.createElement('div');
+            box.className = 'letter-box';
+            // Kazanma kontrolü için harfi bir data niteliğine kaydediyoruz
+            box.dataset.letter = piece.letter; 
+
+            const img = document.createElement('img');
+            img.src = piece.src;
+            img.alt = piece.letter;
+            
+            box.appendChild(img);
+            board.appendChild(box);
+        });
+
+        // Sürükle-bırak motorunu başlat
+        Sortable.create(board, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            onEnd: function () {
+                // Her sürükleme bittiğinde kazanma durumunu kontrol et
+                checkWinCondition();
+            }
+        });
+
+        function checkWinCondition() {
+            // Ekrandaki güncel harf dizilimini al
+            const currentOrder = Array.from(board.children).map(box => box.dataset.letter);
+            const targetOrder = ['K', 'A', 'P', 'L', 'A', 'N', 'P', 'O', 'S', 'T', 'U'];
+            
+            // Güncel dizilim ile hedef dizilimi karşılaştır
+            const isWin = currentOrder.every((val, index) => val === targetOrder[index]);
+
+            if (isWin) {
+                // Kazanıldıysa mesajı göster ve tahtaya müdahaleyi kapat
+                document.getElementById('win-message').style.display = 'block';
+                board.style.pointerEvents = 'none'; 
+            }
+        }
+    </script>
+
+</body>
+</html>

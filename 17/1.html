@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Boğazın Muhafızları — Çanakkale 1915</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@400;700&family=Montserrat:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════ DEĞIŞKENLER ═══════════════════════ */
+    :root {
+      --bg:       #0a0d12;
+      --bg2:      #0f1520;
+      --bg3:      #161e2e;
+      --card:     #111827;
+      --glass:    rgba(10,13,18,0.82);
+      --t1:       #e8dcc8;
+      --t2:       #b0a080;
+      --ta:       #c9a84c;
+      --tm:       #5a6a7d;
+      --gold:     #c9a84c;
+      --goldd:    #8a6a28;
+      --goldl:    #e8c97a;
+      --crimson:  #8b1a1a;
+      --teal:     #2a6e6e;
+      --tl:       #3d9999;
+      --navy:     #1a2a4a;
+      --navyl:    #2a3f6f;
+      --border:   rgba(201,168,76,.18);
+      --borderS:  rgba(201,168,76,.5);
+      --shadow:   0 4px 32px rgba(0,0,0,.65);
+      --r:        8px;
+      --rl:       16px;
+      --tr:       .3s cubic-bezier(.4,0,.2,1);
+      --fd:       'Cinzel Decorative',serif;
+      --ft:       'Cinzel',serif;
+      --fb:       'Lora',serif;
+      --fu:       'Montserrat',sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg:#f5efe0; --bg2:#ede4d0; --bg3:#e4d9c0; --card:#f0e8d4;
+      --glass:rgba(245,239,224,.92); --t1:#2a1f0e; --t2:#5a4520;
+      --ta:#7a4f10; --tm:#8a7a60; --gold:#8a5a10; --goldd:#5a3a08;
+      --goldl:#c08030; --crimson:#7a1515; --teal:#1a5050;
+      --navy:#1a2040; --navyl:#2a3060;
+      --border:rgba(90,50,10,.2); --borderS:rgba(90,50,10,.5);
+      --shadow:0 4px 24px rgba(50,30,10,.2);
+    }
+
+    *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+    
+    html, body {
+      width:100%; height:100%; overflow:hidden; background:var(--bg);
+      color:var(--t1); font-family:var(--fu); font-size:16px;
+      -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    }
+
+    ::-webkit-scrollbar { width:4px; }
+    ::-webkit-scrollbar-thumb { background:var(--borderS); border-radius:2px; }
+    ::-selection { background:rgba(201,168,76,.3); }
+    button:focus-visible, input:focus-visible { outline:2px solid var(--gold); outline-offset:2px; }
+
+    /* ═══════════════════════ EKRAN SİSTEMİ ═══════════════════════ */
+    #app { width:100vw; height:100vh; position:relative; overflow:hidden; }
+    .screen { position:absolute; inset:0; display:none; opacity:0; transition:opacity .5s ease; }
+    .screen.active { display:flex; opacity:1; }
+
+    /* ═══════════════════════ ÜST BAR ═══════════════════════ */
+    #top-bar {
+      position:fixed; top:0; left:0; right:0; height:50px; z-index:900;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:0 16px; background:var(--glass); backdrop-filter:blur(14px);
+      border-bottom:1px solid var(--border); pointer-events:auto;
+    }
+    #logo-wrap { display:flex; align-items:center; gap:10px; pointer-events:none; }
+    #logo-wrap img { height:32px; width:auto; }
+    #logo-wrap .logo-text {
+      font-family:var(--ft); font-size:12px; letter-spacing:.1em; color:var(--gold); opacity:.85;
+    }
+    .top-controls { display:flex; align-items:center; gap:6px; }
+    .cb {
+      width:36px; height:36px; border:1px solid var(--border); border-radius:var(--r);
+      background:transparent; color:var(--t2); cursor:pointer; font-size:15px;
+      display:flex; align-items:center; justify-content:center; transition:var(--tr);
+      pointer-events:auto;
+    }
+    .cb:hover { border-color:var(--borderS); color:var(--gold); background:rgba(201,168,76,.08); }
+    .cb.on { color:var(--gold); border-color:var(--gold); }
+
+    /* ═══════════════════════ PROGRESS ═══════════════════════ */
+    #pbar-wrap { position:fixed; bottom:0; left:0; right:0; height:4px; z-index:900; background:rgba(255,255,255,.04); pointer-events:none; }
+    #pbar { height:100%; background:linear-gradient(90deg,var(--goldd),var(--gold),var(--goldl)); width:0%; transition:width .8s ease; box-shadow:0 0 8px var(--gold); }
+
+    /* ═══════════════════════ GİRİŞ EKRANI ═══════════════════════ */
+    #s-intro {
+      flex-direction:column; align-items:center; justify-content:flex-start;
+      overflow-y:auto; overflow-x:hidden;
+      background:linear-gradient(180deg,#000 0%,#0a0d18 100%);
+      position:relative;
+      height: 100%;
+      padding-top: 50px;
+    }
+    .intro-bg {
+      position:fixed;
+      inset:0; background:url('arkaplan1.png') center/cover no-repeat;
+      opacity:.35; pointer-events:none;
+    }
+    .intro-bg-grad {
+      position:fixed;
+      inset:0;
+      background:linear-gradient(180deg,rgba(0,0,0,.5) 0%,rgba(10,13,24,.7) 45%,rgba(10,13,24,.95) 72%,#0a0d18 100%);
+      pointer-events:none;
+    }
+    .intro-hero {
+      position:relative; z-index:2; max-width:740px; width:100%;
+      padding:40px 24px 40px; text-align:center;
+    }
+    .intro-orn { font-size:22px; color:var(--gold); letter-spacing:.35em; margin-bottom:18px; animation:fadeUp 1s ease forwards .3s; opacity:0; }
+    .intro-sup { font-family:var(--fu); font-size:11px; font-weight:600; letter-spacing:.45em; text-transform:uppercase; color:var(--gold); margin-bottom:18px; animation:fadeUp 1s ease forwards .5s; opacity:0; }
+    .intro-h1 { font-family:var(--fd); font-size:clamp(26px,5vw,54px); font-weight:700; line-height:1.1; letter-spacing:.02em; color:var(--t1); margin-bottom:10px; animation:fadeUp 1.1s ease forwards .7s; opacity:0; }
+    .intro-h1 span { color:var(--gold); display:block; }
+    .intro-year { font-family:var(--ft); font-size:clamp(44px,9vw,100px); font-weight:900; letter-spacing:.1em; color:transparent; -webkit-text-stroke:1px rgba(201,168,76,.35); line-height:1; margin:6px 0 22px; animation:fadeUp 1s ease forwards .9s; opacity:0; }
+    .intro-desc { font-family:var(--fb); font-size:15px; line-height:1.85; color:var(--t2); max-width:520px; margin:0 auto 32px; font-style:italic; animation:fadeUp 1s ease forwards 1.1s; opacity:0; }
+    .intro-badges { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:34px; animation:fadeUp 1s ease forwards 1.3s; opacity:0; }
+    .badge { display:inline-flex; align-items:center; gap:6px; padding:5px 13px; border:1px solid var(--border); border-radius:20px; font-size:11px; font-weight:500; letter-spacing:.06em; color:var(--t2); background:rgba(255,255,255,.03); }
+    .badge .dot { width:6px; height:6px; border-radius:50%; background:var(--gold); }
+    
+    .btn-start {
+      display:inline-flex; align-items:center; gap:12px; padding:16px 48px;
+      background:linear-gradient(135deg,var(--goldd),var(--gold));
+      color:#1a0f00; font-family:var(--ft); font-size:15px; font-weight:700;
+      letter-spacing:.12em; text-transform:uppercase; border:none; border-radius:var(--r);
+      cursor:pointer; transition:var(--tr); box-shadow:0 4px 20px rgba(201,168,76,.3);
+      position:relative; overflow:hidden; animation:fadeUp 1s ease forwards 1.5s; opacity:0;
+    }
+    .btn-start::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent); transition:left .5s; }
+    .btn-start:hover::before { left:100%; }
+    .btn-start:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(201,168,76,.4); }
+
+    /* Video bölümü */
+    .intro-video-section { position:relative; z-index:2; width:100%; max-width:840px; padding:0 24px 40px; text-align:center; }
+    .video-label { font-family:var(--ft); font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:14px; opacity:.8; }
+    .video-frame { width:100%; border-radius:var(--rl); overflow:hidden; border:1px solid var(--border); box-shadow:var(--shadow); background:#000; aspect-ratio:16/9; }
+    .video-frame video { width:100%; height:100%; display:block; object-fit:cover; }
+
+    /* ELİF ÜNSAL ÇALIŞMASI KÖPRÜSÜ */
+    .elif-banner { width:100%; margin-top: auto; padding: 20px 10px; background: rgba(0,0,0,0.6); border-top: 1px solid var(--border); text-align: center; position: relative; z-index: 10; backdrop-filter:blur(5px); }
+    .elif-banner a { color: var(--gold); font-family: var(--fu); font-size: 14px; text-decoration: none; font-weight: 600; letter-spacing: 0.05em; transition: color 0.3s ease; }
+    .elif-banner a:hover { color: #fff; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ═══════════════════════ HARİTA EKRANI ═══════════════════════ */
+    #s-map { flex-direction:column; background:var(--bg2); padding-top:50px; overflow-y:auto; }
+    .map-hdr { padding:28px 24px 12px; text-align:center; flex-shrink:0; }
+    .map-hdr h2 { font-family:var(--ft); font-size:clamp(16px,2.8vw,26px); letter-spacing:.08em; color:var(--gold); margin-bottom:6px; }
+    .map-hdr p { font-family:var(--fb); font-size:13px; color:var(--tm); font-style:italic; }
+    .stages-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; padding:16px 20px 80px; max-width:1200px; margin:0 auto; width:100%; }
+    .scard { background:var(--card); border:1px solid var(--border); border-radius:var(--rl); padding:22px; cursor:pointer; transition:var(--tr); position:relative; overflow:hidden; }
+    .scard::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--sc,var(--gold)); opacity:.55; transition:opacity var(--tr); }
+    .scard:hover { border-color:var(--borderS); transform:translateY(-4px); box-shadow:var(--shadow); }
+    .scard:hover::before { opacity:1; }
+    .scard.locked { opacity:.38; cursor:not-allowed; pointer-events:none; }
+    .scard.done::after { content:'✓'; position:absolute; top:10px; right:14px; width:22px; height:22px; background:var(--gold); color:#1a0f00; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; }
+    .sc-num { font-size:10px; font-weight:600; letter-spacing:.22em; color:var(--tm); text-transform:uppercase; margin-bottom:8px; }
+    .sc-icon { font-size:34px; line-height:1; margin-bottom:10px; }
+    .sc-title { font-family:var(--ft); font-size:15px; font-weight:600; letter-spacing:.04em; color:var(--t1); margin-bottom:8px; }
+    .sc-desc { font-family:var(--fb); font-size:12px; color:var(--t2); line-height:1.65; font-style:italic; margin-bottom:12px; }
+    .sc-tags { display:flex; gap:5px; flex-wrap:wrap; }
+    .sc-tag { padding:3px 9px; border-radius:11px; font-size:10px; font-weight:600; letter-spacing:.06em; border:1px solid var(--border); color:var(--tm); }
+
+    /* ═══════════════════════ AŞAMA GENEL İSKELET ═══════════════════════ */
+    .s-stage { flex-direction:column; background:var(--bg); padding-top:50px; overflow:hidden; }
+    .s-hdr { padding:14px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; flex-shrink:0; background:var(--bg2); }
+    .back-btn { width:34px; height:34px; border:1px solid var(--border); border-radius:var(--r); background:transparent; color:var(--t2); cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:var(--tr); flex-shrink:0; }
+    .back-btn:hover { color:var(--gold); border-color:var(--borderS); }
+    .hdr-info { flex:1; }
+    .hdr-num { font-size:9px; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin-bottom:2px; }
+    .hdr-title { font-family:var(--ft); font-size:clamp(13px,2.2vw,19px); letter-spacing:.04em; color:var(--t1); }
+    .s-body { flex:1; overflow-y:auto; overflow-x:hidden; padding:18px 20px; display:flex; flex-direction:column; gap:16px; }
+    .info-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:14px 16px; }
+    .info-card .ic-tag { font-size:9px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; margin-bottom:6px; }
+    .info-card p { font-family:var(--fb); font-size:13px; color:var(--t2); font-style:italic; line-height:1.75; }
+    .info-card strong { color:var(--t1); }
+
+    /* ═══════════════════════ AŞAMA 1 — NUSRET ═══════════════════════ */
+    #s1-wrap { position:relative; width:100%; flex:1; border-radius:var(--rl); overflow:hidden; border:1px solid var(--border); min-height:260px; }
+    #s1-canvas { display:block; width:100%; height:100%; touch-action:none; }
+    .canvas-ui { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:8px; align-items:center; background:var(--glass); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:20px; padding:8px 16px; }
+    .sp-btn { padding:4px 12px; border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--t2); font-size:11px; cursor:pointer; transition:var(--tr); }
+    .sp-btn.on, .sp-btn:hover { background:rgba(201,168,76,.15); color:var(--gold); border-color:var(--gold); }
+    .sp-label { font-size:10px; color:var(--tm); letter-spacing:.08em; }
+    .hint-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:8px; }
+    .hint-item { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:12px; display:flex; gap:10px; align-items:flex-start; }
+    .hint-item span { font-size:18px; line-height:1; flex-shrink:0; }
+    .hint-item b { font-family:var(--fu); font-size:11px; font-weight:600; color:var(--t1); display:block; margin-bottom:3px; }
+    .hint-item em { font-family:var(--fb); font-size:11px; color:var(--tm); font-style:italic; }
+
+    /* ═══════════════════════ AŞAMA 2 — TELGRAF ═══════════════════════ */
+    .s2-layout { display:flex; flex-direction:column; gap:14px; flex:1; }
+    .s2-message-box { background:var(--card); border:1px solid var(--gold); border-radius:var(--r); padding:16px; text-align:center; }
+    .s2-message-box .s2-label { font-size:9px; font-weight:600; letter-spacing:.25em; text-transform:uppercase; color:var(--gold); margin-bottom:8px; }
+    .s2-encrypted { font-family:'Courier New',monospace; font-size:clamp(13px,2vw,18px); letter-spacing:.12em; color:var(--gold); line-height:1.6; word-break:break-word; }
+    .s2-answer-row { display:flex; flex-wrap:wrap; gap:8px; min-height:52px; border:2px dashed var(--border); border-radius:var(--r); padding:10px; align-items:center; justify-content:center; transition:border-color var(--tr); background:rgba(201,168,76,.03); }
+    .s2-answer-row.drag-over { border-color:var(--gold); background:rgba(201,168,76,.07); }
+    .s2-word-bank { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:6px 0; }
+    .word-chip { padding:9px 16px; background:var(--navy); border:1px solid var(--navyl); border-radius:var(--r); font-family:var(--ft); font-size:13px; letter-spacing:.06em; color:var(--t1); cursor:grab; user-select:none; transition:var(--tr); touch-action:none; }
+    .word-chip:hover { border-color:var(--gold); color:var(--gold); background:rgba(42,63,111,.8); }
+    .word-chip.placed { background:rgba(201,168,76,.12); border-color:var(--gold); color:var(--gold); }
+    .word-chip.wrong { background:rgba(139,26,26,.2); border-color:var(--crimson); animation:shake .4s ease; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .s2-check-btn { padding:13px 28px; background:linear-gradient(135deg,var(--goldd),var(--gold)); color:#1a0f00; font-family:var(--ft); font-size:13px; font-weight:700; letter-spacing:.1em; border:none; border-radius:var(--r); cursor:pointer; transition:var(--tr); align-self:center; }
+    .s2-check-btn:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(201,168,76,.3); }
+
+    /* ═══════════════════════ AŞAMA 3 — MECİDİYE ═══════════════════════ */
+    .s3-view-container {
+      position:relative; width:100%; flex:1; border-radius:var(--rl);
+      overflow:hidden; border:1px solid var(--border); min-height:350px;
+      background-size: cover; background-position: center; transition: background-image 0.5s ease;
+    }
+    .explosion-flash {
+      position:absolute; inset:0; z-index:5; background:radial-gradient(circle, rgba(255,200,50,0.9) 0%, rgba(200,50,0,0.7) 40%, transparent 80%);
+      opacity:0; pointer-events:none; transition: opacity 0.2s;
+    }
+    .explosion-flash.boom { opacity:1; animation: shakeBg 0.5s ease; }
+    @keyframes shakeBg { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-10px,10px)} 40%{transform:translate(10px,-10px)} 60%{transform:translate(-10px,-10px)} 80%{transform:translate(10px,10px)} }
+    
+    .s3-question-modal {
+      position: absolute; top: 50%; left: 50%; width: 90%; max-width: 500px;
+      transform: translate(-50%, -50%) scale(0);
+      background: var(--card); border: 2px solid var(--borderS); border-radius: var(--rl);
+      padding: 24px; box-shadow: var(--shadow); z-index: 20;
+      transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      text-align: center;
+    }
+    .s3-question-modal.show { transform: translate(-50%, -50%) scale(1); }
+    
+    .q-counter { font-size:10px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+    .q-text { font-family:var(--fb); font-size:clamp(15px,2.5vw,18px); color:var(--t1); line-height:1.6; margin-bottom:20px; font-weight:600; }
+    .q-choices { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    @media(max-width:500px){ .q-choices{grid-template-columns:1fr;} }
+    .choice-btn {
+      padding:14px 16px; background:var(--bg2); border:1px solid var(--border);
+      border-radius:var(--r); font-family:var(--fu); font-size:14px; font-weight:600; color:var(--t1);
+      cursor:pointer; transition:var(--tr); text-align:center;
+    }
+    .choice-btn:hover { border-color:var(--borderS); background:rgba(201,168,76,.1); color:var(--gold); }
+    .choice-btn.correct { background:rgba(42,110,110,.3); border-color:var(--tl); color:var(--tl); }
+    .choice-btn.wrong-ans { background:rgba(139,26,26,.3); border-color:var(--crimson); color:#d96060; animation:shake .4s ease; }
+
+    /* ═══════════════════════ AŞAMA 4 — SİPER ═══════════════════════ */
+    .trench-scene { position:relative; width:100%; flex:1; border-radius:var(--rl); overflow:hidden; border:1px solid var(--border); min-height:340px; cursor:default; background:url('arka.png') center/cover no-repeat; touch-action:none; }
+    .to { position:absolute; width:80px; height:80px; background-color:rgba(201,168,76,.14); border:2px solid var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:var(--tr); animation:gp 2.8s ease-in-out infinite; z-index: 10; background-size: cover; background-position: center; }
+    .to:hover { transform:scale(1.25); background-color:rgba(201,168,76,.3); }
+    .to.found { animation:none; background-color:rgba(201,168,76,.35); border-color:var(--goldl); }
+    @keyframes gp { 0%,100%{box-shadow:0 0 6px rgba(201,168,76,.35)} 50%{box-shadow:0 0 18px rgba(201,168,76,.75)} }
+    .disc-bar { display:flex; gap:8px; align-items:center; justify-content:center; }
+
+    /* ═══════════════════════ ANIT EKRANI VE SERTİFİKA ═══════════════════════ */
+    #s-memorial { flex-direction:column; align-items:center; justify-content:flex-start; background: url('arkaplan2.png') center/cover no-repeat; padding-top:50px; overflow-y:auto; }
+    .mem-content { max-width:700px; width:100%; padding:36px 22px 90px; text-align:center; }
+    .mem-flame { font-size:44px; margin-bottom:20px; animation:ff 3s ease-in-out infinite; }
+    @keyframes ff { 0%,100%{transform:scale(1) rotate(-1deg)} 50%{transform:scale(1.06) rotate(1deg)} }
+    .mem-title { font-family:var(--fd); font-size:clamp(16px,3.2vw,30px); letter-spacing:.06em; color:var(--gold); margin-bottom:24px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .atk-quote { background:var(--card); border:1px solid var(--borderS); border-radius:var(--rl); padding:28px; margin:24px 0; position:relative; text-align:left; box-shadow: var(--shadow); }
+    .atk-quote::before { content:'"'; position:absolute; top:-18px; left:20px; font-family:var(--fd); font-size:72px; color:var(--gold); opacity:.25; line-height:1; }
+    .atk-quote p { font-family:var(--fb); font-size:clamp(13px,1.9vw,16px); line-height:1.95; color:var(--t1); font-style:italic; margin-bottom:12px; }
+    .atk-quote cite { font-size:11px; letter-spacing:.14em; color:var(--gold); font-style:normal; text-transform:uppercase; }
+    
+    .medals-row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin:22px 0; }
+    .medal { display:flex; flex-direction:column; align-items:center; gap:5px; opacity:.25; transition:var(--tr); }
+    .medal.on { opacity:1; animation:me .6s cubic-bezier(.34,1.56,.64,1) forwards; }
+    @keyframes me { 0%{transform:scale(0) rotate(-20deg)} 100%{transform:scale(1) rotate(0)} }
+    .medal-icon { font-size:38px; }
+    .medal-lbl { font-size:9px; letter-spacing:.1em; color:var(--t1); text-align:center; max-width:72px; text-shadow: 0 1px 2px #000; }
+    
+    /* ═════════════════ YENİ SERTİFİKA STİLLERİ ═════════════════ */
+    .cert-container { perspective: 1000px; margin: 40px 0; }
+    .cert-refined { position: relative; background: #fdf5e6 url('https://www.transparenttextures.com/patterns/parchment.png'); border: 12px double #8a6a28; padding: 50px 40px; color: #2a1f0e; box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 100px rgba(138,106,40,0.15); border-radius: 4px; overflow: hidden; max-width: 650px; margin: 0 auto; }
+    .cert-refined::before { content: '☪'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 300px; color: rgba(139, 26, 26, 0.04); pointer-events: none; z-index: 0; }
+    .cert-ornament-corner { position: absolute; width: 60px; height: 60px; border: 2px solid #c9a84c; z-index: 1; }
+    .cert-tl { top: 15px; left: 15px; border-right: 0; border-bottom: 0; }
+    .cert-tr { top: 15px; right: 15px; border-left: 0; border-bottom: 0; }
+    .cert-bl { bottom: 15px; left: 15px; border-right: 0; border-top: 0; }
+    .cert-br { bottom: 15px; right: 15px; border-left: 0; border-top: 0; }
+    .cert-header-milli { font-family: var(--fd); color: #8b1a1a; font-size: 20px; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 10px; position: relative; z-index: 2; }
+    .cert-sub-milli { font-family: var(--fb); font-style: italic; color: #5a4520; margin-bottom: 25px; position: relative; z-index: 2; }
+    .cert-input-wrap { position: relative; margin: 20px 0; z-index: 2; }
+    .cert-name-input { background: transparent; border: none; border-bottom: 2px solid rgba(138, 106, 40, 0.3); font-family: 'Cinzel', serif; font-size: 32px; color: #1a0f00; text-align: center; width: 80%; padding: 10px; outline: none; transition: border-color 0.3s; }
+    .cert-name-input:focus { border-color: #8b1a1a; }
+    .cert-body-milli { font-family: var(--fb); line-height: 1.8; font-size: 15px; margin-bottom: 30px; position: relative; z-index: 2; }
+    .cert-seal-milli { width: 80px; height: 80px; background: #8b1a1a; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 40px; box-shadow: 0 4px 15px rgba(139, 26, 26, 0.4); border: 4px double #c9a84c; position: relative; z-index: 2; }
+    .cert-quote-vatan { font-family: var(--ft); font-weight: 900; color: #8b1a1a; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(138, 106, 40, 0.2); position: relative; z-index: 2; }
+    .cert-footer { margin-top:20px; padding-top:14px; font-family:var(--ft); font-size:10px; letter-spacing:.2em; color: #8a6a28; position: relative; z-index: 2; }
+    
+    .btn-download-cert { margin-top: 30px; background: #1a2a4a; color: white; padding: 12px 24px; border: 1px solid var(--navyl); border-radius: 4px; font-family: var(--fu); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; }
+    .btn-download-cert:hover { background: #2a3f6f; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.4); }
+
+    /* ═══════════════════════ MODAL ═══════════════════════ */
+    .modal-ov { position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.82); backdrop-filter:blur(5px); display:none; align-items:center; justify-content:center; padding:20px; }
+    .modal-ov.open { display:flex; }
+    .modal-box { background:var(--card); border:1px solid var(--borderS); border-radius:var(--rl); max-width:580px; width:100%; max-height:85vh; overflow-y:auto; padding:28px; position:relative; box-shadow:var(--shadow); animation:mi .32s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes mi { from{opacity:0; transform:scale(.9) translateY(16px)} to{opacity:1; transform:scale(1) translateY(0)} }
+    .modal-close { position:absolute; top:12px; right:12px; width:30px; height:30px; border:1px solid var(--border); border-radius:50%; background:transparent; color:var(--tm); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:var(--tr); }
+    .modal-close:hover { color:var(--t1); border-color:var(--borderS); }
+    .modal-tag { font-size:9px; font-weight:600; letter-spacing:.28em; text-transform:uppercase; color:var(--gold); margin-bottom:10px; }
+    .modal-title { font-family:var(--ft); font-size:19px; letter-spacing:.04em; color:var(--t1); margin-bottom:14px; line-height:1.3; }
+    .modal-body { font-family:var(--fb); font-size:14px; line-height:1.9; color:var(--t2); }
+    .modal-body p { margin-bottom:12px; }
+    .modal-body em { color:var(--gold); font-style:italic; }
+    .modal-body strong { color:var(--t1); font-weight:600; }
+    .modal-img { width:100%; border-radius:var(--r); margin-bottom:14px; object-fit:contain; max-height:60vh; display:none; }
+    .audio-row { margin-top:16px; padding:12px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); display:flex; align-items:center; gap:12px; }
+    .play-btn { width:38px; height:38px; border:1px solid var(--gold); border-radius:50%; background:rgba(201,168,76,.1); color:var(--gold); cursor:pointer; font-size:15px; display:flex; align-items:center; justify-content:center; transition:var(--tr); flex-shrink:0; }
+    .play-btn:hover { background:rgba(201,168,76,.2); }
+    .audio-meta .aname { font-family:var(--ft); font-size:12px; color:var(--t1); }
+    .audio-meta .asub { font-size:10px; color:var(--tm); }
+
+    /* ═══════════════════════ TOAST ═══════════════════════ */
+    #toast { position:fixed; bottom:18px; right:18px; max-width:300px; background:var(--card); border:1px solid var(--borderS); border-left:4px solid var(--gold); border-radius:var(--r); padding:14px; z-index:1600; transform:translateX(110%); transition:transform .4s cubic-bezier(.34,1.56,.64,1); box-shadow:var(--shadow); pointer-events:none; }
+    #toast.show { transform:translateX(0); }
+    #toast .tt { font-size:9px; font-weight:600; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); margin-bottom:5px; }
+    #toast .tb { font-family:var(--fb); font-size:12px; line-height:1.65; color:var(--t2); }
+
+    /* ═══════════════════════ YÖNERGE BANNER ═══════════════════════ */
+    .yornerge-bar { background:linear-gradient(135deg,rgba(26,42,74,.9),rgba(42,63,111,.9)); border:1px solid var(--navyl); border-radius:var(--r); padding:14px 16px; display:flex; gap:12px; align-items:center; }
+    .yornerge-bar .yb-icon { font-size:22px; flex-shrink:0; }
+    .yornerge-bar .yb-text { font-family:var(--fb); font-size:13px; color:var(--t1); line-height:1.65; font-style:italic; }
+    .yb-audio { width:34px; height:34px; border:1px solid var(--navyl); border-radius:50%; background:transparent; color:var(--ta); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:var(--tr); flex-shrink:0; }
+    .yb-audio:hover { background:rgba(201,168,76,.1); border-color:var(--gold); }
+
+    @media(max-width:480px) {
+      .s-body { padding:12px 14px; gap:12px; }
+      .modal-box { padding:20px; }
+      .q-choices { grid-template-columns:1fr; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div id="top-bar">
+  <div id="logo-wrap">
+    <img src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+    <span class="logo-text">⚓ BOĞAZIN MUHAFIZLARI</span>
+  </div>
+  <div class="top-controls">
+    <button class="cb on" id="btn-snd" title="Ses" aria-label="Ses aç/kapat">🔊</button>
+    <button class="cb" id="btn-theme" title="Tema" aria-label="Tema değiştir">☀</button>
+    <button class="cb" id="btn-map" title="Harita" aria-label="Haritaya dön">🗺</button>
+  </div>
+</div>
+
+<div id="pbar-wrap"><div id="pbar"></div></div>
+
+<div id="app">
+
+  <section id="s-intro" class="screen active">
+    <div class="intro-bg"></div>
+    <div class="intro-bg-grad"></div>
+    <div class="intro-hero">
+      <div class="intro-orn">⚓ ✦ ⚓</div>
+      <p class="intro-sup">Türkçe · Tarih · Kültür</p>
+      <h1 class="intro-h1">Boğazın Muhafızları<span>Çanakkale</span></h1>
+      <div class="intro-year">1915</div>
+      <p class="intro-desc">Tarihin en büyük deniz muhasarası. Bir milletin ölmemek için verdiği sözün hikâyesi. Sen de o tarihin bir parçası ol.</p>
+      <div class="intro-badges">
+        <span class="badge"><span class="dot"></span>4 Bölüm</span>
+        <span class="badge"><span class="dot"></span>Sesli Anlatım</span>
+        <span class="badge"><span class="dot"></span>Türkçe Odaklı</span>
+        <span class="badge"><span class="dot"></span>Tüm Cihazlar</span>
+      </div>
+      <button class="btn-start" id="btn-start">⚔ YOLCULUĞA BAŞLA</button>
+    </div>
+    
+    <div class="intro-video-section">
+      <p class="video-label">▶ Çanakkale Zaferi — Tanıtım Filmi</p>
+      <div class="video-frame">
+        <video id="intro-video" controls preload="metadata" poster="arkaplan1.png">
+          <source src="canakkalezaferi.mp4" type="video/mp4">
+          Tarayıcınız video oynatmayı desteklemiyor.
+        </video>
+      </div>
+    </div>
+
+    <div class="elif-banner">
+      <a href="https://drive.google.com/file/d/1NkyQ3_bhLhugAU5YhPR5x8ZifGmBmCYO/view" target="_blank">
+        Elif Ünsal'ın çalışmasının tamamına ulaşmak için tıklayınız.
+      </a>
+    </div>
+  </section>
+
+  <section id="s-map" class="screen">
+    <div class="map-hdr">
+      <h2>Çanakkale Haritası</h2>
+      <p>Bölümleri sırayla tamamla · Her bölüm yeni bir kapıyı açar</p>
+    </div>
+    <div class="stages-grid">
+      <div class="scard" id="c1" data-stage="1" style="--sc:#3d9999" tabindex="0" role="button">
+        <div class="sc-num">Bölüm 01</div>
+        <div class="sc-icon">⚓</div>
+        <div class="sc-title">Nusret'in Gizli Rotası</div>
+        <div class="sc-desc">Gece yarısı, sessiz sularda. Nusret mayın gemisini yönlendir; fenerlerin ışığından kaç.</div>
+        <div class="sc-tags"><span class="sc-tag">Strateji</span><span class="sc-tag">Keşif</span><span class="sc-tag">Canvas</span></div>
+      </div>
+      <div class="scard locked" id="c2" data-stage="2" style="--sc:#8b6914" tabindex="0" role="button">
+        <div class="sc-num">Bölüm 02</div>
+        <div class="sc-icon">📡</div>
+        <div class="sc-title">Kilitbahir Telgraf Odası</div>
+        <div class="sc-desc">Cepheden şifreli mesaj geldi. Kelimeleri doğru sıraya dizerek kritik istihbaratı aç.</div>
+        <div class="sc-tags"><span class="sc-tag">Sıralama</span><span class="sc-tag">Türkçe</span><span class="sc-tag">Mantık</span></div>
+      </div>
+      <div class="scard locked" id="c3" data-stage="3" style="--sc:#8b1a1a" tabindex="0" role="button">
+        <div class="sc-num">Bölüm 03</div>
+        <div class="sc-icon">🔭</div>
+        <div class="sc-title">Mecidiye Tabyası: Menzil</div>
+        <div class="sc-desc">Seyit Onbaşı'nın destanî anı. Geçmiş zaman sorularını doğru yanıtla, isabetli atış yap.</div>
+        <div class="sc-tags"><span class="sc-tag">Dil Bilgisi</span><span class="sc-tag">Geçmiş Zaman</span><span class="sc-tag">Tarih</span></div>
+      </div>
+      <div class="scard locked" id="c4" data-stage="4" style="--sc:#6b4c9a" tabindex="0" role="button">
+        <div class="sc-num">Bölüm 04</div>
+        <div class="sc-icon">✉</div>
+        <div class="sc-title">Tarihin Yankısı</div>
+        <div class="sc-desc">Parlayan nesnelere dokun; Çanakkale'nin özetini ve o destansı ruhu keşfet.</div>
+        <div class="sc-tags"><span class="sc-tag">Empati</span><span class="sc-tag">Edebiyat</span><span class="sc-tag">Kültür</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-stage1" class="screen s-stage">
+    <div class="s-hdr">
+      <button class="back-btn" id="s1-back">←</button>
+      <div class="hdr-info">
+        <div class="hdr-num">Bölüm 01 — Strateji</div>
+        <div class="hdr-title">Nusret'in Gizli Rotası</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <div class="yornerge-bar">
+        <span class="yb-icon">🎙</span>
+        <p class="yb-text">Haritaya <strong>tıklayarak</strong> Nusret'in rotasını çiz. İşaretli noktalara ulaşınca mayın bırakılır. Dönen ışık konisine girersen <strong>o bölüme geri dönersin</strong>. Hızlı gitme, sessiz ol!</p>
+        <button class="yb-audio" onclick="ExternalAudio.playVoice('yornerge1')" title="Yönergeyi dinle">🔊</button>
+      </div>
+      <div class="info-card" style="border-left:3px solid var(--tl)">
+        <p class="ic-tag" style="color:var(--tl)">TARİHİ BİLGİ NOTU</p>
+        <p><strong>7–8 Mart 1915 gecesi.</strong> Yüzbaşı Hakkı komutasındaki Nusret mayın gemisi, boğazı geçmek üzere olan düşman donanmasının yoluna 26 mayın döktü. Bu gece operasyonu, tarihin seyrini değiştirdi.</p>
+      </div>
+      <div id="s1-wrap">
+        <canvas id="s1-canvas"></canvas>
+        <div class="canvas-ui">
+          <span class="sp-label">Gemi Hızı:</span>
+          <button class="sp-btn on" id="s1-sp1" onclick="S1.setSpd(1)">Yavaş</button>
+          <button class="sp-btn" id="s1-sp2" onclick="S1.setSpd(2)">Orta</button>
+          <button class="sp-btn" id="s1-sp3" onclick="S1.setSpd(3)">Hızlı</button>
+          <button class="sp-btn" id="s1-sp4" onclick="S1.setSpd(4.5)">Çok Hızlı</button>
+        </div>
+      </div>
+      <div class="hint-grid">
+        <div class="hint-item"><span>🖱️</span><div><b>Rota Çiz</b><em>Haritaya tıkla, gemi takip eder</em></div></div>
+        <div class="hint-item"><span>🔦</span><div><b>Işıktan Kaç</b><em>Sarı koniye girince sıfırlanır</em></div></div>
+        <div class="hint-item"><span>⚓</span><div><b>Mayın Noktaları</b><em>Yeşil dairelere ulaş</em></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-stage2" class="screen s-stage">
+    <div class="s-hdr">
+      <button class="back-btn" id="s2-back">←</button>
+      <div class="hdr-info">
+        <div class="hdr-num">Bölüm 02 — İletişim</div>
+        <div class="hdr-title">Kilitbahir Telgraf Odası</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <div class="yornerge-bar">
+        <span class="yb-icon">🎙</span>
+        <p class="yb-text">Aşağıdaki kelime bankasından kelimeleri <strong>sürükleyerek</strong> (veya dokunarak) sıralayla yerleştir. Mesaj tamamlandığında "Doğrula" butonuna bas. Toplam 3 mesaj var.</p>
+        <button class="yb-audio" onclick="ExternalAudio.playVoice('yornerge2')" title="Yönergeyi dinle">🔊</button>
+      </div>
+      <div class="s2-layout">
+        <div class="s2-message-box">
+          <p class="s2-label">📟 GELEN İSTİHBARAT MESAJI</p>
+          <div class="s2-encrypted" id="s2-encrypted" style="font-family: var(--fu); letter-spacing: 0.05em; font-size: 15px; color: var(--t2);">
+            Kelimeler karıştı. Doğru anlamlı cümleyi kur.
+          </div>
+        </div>
+        <div>
+          <p style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">DOĞRU SIRAYA DİZ:</p>
+          <div class="s2-answer-row" id="s2-answer"
+               ondragover="event.preventDefault();this.classList.add('drag-over')"
+               ondragleave="this.classList.remove('drag-over')"
+               ondrop="S2.drop(event)">
+            <span style="font-size:11px;color:var(--tm);font-style:italic" id="s2-placeholder">Kelimeleri buraya sürükle…</span>
+          </div>
+        </div>
+        <div>
+          <p style="font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--tm);margin-bottom:8px">KELİME BANKASI:</p>
+          <div class="s2-word-bank" id="s2-bank"></div>
+        </div>
+        <button class="s2-check-btn" onclick="S2.check()">📨 MESAJI DOĞRULA</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-stage3" class="screen s-stage">
+    <div class="s-hdr">
+      <button class="back-btn" id="s3-back">←</button>
+      <div class="hdr-info">
+        <div class="hdr-num">Bölüm 03 — Dil Bilgisi</div>
+        <div class="hdr-title">Mecidiye Tabyası: Menzil</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <div class="yornerge-bar">
+        <span class="yb-icon">🎙</span>
+        <p class="yb-text">Geçmiş zamanda yaşanan eylemleri bulun! <strong>-di</strong> ve <strong>-miş</strong> geçmiş zaman eklerine dikkat et. Her doğru yanıtta Seyit Onbaşı düşman gemisini vuracak!</p>
+        <button class="yb-audio" onclick="ExternalAudio.playVoice('yornerge3')" title="Yönergeyi dinle">🔊</button>
+      </div>
+      <div class="info-card" style="border-left:3px solid var(--crimson);background:rgba(139,26,26,.08)">
+        <p class="ic-tag" style="color:#d96060">SEYİT ONBAŞI — ANLATIM</p>
+        <p><strong>18 Mart 1915.</strong> Seyit Onbaşı, 215 kiloluk mermiyi tek başına kaldırdı. Dört beş kişinin yapacağı işi inancıyla gerçekleştirdi. O gün attığı top, tarihin seyrini değiştirdi.</p>
+        <button onclick="ExternalAudio.playVoice('anlatim3')" style="margin-top:10px;padding:6px 14px;background:rgba(201,168,76,.1);border:1px solid var(--border);border-radius:var(--r);color:var(--gold);font-size:11px;cursor:pointer;letter-spacing:.08em">🔊 Seslendirmeyi Dinle (anlatim3.mp3)</button>
+      </div>
+      
+      <div class="s3-view-container" id="s3-view">
+        <div class="explosion-flash" id="s3-flash"></div>
+        
+        <div class="s3-question-modal" id="s3-question-box">
+          <p class="q-counter" id="q-counter">SORU 1 / 4</p>
+          <p class="q-text" id="q-text">Yükleniyor…</p>
+          <div class="q-choices" id="q-choices"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="s-stage4" class="screen s-stage">
+    <div class="s-hdr">
+      <button class="back-btn" id="s4-back">←</button>
+      <div class="hdr-info">
+        <div class="hdr-num">Bölüm 04 — Tarih ve Özet</div>
+        <div class="hdr-title">Tarihin Yankısı</div>
+      </div>
+    </div>
+    <div class="s-body">
+      <div class="yornerge-bar">
+        <span class="yb-icon">🎙</span>
+        <p class="yb-text">Siperde <strong>parlayan simgelere</strong> dokun; her biri sana Çanakkale'den efsanevi bir kesit sunacak. 5 simgeyi de keşfedip özetini bitir.</p>
+        <button class="yb-audio" onclick="ExternalAudio.playVoice('yornerge4')" title="Yönergeyi dinle">🔊</button>
+      </div>
+      <div class="trench-scene" id="trench-scene">
+        <svg width="100%" height="100%" style="position:absolute;inset:0;opacity:.18" aria-hidden="true">
+          <defs><pattern id="sb" x="0" y="0" width="40" height="20" patternUnits="userSpaceOnUse">
+            <ellipse cx="20" cy="10" rx="18" ry="8" fill="#8a6a30" opacity=".7"/>
+          </pattern></defs>
+          <rect width="100%" height="30%" fill="url(#sb)" y="64%"/>
+        </svg>
+        <div class="to" style="left:13%;top:33%; background-image:url('sehitlik-panel1.png')" id="to-o1" onclick="S4.open('duryolcu')" tabindex="0" role="button" aria-label="Dur Yolcu"></div>
+        <div class="to" style="left:32%;top:54%; background-image:url('sehitlik-panel2.png')" id="to-o2" onclick="S4.open('ataturk')" tabindex="0" role="button" aria-label="Mustafa Kemal"></div>
+        <div class="to" style="left:55%;top:38%; background-image:url('sehitlik-panel3.png')" id="to-o3" onclick="S4.open('liseliler')" tabindex="0" role="button" aria-label="Liseliler"></div>
+        <div class="to" style="left:74%;top:52%; background-image:url('sehitlik-panel4.png')" id="to-o4" onclick="S4.open('karavana')" tabindex="0" role="button" aria-label="Karavana"></div>
+        <div class="to" style="left:45%;top:22%; background-image:url('sehitlik-panel5.png')" id="to-o5" onclick="S4.open('anma')" tabindex="0" role="button" aria-label="Anma"></div>
+        <div style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+             font-size:11px;color:rgba(201,168,76,.6);letter-spacing:.1em;white-space:nowrap">
+          Parlayan simgelere dokun ↑
+        </div>
+      </div>
+      <div class="disc-bar">
+        <span style="font-size:12px;color:var(--tm)">Keşfedilen:</span>
+        <span id="disc-cnt" style="font-family:var(--ft);font-size:18px;color:var(--gold)">0</span>
+        <span style="font-size:12px;color:var(--tm)">/ 5 konu</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="s-memorial" class="screen">
+    <div class="mem-content">
+      <div class="mem-flame">🕯</div>
+      <h2 class="mem-title">Şehitler Anıtı</h2>
+      <div class="atk-quote">
+        <p>"Yurdunuzdan binlerce mil uzakta yabancı topraklarda hayatını kaybeden bu genç çocuklar burada dostlarımızın yanı başında yatıyorlar. Huzur içinde uyusunlar."</p>
+        <p>"Çanakkale'de ölen düşmanlarımız bizim için de aynı şerefle anılmaya layıktır."</p>
+        <cite>— Mustafa Kemal Atatürk · ANZAK Annelerine · 1934</cite>
+      </div>
+      
+      <div class="medals-row">
+        <div class="medal" id="med1"><div class="medal-icon">⚓</div><div class="medal-lbl">Nusret'in İzi</div></div>
+        <div class="medal" id="med2"><div class="medal-icon">📡</div><div class="medal-lbl">Telgraf Çözücü</div></div>
+        <div class="medal" id="med3"><div class="medal-icon">🔭</div><div class="medal-lbl">Menzil Ustası</div></div>
+        <div class="medal" id="med4"><div class="medal-icon">✉</div><div class="medal-lbl">Siper Tanığı</div></div>
+      </div>
+      
+      <div class="cert-container">
+        <div class="cert-refined">
+          <div class="cert-ornament-corner cert-tl"></div>
+          <div class="cert-ornament-corner cert-tr"></div>
+          <div class="cert-ornament-corner cert-bl"></div>
+          <div class="cert-ornament-corner cert-br"></div>
+          <div class="cert-header-milli">Üstün Başarı Belgesi</div>
+          <div class="cert-sub-milli">Bu onur belgesi, Çanakkale ruhunu yaşatan</div>
+          <div class="cert-input-wrap">
+            <input class="cert-name-input" placeholder="İsminizi Yazınız" type="text" value="Kahraman Vatan Evladı">
+          </div>
+          <div class="cert-body-milli">
+            Çanakkale ruhunu yüreğinde hissederek tüm görevleri üstün başarıyla tamamladığınız için, ecdadımızın kutsal mirasına sahip çıktığınızın ve bu destanı yaşattığınızın nişanesi olarak takdim edilmiştir.
+          </div>
+          <div class="cert-quote-vatan">
+            Vatan, Millet ve Türkçe sevgisiyle daima ileriye!
+          </div>
+          <div class="cert-footer">ÇANAKKALE GEÇİLMEZ · 18 MART 1915</div>
+        </div>
+        
+        <button class="btn-download-cert" onclick="downloadCert()">
+          <span>💾</span> Görüntü Olarak Kaydet
+        </button>
+      </div>
+      
+      <a href="https://memleketim.github.io/17/index.html" class="btn-start" style="margin:0 auto;display:flex;text-decoration:none;justify-content:center;width:fit-content;">🗺 HARİTAYA DÖN</a>
+    </div>
+  </section>
+</div><div class="modal-ov" id="modal-ov">
+  <div class="modal-box">
+    <button class="modal-close" onclick="G.closeMod()">✕</button>
+    <div class="modal-tag" id="mod-tag"></div>
+    <h3 class="modal-title" id="mod-title"></h3>
+    <img id="mod-img" class="modal-img" src="" alt="" style="display:none">
+    <div class="modal-body" id="mod-body"></div>
+    <div class="audio-row" id="mod-audio" style="display:none">
+      <button class="play-btn" id="mod-play" onclick="ExternalAudio.toggleVoice()">▶</button>
+      <div class="audio-meta">
+        <div class="aname" id="mod-aname">Seslendirme</div>
+        <div class="asub">Dinlemek için tıkla</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast">
+  <div class="tt" id="toast-tag"></div>
+  <div class="tb" id="toast-body"></div>
+</div>
+
+<script>
+'use strict';
+
+/* ─── DURUM ─── */
+const ST = {
+  theme:'dark', snd:true,
+  done: new Set(),
+  load(){
+    try{
+      const d=JSON.parse(localStorage.getItem('cg2')||'{}');
+      if(d.done) this.done=new Set(d.done);
+      if(d.theme) this.theme=d.theme;
+    }catch(e){}
+  },
+  save(){
+    try{ localStorage.setItem('cg2',JSON.stringify({done:[...this.done],theme:this.theme})); }catch(e){}
+  }
+};
+
+/* ─── HARİCİ SES (ASSETS) & TTS YÖNETİCİSİ ─── */
+const ExternalAudio = (() => {
+  const files = {
+    sarki1: new Audio('sarki1.mp3'),
+    sarki2: new Audio('sarki2.mp3'),
+    sarki3: new Audio('sarki3.mp3'),
+    sarki4: new Audio('sarki4.mp3'),
+    fail: new Audio('hata_siren.mp3'),
+    success: new Audio('basari_kisa.mp3'),
+    patlama: new Audio('patlama.mp3'),
+    yornerge1: new Audio('yornerge1.mp3'),
+    yornerge2: new Audio('yornerge2.mp3'),
+    yornerge3: new Audio('yornerge3.mp3'),
+    yornerge4: new Audio('yornerge4.mp3'),
+    anlatim3: new Audio('anlatim3.mp3'),
+    anlatim_duryolcu: new Audio('anlatim_duryolcu.mp3'),
+    anlatim_ataturk: new Audio('anlatim_ataturk.mp3'),
+    anlatim_liseliler: new Audio('anlatim_liseliler.mp3'),
+    anlatim_karavana: new Audio('anlatim_karavana.mp3'),
+    anlatim_anma: new Audio('anlatim_anma.mp3')
+  };
+
+  files.sarki1.loop = true; files.sarki1.dataset_origVol = 0.3; files.sarki1.volume = 0.3;
+  files.sarki2.loop = true; files.sarki2.dataset_origVol = 0.3; files.sarki2.volume = 0.3;
+  files.sarki3.loop = true; files.sarki3.dataset_origVol = 0.3; files.sarki3.volume = 0.3;
+  files.sarki4.loop = true; files.sarki4.dataset_origVol = 0.4; files.sarki4.volume = 0.4;
+  files.patlama.volume = 0.8;
+
+  let currentBGM = null;
+  let currentVoiceId = null;
+  let isVoicePlaying = false;
+  let currentModalVoiceId = null;
+
+  const TTS_TEXTS = {
+    yornerge1: "Haritaya tıklayarak Nusret'in rotasını çiz. İşaretli noktalara ulaşınca mayın bırakılır. Dönen ışık konisine girersen o bölüme geri dönersin. Hızlı gitme, sessiz ol!",
+    yornerge2: "Aşağıdaki kelime bankasından kelimeleri sürükleyerek veya dokunarak sıralayla yerleştir. Mesaj tamamlandığında mesajı doğrula butonuna bas. Toplam 3 mesaj var.",
+    yornerge3: "Geçmiş zamanda yaşanan eylemleri bulun! di ve miş geçmiş zaman eklerine dikkat et. Her doğru yanıtta Seyit Onbaşı düşman gemisini vuracak!",
+    yornerge4: "Siperde parlayan simgelere dokun; her biri sana Çanakkale'den efsanevi bir kesit sunacak. 5 simgeyi de keşfedip özetini bitir.",
+    anlatim3: "18 Mart 1915. Seyit Onbaşı, 215 kiloluk mermiyi tek başına kaldırdı. Dört beş kişinin yapacağı işi inancıyla gerçekleştirdi. O gün attığı top, tarihin seyrini değiştirdi.",
+    anlatim_duryolcu: "Dur yolcu! Bilmeden gelip bastığın bu toprak, Bir devrin battığı yerdir. Çanakkale geçilmez vurgusunun en büyük simgesi olan bu topraklarda yüz binlerce vatan evladı yatmaktadır.",
+    anlatim_ataturk: "Çanakkale savunmasının önemi tüm dünyada kabul edilmiştir. Mustafa Kemal'in askeri dehası ve liderliğinde elde edilen başarı, milletimizin kurtuluş mücadelesinin ilk kıvılcımı olmuştur.",
+    anlatim_liseliler: "O yıllarda savaş dolayısıyla pek çok lise mezun veremedi. Gencecik lise öğrencileri sıralarını bırakarak şehit olmak uğruna cepheye koştular.",
+    anlatim_karavana: "Çanakkale cephesindeki yokluk, askerlerimizin nasıl bir inançla savaştığını gösterir. Ekmek bazen hiç yoktu... Yemek listesinde çoğu zaman sadece şekersiz üzüm hoşafı ve kuru fasulye bulunuyordu.",
+    anlatim_anma: "Şu an her sene 18 Mart'ta Çanakkale Zaferi gururla, şehitlerimiz ise rahmetle anılmaktadır. Bugünkü şehitliklerimiz, o büyük destanın yaşayan birer kanıtıdır."
+  };
+  
+  const synth = window.speechSynthesis;
+  let currentUtterance = null;
+
+  function duckBGM(isDucking) {
+    if (currentBGM) {
+      const origVol = currentBGM.dataset_origVol || 0.3;
+      currentBGM.volume = isDucking ? origVol * 0.5 : origVol;
+    }
+  }
+
+  function playBGM(name) {
+    if(!GameState.soundEnabled) return;
+    if(currentBGM) { currentBGM.pause(); currentBGM.currentTime = 0; }
+    if(name && files[name]) {
+      currentBGM = files[name];
+      const origVol = currentBGM.dataset_origVol || 0.3;
+      currentBGM.volume = isVoicePlaying ? origVol * 0.5 : origVol;
+      currentBGM.play().catch(()=>{});
+    }
+  }
+
+  function playSFX(name) {
+    if(!GameState.soundEnabled || !files[name]) return;
+    files[name].currentTime = 0;
+    files[name].play().catch(()=>{});
+  }
+
+  function onVoiceEnd() {
+    isVoicePlaying = false;
+    duckBGM(false);
+    const btn = document.getElementById('mod-play');
+    if(btn) btn.textContent = '▶';
+  }
+
+  function playTTS(id) {
+    const text = TTS_TEXTS[id];
+    if(!text) { onVoiceEnd(); return; }
+    if(synth) synth.cancel();
+    currentUtterance = new SpeechSynthesisUtterance(text);
+    currentUtterance.lang = 'tr-TR';
+    isVoicePlaying = true;
+    duckBGM(true);
+    currentUtterance.onend = onVoiceEnd;
+    currentUtterance.onerror = onVoiceEnd;
+    if(synth) synth.speak(currentUtterance);
+  }
+
+  function playVoice(id) {
+    if(!GameState.soundEnabled) return;
+    stopVoice();
+    currentVoiceId = id;
+
+    const audio = files[id];
+    if(audio) {
+      audio.currentTime = 0;
+      const p = audio.play();
+      if(p !== undefined) {
+        p.then(() => {
+          isVoicePlaying = true;
+          duckBGM(true);
+          audio.onended = onVoiceEnd;
+          audio.onpause = onVoiceEnd;
+        }).catch(() => {
+          playTTS(id);
+        });
+      } else {
+        audio.onended = onVoiceEnd;
+        audio.onpause = onVoiceEnd;
+        audio.onerror = () => playTTS(id);
+        isVoicePlaying = true;
+        duckBGM(true);
+      }
+    } else {
+      playTTS(id);
+    }
+  }
+
+  function setupVoice(id) {
+    stopVoice();
+    currentModalVoiceId = id;
+    const btn = document.getElementById('mod-play');
+    if(btn) btn.textContent = '▶';
+  }
+
+  function toggleVoice() {
+    if(!currentModalVoiceId || !GameState.soundEnabled) return;
+    if(isVoicePlaying) {
+      stopVoice();
+    } else {
+      playVoice(currentModalVoiceId);
+      const btn = document.getElementById('mod-play');
+      if(btn) btn.textContent = '⏸';
+    }
+  }
+
+  function stopVoice() {
+    if(currentVoiceId && files[currentVoiceId]) {
+      files[currentVoiceId].pause();
+    }
+    if(synth) synth.cancel();
+    onVoiceEnd();
+  }
+
+  function setMuted(m) {
+    Object.values(files).forEach(a => {
+      a.muted = m;
+    });
+    if(m && synth) synth.cancel();
+  }
+
+  return { playBGM, playSFX, playVoice, setupVoice, toggleVoice, stopVoice, setMuted };
+})();
+
+/* ─── SES MOTORU (SENTETİK) ─── */
+const SFX = (() => {
+  let ctx=null, master=null;
+  function init(){
+    try{
+      ctx=new(window.AudioContext||window.webkitAudioContext)();
+      master=ctx.createGain(); master.gain.value=0.35;
+      master.connect(ctx.destination);
+    }catch(e){}
+  }
+  function tone(freq,dur,type='sine',vol=0.3){
+    if(!ctx||!ST.snd) return;
+    try{
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g); g.connect(master);
+      o.type=type; o.frequency.value=freq;
+      g.gain.setValueAtTime(vol,ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+      o.start(ctx.currentTime); o.stop(ctx.currentTime+dur);
+    }catch(e){}
+  }
+  function play(name){ ExternalAudio.playSFX(name); }
+  function click(){ tone(460,0.06,'square',0.15); }
+  function success(){ ExternalAudio.playSFX('success'); }
+  function setVol(v){ if(master) master.gain.value=v?0.35:0; }
+  return { init, tone, play, click, success, setVol };
+})();
+
+const GameState = ST;
+GameState.soundEnabled = ST.snd;
+
+/* ─── ANA YÖNETİCİ ─── */
+const G = {
+  curScreen: 's-intro',
+  init(){
+    ST.load();
+    GameState.soundEnabled = ST.snd;
+    this.applyTheme();
+    this.updProgress();
+    this.updLocks();
+    SFX.init();
+    
+    document.getElementById('btn-start').onclick=()=>{ SFX.click(); this.goMap(); };
+    document.getElementById('btn-theme').onclick=()=>this.toggleTheme();
+    document.getElementById('btn-snd').onclick=()=>this.toggleSnd();
+    document.getElementById('btn-map').onclick=()=>this.goMap();
+    
+    document.querySelectorAll('.scard:not(.locked)').forEach(c=>{
+      const fn=()=>{ SFX.click(); this.startStage(+c.dataset.stage); };
+      c.onclick=fn;
+      c.onkeydown=e=>{ if(e.key==='Enter'||e.key===' ') fn(); };
+    });
+    
+    ['s1','s2','s3','s4'].forEach(p=>{
+      const b=document.getElementById(p+'-back');
+      if(b) b.onclick=()=>{ SFX.click(); this.goMap(); };
+    });
+    
+    document.getElementById('modal-ov').onclick=e=>{ if(e.target.id==='modal-ov') this.closeMod(); };
+    document.addEventListener('keydown',e=>{ if(e.key==='Escape') this.closeMod(); });
+  },
+  
+  show(id, cb){
+    const prev=document.querySelector('.screen.active');
+    if(prev){ prev.style.opacity='0'; setTimeout(()=>{prev.classList.remove('active');prev.style.display='';},420); }
+    setTimeout(()=>{
+      const nx=document.getElementById(id);
+      nx.style.display='flex'; nx.style.opacity='0';
+      requestAnimationFrame(()=>{
+        nx.classList.add('active'); nx.style.opacity='1';
+        this.curScreen=id;
+        if(cb) cb();
+      });
+    },440);
+  },
+  
+  startStage(n){
+    ExternalAudio.playBGM('sarki' + n);
+    this.show('s-stage'+n,()=>{
+      if(n===1) S1.init();
+      else if(n===2) S2.init();
+      else if(n===3) S3.init();
+      else if(n===4) S4.init();
+    });
+  },
+  
+  goMap(){ 
+    ExternalAudio.playBGM(null);
+    SFX.click(); this.show('s-map'); this.updLocks(); 
+  },
+  
+  completeStage(n){
+    ST.done.add(n); ST.save();
+    this.updProgress(); this.updLocks();
+    SFX.success();
+    this.toast('🏆 BÖLÜM TAMAMLANDI','Harika! Bir sonraki bölüm açıldı.');
+    setTimeout(()=>{
+      if(ST.done.size>=4) this.showMemorial();
+      else this.goMap();
+    },2200);
+  },
+  
+  showMemorial(){
+    ExternalAudio.playBGM('sarki4');
+    this.show('s-memorial',()=>{
+      ST.done.forEach(n=>{
+        const m=document.getElementById('med'+n);
+        if(m) setTimeout(()=>m.classList.add('on'),n*300);
+      });
+    });
+  },
+  
+  updProgress(){
+    document.getElementById('pbar').style.width=(ST.done.size/4*100)+'%';
+  },
+  
+  updLocks(){
+    for(let i=1;i<=4;i++){
+      const c=document.getElementById('c'+i);
+      if(!c) continue;
+      const unlock=i===1||ST.done.has(i-1);
+      c.classList.toggle('locked',!unlock);
+      c.classList.toggle('done',ST.done.has(i));
+      if(unlock&&!c.classList.contains('locked')){
+        c.onclick=()=>{ SFX.click(); this.startStage(i); };
+        c.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ SFX.click(); this.startStage(i); } };
+      }
+    }
+  },
+  
+  toggleTheme(){
+    ST.theme=ST.theme==='dark'?'light':'dark';
+    this.applyTheme(); SFX.click();
+    ST.save();
+  },
+  
+  applyTheme(){
+    document.documentElement.setAttribute('data-theme',ST.theme==='light'?'light':'');
+    document.getElementById('btn-theme').textContent=ST.theme==='dark'?'☀':'🌙';
+  },
+  
+  toggleSnd(){
+    ST.snd=!ST.snd;
+    GameState.soundEnabled = ST.snd;
+    SFX.setVol(ST.snd);
+    ExternalAudio.setMuted(!ST.snd);
+    const b=document.getElementById('btn-snd');
+    b.textContent=ST.snd?'🔊':'🔇';
+    b.classList.toggle('on',ST.snd);
+    ST.save();
+  },
+  
+  showMod(tag,title,body,imgSrc,audioFile,audioName){
+    document.getElementById('mod-tag').textContent=tag;
+    document.getElementById('mod-title').textContent=title;
+    document.getElementById('mod-body').innerHTML=body;
+    const img=document.getElementById('mod-img');
+    if(imgSrc){ img.src=imgSrc; img.style.display='block'; }
+    else img.style.display='none';
+    
+    const aud=document.getElementById('mod-audio');
+    if(audioFile){
+      aud.style.display='flex';
+      document.getElementById('mod-aname').textContent=audioName||audioFile;
+      ExternalAudio.setupVoice(audioFile);
+    } else { aud.style.display='none'; }
+    document.getElementById('modal-ov').classList.add('open');
+  },
+  
+  closeMod(){
+    document.getElementById('modal-ov').classList.remove('open');
+    ExternalAudio.stopVoice();
+    document.getElementById('mod-play').textContent='▶';
+  },
+  
+  toast(tag,txt,dur=3200){
+    document.getElementById('toast-tag').textContent=tag;
+    document.getElementById('toast-body').textContent=txt;
+    const t=document.getElementById('toast');
+    t.classList.add('show');
+    clearTimeout(this._tt);
+    this._tt=setTimeout(()=>t.classList.remove('show'),dur);
+  }
+};
+
+/* ══════════════════════════════════════════════
+   AŞAMA 1 — NUSRET'İN GİZLİ ROTASI
+══════════════════════════════════════════════ */
+const S1 = (() => {
+  let cv,ctx,W,H;
+  let ship={x:0,y:0,ang:0};
+  let path=[], pidx=0, pt=0;
+  let wps=[], lhs=[], mines=[];
+  let spd=1, mineCount=0;
+  const NEED=5;
+  let raf=null;
+  let lastCheckpoint=0;
+  let isCaught = false;
+  let stage1Done = false;
+  
+  function init(){
+    cancelAnimationFrame(raf);
+    cv=document.getElementById('s1-canvas');
+    ctx=cv.getContext('2d');
+    window.removeEventListener('resize',onResize);
+    window.addEventListener('resize',onResize);
+    resize(); setup(); input(); loop();
+    G.toast('🗺 GÖREV',"Haritaya tıkla, Nusret'in rotasını çiz!");
+  }
+  
+  function onResize(){ resize(); }
+  
+  function resize(){
+    const wr=document.getElementById('s1-wrap');
+    W=cv.width=wr.clientWidth;
+    H=cv.height=wr.clientHeight||Math.round(W*0.52);
+    if(H<220) H=cv.height=220;
+  }
+  
+  function setup(){
+    isCaught = false; stage1Done = false;
+    ship={x:W*.10,y:H*.6,ang:0};
+    path=[{x:ship.x,y:ship.y}]; pidx=0; pt=0; lastCheckpoint=0;
+    wps=[
+      {x:W*.28,y:H*.38},{x:W*.42,y:H*.56},{x:W*.54,y:H*.34},
+      {x:W*.66,y:H*.52},{x:W*.79,y:H*.40}
+    ];
+    lhs=[
+      {x:W*.33,y:H*.12,ang:0,spd:.008,range:W*.15,arc:Math.PI/5.5},
+      {x:W*.60,y:H*.88,ang:Math.PI,spd:.006,range:W*.15,arc:Math.PI/5},
+      {x:W*.88,y:H*.28,ang:Math.PI/2,spd:.011,range:W*.15,arc:Math.PI/5.5}
+    ];
+    mines=[]; mineCount=0;
+  }
+  
+  function input(){
+    cv.onclick=e=>addPoint(e.clientX,e.clientY);
+    cv.ontouchstart=e=>{
+      e.preventDefault();
+      const t=e.touches[0];
+      addPoint(t.clientX,t.clientY);
+    };
+  }
+  
+  function addPoint(cx,cy){
+    if(isCaught || stage1Done) return;
+    const r=cv.getBoundingClientRect();
+    const x=(cx-r.left)*(W/r.width);
+    const y=(cy-r.top)*(H/r.height);
+    path.push({x,y});
+    SFX.click();
+  }
+  
+  function setSpd(s){
+    spd=s;
+    ['s1-sp1','s1-sp2','s1-sp3','s1-sp4'].forEach(id=>{
+      document.getElementById(id)?.classList.remove('on');
+    });
+    const map={1:'s1-sp1',2:'s1-sp2',3:'s1-sp3',4.5:'s1-sp4'};
+    if(map[s]) document.getElementById(map[s])?.classList.add('on');
+  }
+  
+  function moveShip(){
+    if(isCaught || stage1Done || path.length<2 || pidx>=path.length-1) return;
+    const fr=path[pidx], to=path[pidx+1];
+    const dx=to.x-fr.x, dy=to.y-fr.y;
+    const dist=Math.sqrt(dx*dx+dy*dy)||1;
+    pt+=(spd*1.1)/dist;
+    
+    if(pt>=1){ pt=0; pidx++; return; }
+    ship.x=fr.x+dx*pt; ship.y=fr.y+dy*pt;
+    ship.ang=Math.atan2(dy,dx);
+    
+    wps.forEach((wp,i)=>{
+      if(mines.find(m=>m.i===i)) return;
+      if(Math.hypot(ship.x-wp.x,ship.y-wp.y)<26){
+        mines.push({x:wp.x,y:wp.y,i,t:0});
+        mineCount++;
+        SFX.tone(300,.3,'triangle',.3);
+        lastCheckpoint=pidx;
+        G.toast('⚓ MAYIN DÖKÜLDÜ',`${mineCount}/${NEED} mayın bırakıldı`);
+        if(mineCount===NEED){
+          stage1Done = true;
+          setTimeout(()=>{
+            G.showMod(
+              'TARİHİ BAŞARI',
+              "Nusret'in Görevi Tamamlandı",
+              `<p>7–8 Mart 1915 gecesi dökülen bu mayınlar, düşman donanmasının büyük gemilerini
+              boğazda durdurdu. 18 Mart sabahı bu mayınlar tarihin seyrini değiştirdi.</p>
+              <p><strong>Öğrenilen kelimeler:</strong> Mayın · Boğaz · Strateji · Harekat · Gece Operasyonu</p>`
+            );
+            setTimeout(()=>{ G.closeMod(); G.completeStage(1); },4800);
+          },800);
+        }
+      }
+    });
+  }
+  
+  function checkLight(){
+    if(isCaught || stage1Done) return;
+    lhs.forEach(lh=>{
+      const dx=ship.x-lh.x, dy=ship.y-lh.y;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>lh.range) return;
+      let diff=Math.atan2(dy,dx)-lh.ang;
+      while(diff>Math.PI) diff-=2*Math.PI;
+      while(diff<-Math.PI) diff+=2*Math.PI;
+      if(Math.abs(diff)<lh.arc/2){
+        isCaught = true;
+        SFX.play('fail');
+        G.toast('⚠ YAKALANDIN!','Işık seni gördü! Son mayın noktasından başlıyorsun…',2500);
+        resetToCheckpoint();
+      }
+    });
+  }
+  
+  function resetToCheckpoint(){
+    pidx=Math.max(0,lastCheckpoint);
+    pt=0;
+    if(path[pidx]){
+      ship.x=path[pidx].x;
+      ship.y=path[pidx].y;
+    }
+    path=path.slice(0,pidx+1);
+    setTimeout(() => { isCaught = false; }, 2500);
+  }
+  
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    const dk=ST.theme!=='light';
+    
+    const sg=ctx.createLinearGradient(0,0,0,H);
+    sg.addColorStop(0,dk?'#091525':'#5a9fc0');
+    sg.addColorStop(1,dk?'#050d18':'#2a7a9a');
+    ctx.fillStyle=sg; ctx.fillRect(0,0,W,H);
+    
+    ctx.fillStyle=dk?'rgba(50,38,18,.55)':'rgba(160,130,70,.45)';
+    ctx.fillRect(0,0,W,H*.12); ctx.fillRect(0,H*.88,W,H*.12);
+    
+    ctx.strokeStyle='rgba(255,255,255,.025)'; ctx.lineWidth=.5;
+    for(let x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    
+    lhs.forEach(lh=>{
+      if(!stage1Done) lh.ang += lh.spd;
+      ctx.save(); ctx.translate(lh.x,lh.y);
+      ctx.beginPath(); ctx.moveTo(0,0);
+      ctx.arc(0,0,lh.range,lh.ang-lh.arc/2,lh.ang+lh.arc/2);
+      ctx.closePath();
+      ctx.fillStyle=isCaught ? 'rgba(255,100,100,.15)' : 'rgba(255,240,120,.07)'; ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,6,0,Math.PI*2);
+      ctx.fillStyle='#fff8a0'; ctx.fill();
+      ctx.restore();
+    });
+    
+    wps.forEach((wp,i)=>{
+      const placed=mines.find(m=>m.i===i);
+      ctx.save(); ctx.beginPath(); ctx.arc(wp.x,wp.y,13,0,Math.PI*2);
+      ctx.fillStyle=placed?'rgba(201,168,76,.38)':'rgba(42,110,110,.2)';
+      ctx.strokeStyle=placed?'rgba(201,168,76,.85)':'rgba(42,110,110,.7)';
+      ctx.lineWidth=1.5; ctx.fill(); ctx.stroke();
+      ctx.fillStyle=placed?'#c9a84c':'#3d9999';
+      ctx.font='bold 10px Montserrat,sans-serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(placed?'⚓':(i+1),wp.x,wp.y);
+      ctx.restore();
+    });
+    
+    mines.forEach(m=>{
+      m.t=Math.min(m.t+.04,1);
+      ctx.save(); ctx.globalAlpha=m.t;
+      ctx.beginPath(); ctx.arc(m.x,m.y,5+(1-m.t)*10,0,Math.PI*2);
+      ctx.strokeStyle='rgba(201,168,76,.6)'; ctx.lineWidth=1; ctx.stroke();
+      ctx.restore();
+    });
+    
+    if(path.length>1){
+      ctx.save(); ctx.beginPath(); ctx.moveTo(path[0].x,path[0].y);
+      path.forEach(p=>ctx.lineTo(p.x,p.y));
+      ctx.strokeStyle=isCaught ? 'rgba(255,50,50,.5)' : 'rgba(201,168,76,.38)'; ctx.lineWidth=1.5;
+      ctx.setLineDash([5,4]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.restore();
+    }
+    
+    drawShip();
+    
+    ctx.font='500 11px Montserrat,sans-serif';
+    ctx.fillStyle='rgba(201,168,76,.75)';
+    ctx.textAlign='left'; ctx.fillText(`⚓ ${mineCount}/${NEED} mayın`,12,H-12);
+    ctx.textAlign='right'; ctx.fillText('Haritaya tıkla → rota çiz',W-12,H-12);
+  }
+  
+  function drawShip(){
+    const dk=ST.theme!=='light';
+    ctx.save(); ctx.translate(ship.x,ship.y); ctx.rotate(ship.ang);
+    ctx.beginPath(); ctx.ellipse(0,0,17,6,0,0,Math.PI*2);
+    ctx.fillStyle=dk?'#c8b87a':'#5a4528'; ctx.fill();
+    ctx.fillStyle=dk?'#8a6a30':'#3a2810';
+    ctx.fillRect(3,-9,4,8);
+    ctx.beginPath(); ctx.arc(5,-11,3,0,Math.PI*2);
+    ctx.fillStyle='rgba(200,200,200,.35)'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(-17,0); ctx.quadraticCurveTo(-28,-5,-40,0);
+    ctx.strokeStyle='rgba(100,180,200,.28)'; ctx.lineWidth=2; ctx.stroke();
+    ctx.restore();
+  }
+  
+  function loop(){
+    moveShip(); checkLight(); draw();
+    raf=requestAnimationFrame(loop);
+  }
+  
+  return { init, setSpd };
+})();
+
+/* ══════════════════════════════════════════════
+   AŞAMA 2 — TELGRAF ODASI (Sıralı 3 Şifre)
+══════════════════════════════════════════════ */
+const S2 = (() => {
+  const MSGS = [
+    { answer:['ÇANAKKALE','BUGÜN','TOZ','İLE','DUMAN'], bank:['ÇANAKKALE','BUGÜN','TOZ','İLE','DUMAN'] },
+    { answer:['DÜŞMANDA','İMKAN','VAR','MEHMET\'TE','İMAN'], bank:['DÜŞMANDA','İMKAN','VAR','MEHMET\'TE','İMAN'] },
+    { answer:['HEY','ONBEŞLİ','ONBEŞLİ','KIZLARIN','GÖZÜ','YAŞLI'], bank:['HEY','ONBEŞLİ','ONBEŞLİ','KIZLARIN','GÖZÜ','YAŞLI'] }
+  ];
+  let curLvl=0, cur, placed=[];
+  
+  function init(){
+    curLvl=0;
+    loadLevel();
+  }
+  
+  function loadLevel(){
+    cur = MSGS[curLvl];
+    placed = [];
+    renderBank();
+    renderAnswer();
+  }
+  
+  function renderBank(){
+    const bk=document.getElementById('s2-bank');
+    const shuffled=[...cur.bank].sort(()=>Math.random()-.5);
+    bk.innerHTML='';
+    shuffled.forEach((w, idx)=>{
+      const d=document.createElement('div');
+      d.className='word-chip';
+      d.textContent=w;
+      d.draggable=true;
+      d.dataset.idx=idx;
+      d.ondragstart=e=>{ e.dataTransfer.setData('text', w + '|' + idx); d.classList.add('placed'); };
+      d.ondragend=e=>{ if(!placed.find(p=>p.idx==idx)) d.classList.remove('placed'); };
+      d.onclick=()=>tapWord(w,d,idx);
+      bk.appendChild(d);
+    });
+  }
+  
+  function renderAnswer(){
+    const ar=document.getElementById('s2-answer');
+    const ph=document.getElementById('s2-placeholder');
+    ar.innerHTML='';
+    if(placed.length===0){
+      ar.appendChild(ph||createPH());
+    } else {
+      placed.forEach((pItem,i)=>{
+        const d=document.createElement('div');
+        d.className='word-chip placed';
+        d.textContent=pItem.w;
+        d.style.cursor='pointer';
+        d.title='Kaldırmak için tıkla';
+        d.onclick=()=>removeFromAnswer(i);
+        ar.appendChild(d);
+    });
+    }
+  }
+  
+  function createPH(){
+    const s=document.createElement('span');
+    s.id='s2-placeholder';
+    s.style.cssText='font-size:11px;color:var(--tm);font-style:italic';
+    s.textContent='Kelimeleri buraya sürükle…';
+    return s;
+  }
+  
+  function tapWord(w,el,idx){
+    if(!el.classList.contains('placed')){
+      placed.push({w, idx});
+      el.classList.add('placed');
+      renderAnswer();
+      SFX.click();
+    }
+  }
+  
+  function removeFromAnswer(i){
+    const item = placed[i];
+    placed.splice(i,1);
+    const c = document.querySelector(`#s2-bank .word-chip[data-idx="${item.idx}"]`);
+    if(c) c.classList.remove('placed');
+    renderAnswer();
+    SFX.click();
+  }
+  
+  function drop(e){
+    e.preventDefault();
+    document.getElementById('s2-answer').classList.remove('drag-over');
+    const data = e.dataTransfer.getData('text');
+    if(data){
+      const parts = data.split('|');
+      const w = parts[0];
+      const idx = parts[1];
+      if(w && idx !== undefined && !placed.find(p=>p.idx==idx)){
+        placed.push({w, idx});
+        const c = document.querySelector(`#s2-bank .word-chip[data-idx="${idx}"]`);
+        if(c) c.classList.add('placed');
+        renderAnswer();
+        SFX.click();
+      }
+    }
+  }
+  
+  function check(){
+    const correct=cur.answer;
+    let ok=placed.length===correct.length;
+    if(ok) placed.forEach((pItem,i)=>{ if(pItem.w!==correct[i]) ok=false; });
+    
+    if(ok){
+      SFX.success();
+      if(curLvl === 2) {
+        G.showMod(
+          'MESAJ ÇÖZÜLDÜ',
+          '📟 '+cur.answer.join(' '),
+          `<p>Tüm mesajlar iletildi! Cepheye iletilen bu kelimeler, askerlerimizin moralini ve kararlılığını gösteriyor.</p>`
+        );
+        setTimeout(()=>{ G.closeMod(); G.completeStage(2); },4500);
+      } else {
+        G.toast('DOĞRU!', 'Sıradaki mesaja geçiliyor...', 2500);
+        setTimeout(() => { curLvl++; loadLevel(); }, 2500);
+      }
+    } else {
+      document.querySelectorAll('#s2-answer .word-chip').forEach((c,i)=>{
+        if(c.textContent!==correct[i]){ c.classList.add('wrong'); setTimeout(()=>c.classList.remove('wrong'),500); }
+      });
+      G.toast('⚠ YANLIŞ SIRA','Kelimeleri doğru sıraya diz. Cümleyi mantıklı oku!',2800);
+      ExternalAudio.playSFX('fail');
+    }
+  }
+  
+  return { init, drop, check };
+})();
+
+/* ══════════════════════════════════════════════
+   AŞAMA 3 — MECİDİYE TABYASI (Dil Bilgisi)
+══════════════════════════════════════════════ */
+const S3 = (() => {
+  const QS=[
+    {
+      q:'Seyit Onbaşı mermiyi sırtına ___.',
+      choices:['alacak','alıyor','aldı','alır'],
+      ans:2,
+      exp:'<strong>-di</strong> li geçmiş zaman: "aldı" — kesin olarak yaşanmış, görülen geçmiş zaman.'
+    },
+    {
+      q:'Düşman zırhlısı boğazın serin sularına ___.',
+      choices:['gömülmüş','gömülür','gömülecek','gömülüyor'],
+      ans:0,
+      exp:'<strong>-miş</strong> li geçmiş zaman: "gömülmüş" — sonradan öğrenilen/anlatılan eylem.'
+    },
+    {
+      q:'Mecidiye Tabyası boğazı kahramanca ___.',
+      choices:['savunacak','savunuyor','savundu','savunur'],
+      ans:2,
+      exp:'<strong>-di</strong> li geçmiş zaman: "savundu" — bizzat yaşanmış ve tamamlanmış eylem.'
+    },
+    {
+      q:'Nusret mayın gemisi sessizce görevini ___.',
+      choices:['tamamlar','tamamlamış','tamamlayacak','tamamlıyor'],
+      ans:1,
+      exp:'<strong>-miş</strong> li geçmiş zaman: "tamamlamış" — anlatılan eylem.'
+    }
+  ];
+  const BGS = ['tabya-4gemi.png','tabya-3gemi.png','tabya-2gemi.png','tabya-1gemi.png'];
+  let qi=0, answered=false;
+  
+  function init(){
+    qi=0; answered=false;
+    setBg(qi);
+    document.getElementById('s3-question-box').classList.remove('show');
+    setTimeout(showQ, 2000);
+  }
+  
+  function setBg(i){
+    if(i < BGS.length) {
+      document.getElementById('s3-view').style.backgroundImage = `url('${BGS[i]}')`;
+    }
+  }
+  
+  function showQ(){
+    if(qi>=QS.length){ G.completeStage(3); return; }
+    answered=false;
+    const q=QS[qi];
+    document.getElementById('q-counter').textContent=`SORU ${qi+1} / ${QS.length}`;
+    document.getElementById('q-text').textContent=q.q;
+    const ch=document.getElementById('q-choices');
+    ch.innerHTML='';
+    q.choices.forEach((c,i)=>{
+      const b=document.createElement('button');
+      b.className='choice-btn'; b.textContent=c;
+      b.onclick=()=>answer(i,b);
+      ch.appendChild(b);
+    });
+    document.getElementById('s3-question-box').classList.add('show');
+  }
+  
+  function answer(idx,btn){
+    if(answered) return;
+    answered=true;
+    const q=QS[qi];
+    if(idx===q.ans){
+      btn.classList.add('correct');
+      setTimeout(() => {
+        document.getElementById('s3-question-box').classList.remove('show');
+        ExternalAudio.playSFX('patlama');
+        const fl = document.getElementById('s3-flash');
+        fl.classList.add('boom');
+        setTimeout(() => fl.classList.remove('boom'), 500);
+        
+        G.toast('✓ İSABETLİ ATIŞ!', q.exp, 3500);
+        
+        setTimeout(() => {
+          qi++;
+          setBg(qi);
+          setTimeout(showQ, 2000);
+        }, 1500);
+      }, 500);
+    } else {
+      btn.classList.add('wrong-ans');
+      ExternalAudio.playSFX('fail');
+      G.toast('✗ YANLIŞ','Tekrar dene! İpucu: Zaman eklerine dikkat et.',3000);
+      setTimeout(()=>{ btn.classList.remove('wrong-ans'); answered=false; },700);
+    }
+  }
+  
+  return { init };
+})();
+
+/* ══════════════════════════════════════════════
+   AŞAMA 4 — SİPER VE TARİHİ ÖZET
+══════════════════════════════════════════════ */
+const S4 = (() => {
+  let disc=new Set();
+  const OBJ={
+    duryolcu:{
+      tag:'ŞEHİTLER ANITII',
+      title:'Dur Yolcu!',
+      body:`<p>"Dur yolcu! Bilmeden gelip bastığın bu toprak,<br>Bir devrin battığı yerdir."</p>
+            <p>Çanakkale geçilmez vurgusunun en büyük simgesi olan bu topraklarda yüz binlerce vatan evladı yatmaktadır.</p>`,
+      img:'sehitlik-panel1.png', audio:'anlatim_duryolcu', aname:'Dur Yolcu'
+    },
+    ataturk:{
+      tag:'MUSTAFA KEMAL · ZAFER',
+      title:'Tarihi Başarı',
+      body:`<p>Çanakkale savunmasının önemi tüm dünyada kabul edilmiştir.</p>
+            <p>Mustafa Kemal'in askeri dehası ve liderliğinde elde edilen başarı, milletimizin kurtuluş mücadelesinin ilk kıvılcımı olmuştur.</p>`,
+      img:'sehitlik-panel2.png', audio:'anlatim_ataturk', aname:'Tarihi Başarı'
+    },
+    liseliler:{
+      tag:'GENÇLİK VE FEDAKARLIK',
+      title:'Mezun Olamadılar',
+      body:`<p>O yıllarda savaş dolayısıyla pek çok lise mezun veremedi.</p>
+            <p>Gencecik lise öğrencileri sıralarını bırakarak şehit olmak uğruna cepheye koştular.</p>`,
+      img:'sehitlik-panel3.png', audio:'anlatim_liseliler', aname:'Mezun Olamadılar'
+    },
+    karavana:{
+      tag:'CEPHE YAŞAMI',
+      title:'Yemek Listesi',
+      body:`<p>Çanakkale cephesindeki yokluk, askerlerimizin nasıl bir inançla savaştığını gösterir.</p>
+            <p>Ekmek bazen hiç yoktu... Yemek listesinde çoğu zaman sadece şekersiz üzüm hoşafı ve kuru fasulye bulunuyordu.</p>`,
+      img:'sehitlik-panel4.png', audio:'anlatim_karavana', aname:'Yemek Listesi'
+    },
+    anma:{
+      tag:'ANMA · 18 MART',
+      title:'Anma Günü',
+      body:`<p>Her sene 18 Mart'ta Çanakkale Zaferi gururla, şehitlerimiz ise rahmetle anılmaktadır.</p>
+            <p>Bu saygı hali, o büyük destanın yaşayan birer kanıtıdır.</p>`,
+      img:'sehitlik-panel5.png', audio:'anlatim_anma', aname:'Anma Günü'
+    }
+  };
+  
+  function init(){ disc=new Set(); updateCount(); }
+  
+  function open(id){
+    const o=OBJ[id]; if(!o) return;
+    SFX.click();
+    G.showMod(o.tag,o.title,o.body,o.img,o.audio||null,o.aname||'');
+    if(!disc.has(id)){
+      disc.add(id);
+      updateCount();
+      SFX.tone(660,.25,'sine',.2);
+      const el=document.getElementById('to-o'+(Object.keys(OBJ).indexOf(id)+1));
+      if(el) el.classList.add('found');
+      if(disc.size>=5){
+        setTimeout(()=>{ 
+          G.closeMod(); G.toast('🏆 TÜMÜ KEŞFEDİLDİ','Tarihin yankısını ve mirasını öğrendin!',2500);
+          setTimeout(()=>G.completeStage(4),3000); 
+        },4000);
+      }
+    }
+  }
+  
+  function updateCount(){ document.getElementById('disc-cnt').textContent=disc.size; }
+  
+  return { init, open };
+})();
+
+/* ─── SERTİFİKA İNDİRME FONKSİYONU ─── */
+function downloadCert() {
+  const btn = document.querySelector('.btn-download-cert');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<span>⏳</span> Hazırlanıyor...';
+  btn.style.pointerEvents = 'none';
+
+  const certEl = document.querySelector('.cert-refined');
+  
+  html2canvas(certEl, { scale: 2, backgroundColor: '#fdf5e6', useCORS: true }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'Canakkale_Ustun_Basari_Belgesi.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    btn.innerHTML = originalText;
+    btn.style.pointerEvents = 'auto';
+  }).catch(() => {
+    btn.innerHTML = '<span>❌</span> Hata Oluştu';
+    setTimeout(() => { 
+      btn.innerHTML = originalText; 
+      btn.style.pointerEvents = 'auto'; 
+    }, 2000);
+  });
+}
+
+/* ─── BAŞLAT ─── */
+document.addEventListener('DOMContentLoaded',()=>G.init());
+</script>
+
+</body>
+</html>

@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frig Kaşifleri Macerası</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;700;900&display=swap');
+        
+        :root {
+            --bg-light-1: #87CEEB;
+            --bg-light-2: #E0F6FF;
+            --bg-light-3: #90EE90;
+            --text-main: #1e293b;
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        .dark-mode {
+            --bg-light-1: #0f172a;
+            --bg-light-2: #1e293b;
+            --bg-light-3: #064e3b;
+            --text-main: #f8fafc;
+            --card-bg: rgba(30, 41, 59, 0.95);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            background-color: var(--bg-light-1);
+            color: var(--text-main);
+            transition: background-color 0.5s ease;
+        }
+
+        h1, h2, h3, .title-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        .btn-game {
+            background: #FFD700;
+            border: 4px solid #FFA500;
+            border-radius: 20px;
+            box-shadow: 0 6px 0 #D2691E;
+            transition: all 0.1s ease;
+            color: #451a03;
+            font-family: 'Montserrat', sans-serif;
+            cursor: pointer;
+        }
+        
+        .btn-game:active {
+            transform: translateY(6px);
+            box-shadow: 0 0 0 #D2691E;
+        }
+        
+        .btn-game:disabled {
+            background: #e5e7eb;
+            border-color: #9ca3af;
+            color: #6b7280;
+            box-shadow: 0 6px 0 #9ca3af;
+            transform: none;
+            cursor: not-allowed;
+        }
+
+        .float-slow { animation: float 4s ease-in-out infinite; }
+        .float-med { animation: float 3s ease-in-out infinite; }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .animate-shake { animation: shake 0.5s; }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            animation: confetti-fall linear forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .bg-cover-center {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // --- SİSTEM SESLERİ (Yapay Zeka / Web Audio API) ---
+        const playSysSound = (type) => {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const ctx = new AudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            
+            if (type === 'success') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, ctx.currentTime); 
+                osc.frequency.exponentialRampToValueAtTime(1046.50, ctx.currentTime + 0.2); 
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } else if (type === 'fail') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.3);
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3);
+            }
+        };
+
+        // --- SESLENDİRME (TTS) ---
+        const speakInstruction = (text) => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'tr-TR';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }
+        };
+
+        const stopSpeech = () => {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        };
+
+        // --- ORTAK BİLEŞENLER ---
+        const Confetti = () => {
+            const [particles, setParticles] = useState([]);
+            useEffect(() => {
+                const colors = ['#FFC700', '#FF0000', '#2E3192', '#41BBC7', '#42B549'];
+                const newParticles = Array.from({ length: 60 }).map((_, i) => ({
+                    id: i,
+                    left: Math.random() * 100 + 'vw',
+                    animationDuration: Math.random() * 2 + 2 + 's',
+                    backgroundColor: colors[Math.floor(Math.random() * colors.length)],
+                    delay: Math.random() * 0.5 + 's'
+                }));
+                setParticles(newParticles);
+            }, []);
+            return (
+                <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
+                    {particles.map(p => (
+                        <div key={p.id} className="confetti" style={{ left: p.left, animationDuration: p.animationDuration, backgroundColor: p.backgroundColor, animationDelay: p.delay }} />
+                    ))}
+                </div>
+            );
+        };
+
+        const GuideModal = ({ title, message, instruction, buttonText, onContinue, imgSrc }) => {
+            useEffect(() => {
+                speakInstruction(`${title}. ${message} Yönerge: ${instruction}`);
+                return () => stopSpeech();
+            }, [title, message, instruction]);
+
+            return (
+                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[var(--card-bg)] rounded-[2rem] max-w-2xl w-full p-6 sm:p-8 shadow-2xl animate-pop-in relative border-8 border-yellow-400 overflow-hidden">
+                        {imgSrc && (
+                            <div className="w-full h-48 sm:h-64 mb-6 rounded-xl overflow-hidden border-4 border-stone-300">
+                                <img src={imgSrc} alt={title} className="w-full h-full object-cover" />
+                            </div>
+                        )}
+                        <div className="text-center">
+                            <h2 className="title-font text-3xl font-black text-sky-800 mb-4">{title}</h2>
+                            <p className="text-xl font-bold mb-4" style={{ color: 'var(--text-main)' }}>{message}</p>
+                            <div className="bg-yellow-100 p-4 rounded-xl border-2 border-yellow-300 mb-6 text-left">
+                                <span className="font-black text-yellow-800 flex items-center gap-2"><span>📌</span> Yönerge:</span>
+                                <p className="text-lg text-gray-800 font-semibold mt-1">{instruction}</p>
+                            </div>
+                            <button onClick={() => { stopSpeech(); onContinue(); }} className="btn-game px-8 py-4 text-2xl font-black w-full">
+                                {buttonText || "Başla!"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- OYUN 1: ASLANTAŞ & SEYDİLER ---
+        const Game1_Aslantas = ({ onComplete }) => {
+            const [showIntro, setShowIntro] = useState(true);
+            const correctWords = ["Seydiler", "ve", "Aslantaş'ta", "kayalara", "oyulmuş", "eserler", "vardır."];
+            const [availableWords, setAvailableWords] = useState([]);
+            const [selectedWords, setSelectedWords] = useState([]);
+            const [isSuccess, setIsSuccess] = useState(false);
+
+            useEffect(() => {
+                setAvailableWords([...correctWords].sort(() => Math.random() - 0.5));
+            }, []);
+
+            const handleSelect = (word) => {
+                setAvailableWords(availableWords.filter(w => w !== word));
+                setSelectedWords([...selectedWords, word]);
+            };
+
+            const handleDeselect = (word) => {
+                setSelectedWords(selectedWords.filter(w => w !== word));
+                setAvailableWords([...availableWords, word]);
+            };
+
+            useEffect(() => {
+                if (selectedWords.length === correctWords.length) {
+                    if (selectedWords.join(" ") === correctWords.join(" ")) {
+                        playSysSound('success');
+                        setIsSuccess(true);
+                        speakInstruction("Harika! Seydiler ve Aslantaş'ta kayalara oyulmuş eserler vardır.");
+                    } else {
+                        playSysSound('fail');
+                    }
+                }
+            }, [selectedWords]);
+
+            if (showIntro) {
+                return <GuideModal 
+                    title="Seydiler ve Aslantaş!" 
+                    imgSrc="./assets/img/peribacalari.png"
+                    message="Seydiler Peribacaları ve Aslantaş gibi devasa yapılarla dolu bu vadiye hoş geldin! Giriş kapısındaki tarihi yazı depremde dağılmış." 
+                    instruction="Aşağıdaki kelimelere doğru sırayla tıklayarak anlamlı ve kurallı bir cümle oluştur." 
+                    onContinue={() => setShowIntro(false)} 
+                />;
+            }
+
+            return (
+                <div className="flex flex-col items-center justify-center p-4 min-h-[80vh] w-full max-w-4xl mx-auto relative">
+                    <h2 className="title-font text-3xl font-black mb-8 text-center bg-white/80 p-4 rounded-xl shadow" style={{color: 'var(--text-main)'}}>Bozulan Cümleyi Düzelt</h2>
+                    
+                    <div className="bg-[var(--card-bg)] p-6 rounded-2xl min-h-[120px] w-full flex flex-wrap gap-2 items-center justify-center border-4 border-stone-400 shadow-inner mb-8">
+                        {selectedWords.length === 0 && <span className="text-stone-400 font-bold text-xl">Kelimeler buraya dizilecek...</span>}
+                        {selectedWords.map((word, i) => (
+                            <button key={i} onClick={() => handleDeselect(word)} className="bg-stone-600 text-white px-4 py-2 rounded-lg text-xl font-bold shadow hover:bg-stone-500 animate-pop-in">
+                                {word}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 justify-center w-full">
+                        {availableWords.map((word, i) => (
+                            <button key={i} onClick={() => handleSelect(word)} className="btn-game px-6 py-3 text-xl font-black">
+                                {word}
+                            </button>
+                        ))}
+                    </div>
+
+                    {selectedWords.length === correctWords.length && !isSuccess && (
+                        <div className="mt-6 text-red-600 font-black text-2xl bg-white/90 px-6 py-2 rounded-full shadow animate-bounce border-2 border-red-500">
+                            Cümle tam olmadı. Geri almak için kelimelere tıkla ve tekrar dene!
+                        </div>
+                    )}
+
+                    {isSuccess && (
+                        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                            <Confetti />
+                            <div className="bg-white p-8 rounded-3xl text-center border-8 border-green-500 max-w-md w-full animate-pop-in">
+                                <div className="text-6xl mb-4">🌟</div>
+                                <h3 className="title-font text-3xl font-black text-green-600 mb-4">Harika!</h3>
+                                <p className="text-xl font-bold mb-6 text-gray-800">"Seydiler ve Aslantaş'ta kayalara oyulmuş eserler vardır."</p>
+                                <button onClick={onComplete} className="btn-game px-8 py-3 text-xl font-black w-full">İlerlemeye Devam Et</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- OYUN 2: AYAZİNİ (Gizli Eşya) ---
+        const Game2_Ayazini = ({ onComplete }) => {
+            const [showIntro, setShowIntro] = useState(true);
+            const [foundItems, setFoundItems] = useState({ testi: false, sikke: false, parsomen: false });
+
+            const targets = [
+                { id: 'testi', desc: 'İçinde su ve erzak saklanan kilden eşya (Testi).' },
+                { id: 'sikke', desc: 'Eski zamanlarda kullanılan madeni para (Sikke).' },
+                { id: 'parsomen', desc: 'Üzerine yazı yazılan deri kağıt (Parşömen).' }
+            ];
+
+            const allEmojis = [
+                { id: 'testi', icon: '🏺', top: '70%', left: '20%', isTarget: true },
+                { id: 'sikke', icon: '🪙', top: '85%', left: '60%', isTarget: true },
+                { id: 'parsomen', icon: '📜', top: '65%', left: '80%', isTarget: true },
+                { id: 'kalkan', icon: '🛡️', top: '40%', left: '30%', isTarget: false },
+                { id: 'kilic', icon: '⚔️', top: '50%', left: '75%', isTarget: false },
+                { id: 'kase', icon: '🥣', top: '80%', left: '40%', isTarget: false },
+                { id: 'yuzuk', icon: '💍', top: '30%', left: '50%', isTarget: false },
+                { id: 'anahtar', icon: '🗝️', top: '60%', left: '10%', isTarget: false }
+            ];
+
+            const handleFind = (id, isTarget, e) => {
+                if(isTarget) {
+                    playSysSound('success');
+                    setFoundItems(prev => ({ ...prev, [id]: true }));
+                } else {
+                    playSysSound('fail');
+                    if(e && e.currentTarget) {
+                        e.currentTarget.classList.add('animate-shake');
+                        setTimeout(() => {
+                            if(e.currentTarget) e.currentTarget.classList.remove('animate-shake');
+                        }, 500);
+                    }
+                }
+            };
+
+            const allFound = Object.values(foundItems).every(Boolean);
+
+            useEffect(() => {
+                if(allFound) {
+                    speakInstruction("Müthiş gözlem! Tüm tarihi eserleri buldun.");
+                }
+            }, [allFound]);
+
+            if (showIntro) {
+                return <GuideModal 
+                    title="Ayazini'nin Sırrı" 
+                    imgSrc="./assets/img/Ayazini.png"
+                    message="Burası Akustik Meryem Ana Kilisesi'nin bulunduğu Ayazini! Kaya evlerin arasına karışmış tarihi eşyaları bulmamız gerek." 
+                    instruction="Aşağıda listelenen tarihi eşyaların özelliklerini oku ve resmin içinde gizlenmiş olanları 8 emoji arasından bulup tıkla." 
+                    onContinue={() => setShowIntro(false)} 
+                />;
+            }
+
+            return (
+                <div className="flex flex-col items-center p-4 max-w-5xl mx-auto min-h-[80vh] w-full">
+                    <h2 className="title-font text-3xl font-black mb-4 bg-white/80 px-6 py-2 rounded-xl shadow" style={{color: 'var(--text-main)'}}>Kayıp Eşyaları Bul</h2>
+                    
+                    <div className="bg-[var(--card-bg)] p-4 rounded-xl border-4 border-sky-400 w-full mb-6 flex flex-col gap-2 justify-center shadow-lg">
+                        {targets.map(item => (
+                            <div key={item.id} className={`flex items-center gap-3 p-2 rounded-lg font-bold text-sm sm:text-base ${foundItems[item.id] ? 'bg-green-200 text-green-800' : 'bg-gray-100 text-gray-700'}`}>
+                                <span className="text-2xl">{foundItems[item.id] ? '✅' : '🔍'}</span>
+                                <span>{item.desc}</span>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="relative w-full aspect-[4/3] md:aspect-[16/9] bg-cover-center rounded-3xl border-8 border-stone-500 overflow-hidden shadow-2xl"
+                         style={{ backgroundImage: 'url(./assets/img/Ayazini.png)' }}>
+                        
+                        {allEmojis.map(item => (
+                            (!item.isTarget || !foundItems[item.id]) && (
+                                <button key={item.id} onClick={(e) => handleFind(item.id, item.isTarget, e)}
+                                        className="absolute text-3xl sm:text-4xl transition-transform hover:scale-110 focus:outline-none drop-shadow-xl bg-white/60 backdrop-blur-sm rounded-full p-2 border-2 border-white shadow-lg"
+                                        style={{ top: item.top, left: item.left }}>
+                                    {item.icon}
+                                </button>
+                            )
+                        ))}
+                    </div>
+
+                    {allFound && (
+                        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                            <Confetti />
+                            <div className="bg-white p-8 rounded-3xl text-center border-8 border-green-500 max-w-md w-full animate-pop-in">
+                                <div className="text-6xl mb-4">🏆</div>
+                                <h3 className="title-font text-3xl font-black text-green-600 mb-4">Müthiş Gözlem!</h3>
+                                <p className="text-lg font-bold text-gray-700 mb-6">Okuma ve dikkat yeteneğin harika!</p>
+                                <button onClick={onComplete} className="btn-game px-8 py-3 text-xl font-black w-full">Sıradaki Maceraya Git</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- OYUN 3: EMRE GÖLÜ ---
+        const Game3_EmreGolu = ({ onComplete }) => {
+            const [showIntro, setShowIntro] = useState(true);
+            const targetWord = "FRİGYA";
+            const [collectedLetters, setCollectedLetters] = useState("");
+            const [balloons, setBalloons] = useState([]);
+            const [timeLeft, setTimeLeft] = useState(20);
+            const [gameOver, setGameOver] = useState(false);
+
+            const resetGame = () => {
+                const letters = targetWord.split('').sort(() => Math.random() - 0.5);
+                const newBalloons = letters.map((l, i) => ({
+                    id: i, letter: l,
+                    color: ['bg-red-500', 'bg-blue-500', 'bg-yellow-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500'][i % 6],
+                    delay: Math.random() * 2 + 's'
+                }));
+                setBalloons(newBalloons);
+                setCollectedLetters("");
+                setTimeLeft(20);
+                setGameOver(false);
+            };
+
+            useEffect(() => {
+                resetGame();
+            }, []);
+
+            useEffect(() => {
+                let timer;
+                if (!showIntro && !gameOver && collectedLetters !== targetWord) {
+                    timer = setInterval(() => {
+                        setTimeLeft((prev) => {
+                            if (prev <= 1) {
+                                clearInterval(timer);
+                                setGameOver(true);
+                                playSysSound('fail');
+                                return 0;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+                }
+                return () => clearInterval(timer);
+            }, [showIntro, gameOver, collectedLetters]);
+
+            const handleBalloonClick = (letter, id) => {
+                if (gameOver) return;
+                const nextExpectedLetter = targetWord[collectedLetters.length];
+                if (letter === nextExpectedLetter) {
+                    playSysSound('success');
+                    setCollectedLetters(prev => prev + letter);
+                    setBalloons(prev => prev.filter(b => b.id !== id));
+                    
+                    if (collectedLetters + letter === targetWord) {
+                        speakInstruction("Harfler Tamam! Doğru heceleme yeteneğin kusursuz.");
+                    }
+                } else {
+                    playSysSound('fail');
+                    const el = document.getElementById(`balloon-${id}`);
+                    if(el) {
+                        el.classList.add('animate-shake');
+                        setTimeout(() => el.classList.remove('animate-shake'), 500);
+                    }
+                }
+            };
+
+            if (showIntro) {
+                return <GuideModal 
+                    title="Emre Gölü Üzerinde Uçuş!" 
+                    imgSrc="./assets/img/emre.png"
+                    message="Burası Emre Gölü! Memeç Kayalıkları manzarası eşliğinde balon turları yapılıyor. Gökyüzünde dağınık harfler var!" 
+                    instruction="Gizli kelimeyi oluşturmak için harfleri doğru sırayla tıkla. Yalnız acele et, sadece 20 saniyen var!" 
+                    onContinue={() => setShowIntro(false)} 
+                />;
+            }
+
+            return (
+                <div className="flex flex-col items-center p-4 min-h-[85vh] w-full relative overflow-hidden bg-cover-center" style={{ backgroundImage: 'url(./assets/img/emre.png)' }}>
+                    <div className="absolute inset-0 bg-white/20 backdrop-blur-sm"></div>
+                    
+                    <div className="z-10 bg-white/95 p-4 rounded-2xl shadow-lg text-center mt-4 border-4 border-sky-400 w-full max-w-lg">
+                        <h2 className="title-font text-2xl font-black text-sky-900 mb-2">Gizli Kelimeyi Bul:</h2>
+                        <div className="w-full bg-gray-300 h-4 rounded-full overflow-hidden border-2 border-stone-400">
+                            <div className="bg-red-500 h-full transition-all duration-1000 ease-linear" style={{ width: `${(timeLeft / 20) * 100}%` }}></div>
+                        </div>
+                        <p className="mt-2 font-bold text-red-600">{timeLeft} Saniye Kaldı!</p>
+                    </div>
+                    
+                    <div className="bg-white/95 px-8 py-4 rounded-full border-4 border-sky-500 shadow-xl z-10 flex gap-2 min-w-[200px] justify-center mt-6">
+                        {targetWord.split('').map((_, i) => (
+                            <span key={i} className="text-4xl font-black text-sky-700 w-8 text-center border-b-4 border-sky-300">
+                                {collectedLetters[i] || "_"}
+                            </span>
+                        ))}
+                    </div>
+
+                    <div className="relative w-full h-80 z-10 flex justify-center items-end pb-10 gap-4 sm:gap-8 flex-wrap mt-8">
+                        {balloons.map(b => (
+                            <button key={b.id} id={`balloon-${b.id}`} onClick={() => handleBalloonClick(b.letter, b.id)}
+                                className="float-slow relative flex flex-col items-center group transition-transform hover:scale-110 focus:outline-none"
+                                style={{ animationDelay: b.delay }}>
+                                <div className={`w-20 h-24 rounded-[50%] ${b.color} flex items-center justify-center border-2 border-white shadow-xl`}>
+                                    <span className="text-4xl font-black text-white drop-shadow-md">{b.letter}</span>
+                                </div>
+                                <div className="w-1 h-4 bg-stone-700"></div>
+                                <div className="w-8 h-6 bg-yellow-800 rounded-sm shadow-md"></div>
+                            </button>
+                        ))}
+                    </div>
+
+                    {gameOver && collectedLetters !== targetWord && (
+                        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white p-8 rounded-3xl text-center border-8 border-red-500 max-w-md w-full animate-pop-in">
+                                <div className="text-6xl mb-4">⏰</div>
+                                <h3 className="title-font text-3xl font-black text-red-600 mb-4">Süre Doldu!</h3>
+                                <p className="text-lg font-bold text-gray-700 mb-6">Kelimeyi tamamlamak için daha hızlı olmalısın.</p>
+                                <button onClick={resetGame} className="btn-game px-8 py-3 text-xl font-black w-full">Tekrar Dene</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {collectedLetters === targetWord && (
+                        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+                            <Confetti />
+                            <div className="bg-white p-8 rounded-3xl text-center border-8 border-green-500 max-w-md w-full animate-pop-in">
+                                <div className="text-6xl mb-4">🎈</div>
+                                <h3 className="title-font text-3xl font-black text-green-600 mb-4">Harfler Tamam!</h3>
+                                <p className="text-lg font-bold text-gray-700 mb-6">Emre Gölü üzerinde harika bir uçuştu. Doğru heceleme ve sıralama becerin kusursuz!</p>
+                                <button onClick={onComplete} className="btn-game px-8 py-3 text-xl font-black w-full">İlerleyelim</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- OYUN 4: AVDALAS KALESİ ---
+        const Game4_Avdalas = ({ onComplete }) => {
+            const [showIntro, setShowIntro] = useState(true);
+            const [currentQ, setCurrentQ] = useState(0);
+            const [showFeedback, setShowFeedback] = useState(null);
+            
+            const questions = [
+                { word: "Eski", answer: "Yeni", options: ["Yeni", "Büyük", "Güzel"] },
+                { word: "Yüksek", answer: "Alçak", options: ["Uzun", "Alçak", "Geniş"] },
+                { word: "Sıcak", answer: "Soğuk", options: ["Ilık", "Bulutlu", "Soğuk"] }
+            ];
+
+            const handleAnswer = (opt) => {
+                if (opt === questions[currentQ].answer) {
+                    playSysSound('success');
+                    setShowFeedback('correct');
+                    setTimeout(() => {
+                        setShowFeedback(null);
+                        if (currentQ < questions.length - 1) {
+                            setCurrentQ(prev => prev + 1);
+                        } else {
+                            speakInstruction("Kapılar Açıldı! Zıt anlamlı kelimeleri mükemmel biliyorsun.");
+                            setCurrentQ(99); 
+                        }
+                    }, 1000);
+                } else {
+                    playSysSound('fail');
+                    setShowFeedback('wrong');
+                    setTimeout(() => setShowFeedback(null), 1000);
+                }
+            };
+
+            if (showIntro) {
+                return <GuideModal 
+                    title="Avdalas Kalesi Muhafızı" 
+                    imgSrc="./assets/img/avdalas.png"
+                    message="Çok katlı ilginç bir kaya yerleşimi olan Avdalas Kalesi'nin kapısındayız. İçeri girmek için kale muhafızının kelime bilmecelerini çözmelisin." 
+                    instruction="Ekranda beliren kelimenin 'Zıt Anlamlısını' (Tam Tersi) şıklardan bul ve tıkla." 
+                    onContinue={() => setShowIntro(false)} 
+                />;
+            }
+
+            if (currentQ === 99) {
+                return (
+                    <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 w-full bg-cover-center" style={{ backgroundImage: 'url(./assets/img/avdalas.png)' }}>
+                        <div className="absolute inset-0 bg-black/50"></div>
+                        <Confetti />
+                        <div className="bg-white p-8 rounded-3xl text-center border-8 border-green-500 max-w-md w-full animate-pop-in shadow-2xl z-10">
+                            <div className="text-6xl mb-4">🏰</div>
+                            <h3 className="title-font text-3xl font-black text-green-600 mb-4">Kapılar Açıldı!</h3>
+                            <p className="text-lg font-bold text-gray-700 mb-6">Zıt anlamlı kelimeleri mükemmel biliyorsun. Türkçeyi çok iyi kullanıyorsun!</p>
+                            <button onClick={onComplete} className="btn-game px-8 py-3 text-xl font-black w-full">Son Göreve Git</button>
+                        </div>
+                    </div>
+                );
+            }
+
+            const q = questions[currentQ];
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen p-4 w-full bg-cover-center relative" style={{ backgroundImage: 'url(./assets/img/avdalas.png)' }}>
+                    <div className="absolute inset-0 bg-black/40"></div>
+                    
+                    <div className="bg-[var(--card-bg)] p-8 rounded-3xl border-8 border-stone-600 shadow-2xl max-w-lg w-full text-center relative z-10">
+                        <div className="absolute -top-5 right-4 bg-yellow-400 text-yellow-900 font-black px-4 py-1 rounded-full border-2 border-yellow-600">
+                            Soru {currentQ + 1}/{questions.length}
+                        </div>
+                        <div className="text-5xl absolute -top-10 left-4">💂‍♂️</div>
+                        <h3 className="title-font text-2xl font-bold text-stone-800 mb-2 mt-4">Muhafız Soruyor:</h3>
+                        <p className="text-lg text-stone-600 mb-6 font-semibold">Bu kelimenin zıt anlamlısı nedir?</p>
+                        
+                        <div className="text-5xl font-black text-amber-600 mb-8 animate-pulse">"{q.word}"</div>
+
+                        <div className="flex flex-col gap-4">
+                            {q.options.map((opt, i) => (
+                                <button key={i} onClick={() => handleAnswer(opt)} disabled={showFeedback !== null}
+                                    className={`p-4 rounded-xl text-2xl font-black border-b-4 transition-transform active:scale-95
+                                        ${showFeedback === 'correct' && opt === q.answer ? 'bg-green-500 border-green-700 text-white' : ''}
+                                        ${showFeedback === 'wrong' && opt !== q.answer ? 'bg-red-500 border-red-700 text-white opacity-50' : ''}
+                                        ${showFeedback === null ? 'bg-stone-100 border-stone-300 text-stone-900 hover:bg-stone-200' : ''}`}>
+                                    {opt}
+                                </button>
+                            ))}
+                        </div>
+
+                        {showFeedback === 'correct' && (
+                            <div className="absolute inset-0 bg-green-500/95 rounded-2xl flex items-center justify-center animate-pop-in z-10">
+                                <span className="text-5xl md:text-6xl text-white font-black drop-shadow-md">DOĞRU! ✅</span>
+                            </div>
+                        )}
+                        {showFeedback === 'wrong' && (
+                            <div className="absolute inset-0 bg-red-500/95 rounded-2xl flex items-center justify-center animate-pop-in z-10">
+                                <span className="text-5xl md:text-6xl text-white font-black drop-shadow-md">YANLIŞ! ❌</span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        // --- OYUN 5: MÜZİK YARIŞMASI ---
+        const Game5_Music = ({ onComplete }) => {
+            const [showIntro, setShowIntro] = useState(true);
+            const [sequence, setSequence] = useState([]);
+            const [playerStep, setPlayerStep] = useState(0);
+            const [activeNote, setActiveNote] = useState(null);
+            const [isShowingSequence, setIsShowingSequence] = useState(false);
+            const [message, setMessage] = useState("Dinle...");
+            const maxRounds = 4; 
+
+            const audioMap = useRef({
+                flute: new Audio('./assets/audio/flut.mp3'),
+                cymbals: new Audio('./assets/audio/zil.mp3'),
+                lyre: new Audio('./assets/audio/lir.mp3'),
+                drum: new Audio('./assets/audio/davul.mp3')
+            });
+
+            const playNoteSound = (id) => {
+                const audio = audioMap.current[id];
+                if (audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log("Audio play error:", e));
+                }
+            };
+
+            const notes = [
+                { id: 'flute', icon: '🎵', name: 'Flüt', color: 'bg-green-500', activeColor: 'bg-green-300' },
+                { id: 'cymbals', icon: '📀', name: 'Zil', color: 'bg-yellow-500', activeColor: 'bg-yellow-300' },
+                { id: 'lyre', icon: '🪕', name: 'Lir', color: 'bg-purple-500', activeColor: 'bg-purple-300' },
+                { id: 'drum', icon: '🥁', name: 'Davul', color: 'bg-red-500', activeColor: 'bg-red-300' }
+            ];
+
+            const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+            const playSequence = async (seq) => {
+                setIsShowingSequence(true);
+                setMessage("Melodiyi Dinle... 🎶");
+                await sleep(800);
+                for (let note of seq) {
+                    setActiveNote(note);
+                    playNoteSound(note);
+                    await sleep(600);
+                    setActiveNote(null);
+                    await sleep(300);
+                }
+                setMessage("Şimdi Sıra Sende! Aynı sırayla tıkla.");
+                setIsShowingSequence(false);
+                setPlayerStep(0);
+            };
+
+            const startNextRound = (currentSeq = sequence) => {
+                const nextNote = notes[Math.floor(Math.random() * notes.length)].id;
+                const newSeq = [...currentSeq, nextNote];
+                setSequence(newSeq);
+                playSequence(newSeq);
+            };
+
+            useEffect(() => {
+                if (!showIntro && sequence.length === 0) {
+                    startNextRound([]);
+                }
+            }, [showIntro]);
+
+            const handleNoteClick = async (noteId) => {
+                if (isShowingSequence) return;
+                setActiveNote(noteId);
+                playNoteSound(noteId);
+                setTimeout(() => setActiveNote(null), 200);
+
+                if (noteId === sequence[playerStep]) {
+                    const nextStep = playerStep + 1;
+                    if (nextStep === sequence.length) {
+                        if (sequence.length >= maxRounds) {
+                            setMessage("Harika! Midas'ın gizemini çözdün!");
+                            speakInstruction("Büyük başarı! Frig Vadisi'nin tüm gizemlerini çözdün.");
+                            setPlayerStep(nextStep);
+                        } else {
+                            setMessage("Doğru! Yeni notaya hazır ol...");
+                            setIsShowingSequence(true);
+                            await sleep(1000);
+                            startNextRound(sequence);
+                        }
+                    } else {
+                        setPlayerStep(nextStep);
+                    }
+                } else {
+                    setMessage("Eyvah, yanlış nota! Tekrar dinle.");
+                    playSysSound('fail');
+                    setIsShowingSequence(true);
+                    await sleep(1500);
+                    playSequence(sequence);
+                }
+            };
+
+            if (showIntro) {
+                return <GuideModal 
+                    title="Müzik Yarışması" 
+                    imgSrc="./assets/img/panflut.png"
+                    message="Efsaneye göre dünyanın ilk müzik yarışması Afyon Dinar'da yapıldı! Çoban Marsyas pan flütüyle, usta Apollon ise liriyle yarıştı." 
+                    instruction="Kral Midas'ın dinlediği antik melodileri hafızanda tut ve aynı sırayla enstrümanlara tıkla!" 
+                    onContinue={() => setShowIntro(false)} 
+                />;
+            }
+
+            const isWin = sequence.length >= maxRounds && playerStep === sequence.length;
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-[85vh] p-4 w-full">
+                    <div className="text-center mb-8 w-full max-w-lg">
+                        <h2 className="title-font text-4xl font-black mb-4" style={{color: 'var(--text-main)'}}>Midas'ın Notaları</h2>
+                        <div className="bg-[var(--card-bg)] px-6 py-4 rounded-2xl border-4 border-sky-400 font-bold text-xl shadow-md" style={{color: 'var(--text-main)'}}>
+                            {message}
+                        </div>
+                        <div className="mt-6 flex gap-3 justify-center bg-black/10 p-3 rounded-full mx-auto w-fit">
+                            {sequence.map((_, i) => (
+                                <div key={i} className={`w-5 h-5 rounded-full transition-colors duration-300 ${i < playerStep ? 'bg-green-500 shadow-inner' : 'bg-gray-400'}`}></div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 sm:gap-6 max-w-md w-full">
+                        {notes.map(note => {
+                            const isActive = activeNote === note.id;
+                            return (
+                                <button key={note.id} onClick={() => handleNoteClick(note.id)} disabled={isShowingSequence || isWin}
+                                    className={`relative aspect-square rounded-[2rem] border-[6px] shadow-xl transition-all duration-100 flex flex-col items-center justify-center focus:outline-none
+                                        ${isActive ? note.activeColor + ' scale-105 border-white shadow-2xl z-10' : note.color + ' border-black/20 hover:scale-105 active:scale-95'}
+                                        ${isShowingSequence ? 'cursor-not-allowed opacity-90' : 'cursor-pointer'} `}>
+                                    <span className="text-6xl drop-shadow-md mb-2">{note.icon}</span>
+                                    <span className="text-xl font-black text-white drop-shadow">{note.name}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {isWin && (
+                        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                            <Confetti />
+                            <div className="bg-white p-8 rounded-[2rem] text-center border-8 border-yellow-400 max-w-lg w-full animate-pop-in relative">
+                                <div className="absolute -top-12 left-1/2 -translate-x-1/2 text-7xl bg-white rounded-full p-2 border-4 border-yellow-400">🎵</div>
+                                <h3 className="title-font text-4xl font-black text-yellow-600 mb-4 mt-8">BÜYÜK BAŞARI!</h3>
+                                <p className="text-xl font-bold text-gray-800 mb-4">Frig Vadisi'nin tüm gizemlerini çözdün!</p>
+                                <button onClick={onComplete} className="btn-game px-8 py-4 text-2xl font-black w-full text-yellow-900">Oyunu Bitir</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // --- ANA UYGULAMA (APP) ---
+        function App() {
+            const [gameState, setGameState] = useState('welcome'); 
+            const [unlockedLevels, setUnlockedLevels] = useState([1]); 
+            const [isDarkMode, setIsDarkMode] = useState(false);
+
+            useEffect(() => {
+                if (isDarkMode) document.body.classList.add('dark-mode');
+                else document.body.classList.remove('dark-mode');
+            }, [isDarkMode]);
+
+            const levels = [
+                { id: 1, name: "Seydiler & Aslantaş", img: "./assets/img/peribacalari.png", x: "20%", y: "30%", component: Game1_Aslantas },
+                { id: 2, name: "Ayazini'nin Sırrı", img: "./assets/img/Ayazini.png", x: "40%", y: "50%", component: Game2_Ayazini },
+                { id: 3, name: "Emre Gölü", img: "./assets/img/emre.png", x: "65%", y: "20%", component: Game3_EmreGolu },
+                { id: 4, name: "Avdalas Kalesi", img: "./assets/img/avdalas.png", x: "80%", y: "60%", component: Game4_Avdalas },
+                { id: 5, name: "Müzik Yarışması", img: "./assets/img/panflut.png", x: "50%", y: "80%", component: Game5_Music },
+            ];
+
+            const handleLevelComplete = (levelId) => {
+                if (levelId === 5) {
+                    window.location.href = "https://memleketim.github.io/03/index.html";
+                } else {
+                    if (!unlockedLevels.includes(levelId + 1)) {
+                        setUnlockedLevels([...unlockedLevels, levelId + 1]);
+                    }
+                    setGameState('map');
+                }
+            };
+
+            return (
+                <div className="game-container relative selection:bg-yellow-300 selection:text-black w-full min-h-screen">
+                    
+                    {/* Üst Menü / Kontroller */}
+                    <div className="fixed top-4 w-full px-4 flex justify-between items-start z-[100] pointer-events-none">
+                        <div className="pointer-events-auto">
+                            <img src="./assets/img/orjinal.svg" alt="Logo" className="w-20 h-20 md:w-24 md:h-24 drop-shadow-lg object-contain bg-white/50 rounded-2xl p-1" onError={(e) => e.target.style.display='none'} />
+                        </div>
+                        <div className="flex gap-2 pointer-events-auto">
+                            <button onClick={() => setIsDarkMode(!isDarkMode)} className="bg-[var(--card-bg)] backdrop-blur p-3 rounded-full shadow-lg border-2 border-sky-300 text-xl hover:scale-110 transition">
+                                {isDarkMode ? '☀️' : '🌙'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* EKRAN: Karşılama */}
+                    {gameState === 'welcome' && (
+                        <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center relative overflow-y-auto bg-cover-center" style={{ backgroundImage: 'url(./assets/img/frig.png)' }}>
+                            <div className="absolute inset-0 bg-black/40"></div>
+                            
+                            <div className="bg-[var(--card-bg)] p-6 md:p-10 rounded-[2rem] shadow-2xl max-w-3xl w-full border-8 border-yellow-400 relative z-10 animate-pop-in mt-20 mb-10">
+                                
+                                <a href="https://drive.google.com/file/d/1p5bPf2sugOD_BZNFy5asFnRHLBdOQ-_k/view" target="_blank" rel="noopener noreferrer" 
+                                   className="block w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-xl mb-6 shadow-lg hover:bg-blue-700 transition transform hover:scale-105 border-2 border-blue-300 text-sm md:text-base">
+                                    🌟 Demirhan Yılmaz'ın çalışmasının tamamına ulaşmak için tıklayınız.
+                                </a>
+
+                                <h1 className="title-font text-4xl md:text-5xl font-black mb-4 uppercase tracking-wider leading-tight" style={{ color: 'var(--text-main)' }}>
+                                    Afyon Frig Vadisi <br/><span className="text-yellow-600">Macerası</span>
+                                </h1>
+                                
+                                <p className="text-lg font-bold mb-6 text-stone-700">
+                                    Hoş geldin! Oyuna geçmeden önce Frigya’yı yakından tanıyalım. Aşağıdaki videoyu izleyebilirsin.
+                                </p>
+                                
+                                <div className="w-full aspect-video rounded-xl overflow-hidden shadow-inner border-4 border-stone-300 mb-6 bg-black">
+                                    <iframe className="w-full h-full" src="https://www.youtube.com/embed/Vd-7yVdxqb8" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+                                </div>
+
+                                <p className="text-xl font-bold mb-8 leading-relaxed text-sky-800 bg-sky-100 p-4 rounded-xl border-2 border-sky-300">
+                                    Frig Vadisi'nin gizemlerini çözmeye ve Türkçe becerilerini geliştirmeye hazır mısın?
+                                </p>
+
+                                <button onClick={() => setGameState('map')} className="btn-game px-10 py-5 text-2xl font-black w-full rounded-full shadow-xl">
+                                    Maceraya Başla! 🚀
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EKRAN: Harita */}
+                    {gameState === 'map' && (
+                        <div className="p-4 min-h-screen flex flex-col items-center justify-center relative pt-24">
+                            <h2 className="title-font text-3xl font-black text-white drop-shadow-md mb-6 bg-sky-800/80 px-8 py-3 rounded-full border-4 border-sky-300 z-10">
+                                Keşif Haritası
+                            </h2>
+                            <div className="relative w-full max-w-4xl aspect-[4/3] md:aspect-[16/9] bg-amber-100/90 rounded-[3rem] border-8 border-stone-500 shadow-2xl overflow-hidden backdrop-blur-sm">
+                                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none">
+                                    <path d="M 20% 30% L 40% 50% L 65% 20% L 80% 60% L 50% 80%" stroke="#A8A29E" strokeWidth="4" strokeDasharray="10,10" fill="none" />
+                                </svg>
+
+                                {levels.map(level => {
+                                    const isUnlocked = unlockedLevels.includes(level.id);
+                                    return (
+                                        <button key={level.id} onClick={() => isUnlocked && setGameState(`level${level.id}`)}
+                                            className={`absolute transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center transition-all ${isUnlocked ? 'hover:scale-110 cursor-pointer z-20' : 'opacity-60 grayscale cursor-not-allowed z-10'}`}
+                                            style={{ left: level.x, top: level.y }}>
+                                            <div className={`w-20 h-20 md:w-24 md:h-24 rounded-2xl flex items-center justify-center shadow-xl border-4 overflow-hidden ${isUnlocked ? 'bg-white border-green-500' : 'bg-gray-300 border-gray-500'}`}>
+                                                <img src={level.img} alt={level.name} className="w-full h-full object-cover" onError={(e) => e.target.style.display='none'} />
+                                                {!isUnlocked && <span className="absolute text-4xl drop-shadow-md">🔒</span>}
+                                            </div>
+                                            <span className={`mt-2 font-black text-sm md:text-base px-3 py-1 md:px-4 md:py-1 rounded-full shadow-lg whitespace-nowrap ${isUnlocked ? 'bg-white text-sky-900 border-2 border-sky-200' : 'bg-gray-200 text-gray-500'}`}>
+                                                {level.name}
+                                            </span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* EKRAN: Dinamik Oyun Bölümleri */}
+                    {gameState.startsWith('level') && (() => {
+                        const levelId = parseInt(gameState.replace('level', ''));
+                        const LevelComponent = levels.find(l => l.id === levelId)?.component;
+                        return (
+                            <div className="pt-0 relative z-10 w-full h-full flex flex-col items-center">
+                                <button onClick={() => { stopSpeech(); setGameState('map'); }} className="fixed top-6 right-20 bg-[var(--card-bg)] border-2 border-sky-400 font-bold px-4 py-2 rounded-xl z-[100] shadow hover:scale-105 transition" style={{color: 'var(--text-main)'}}>
+                                    Haritaya Dön
+                                </button>
+                                {LevelComponent ? <LevelComponent onComplete={() => handleLevelComplete(levelId)} /> : null}
+                            </div>
+                        );
+                    })()}
+
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
