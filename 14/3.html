@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Bolu'nun Gizli Cennetleri - Aylin Dinç</title>
+<script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Montserrat:wght@500;700&family=Playfair+Display:wght@600;800&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+<style>
+:root{ --bg:#f6f1e7; --bg2:#e8efe6; --text:#1d2a1f; --accent:#2e7d32; --accent2:#ff8f00; --card:rgba(255,255,255,0.95); --shadow:0 20px 60px rgba(0,0,0,0.18); --fontDisplay:'Playfair Display',serif; --fontBody:'Lora',serif; --fontUI:'Montserrat',sans-serif; }
+[data-theme="dark"]{ --bg:#121b13; --bg2:#1e2e21; --text:#eef6ee; --card:rgba(18,27,19,0.96); }
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:var(--fontBody)}
+#canvasWrap{position:fixed;inset:0;z-index:0} #threeCanvas{width:100vw;height:100vh;display:block}
+
+/* doga.png entegrasyonu */
+#coverScreen {
+  background: linear-gradient(rgba(10,25,18,0.7), rgba(10,25,18,0.8)), url('doga.png') center/cover no-repeat;
+}
+
+.topbar{position:fixed;top:0;left:0;right:0;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:100;background:linear-gradient(to bottom, rgba(0,0,0,0.4), transparent);pointer-events:none}
+.topbar *{pointer-events:auto}
+.logo{width:50px;height:50px;background:white;border-radius:12px;padding:6px;box-shadow:var(--shadow)}
+.icon-btn{width:42px;height:42px;border-radius:50%;border:none;background:var(--card);box-shadow:var(--shadow);cursor:pointer;font-size:18px;display:grid;place-items:center}
+.screen{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow:auto}
+.screen.active{display:flex!important}
+.card{max-width:920px;width:100%;background:var(--card);backdrop-filter:blur(16px);border-radius:28px;padding:28px 24px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.3)}
+.cover-card{text-align:center}
+.cover-card h1{font-family:var(--fontDisplay);font-size:clamp(34px,6vw,60px);line-height:0.95}.cover-card h1 span{color:var(--accent)}
+.cover-sub{margin:14px auto;line-height:1.7;font-size:clamp(15px,2vw,18px);max-width:700px}
+.badge{display:inline-flex;padding:8px 14px;border-radius:999px;background:var(--bg2);font-family:var(--fontUI);font-size:12px;margin:10px 0}
+.btn{border:none;border-radius:14px;padding:14px 20px;font-weight:700;cursor:pointer;transition:.2s;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-family:var(--fontUI)}
+.btn-primary{background:var(--accent);color:white}.btn-secondary{background:var(--bg2);color:var(--text)}
+.btn:hover{transform:translateY(-2px)}.btn-large{font-size:16px;padding:18px 30px}
+.aylin-btn{display:inline-block;margin:18px 0;padding:16px 22px;background:#1a73e8;color:white;border-radius:14px;text-decoration:none;font-family:var(--fontUI);font-weight:700;box-shadow:0 10px 28px rgba(26,115,232,0.35)}
+.map-route{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.route-step{padding:9px 14px;border-radius:999px;background:var(--bg2);border:2px solid transparent;font-family:var(--fontUI);font-size:12px}
+.route-step.done{border-color:var(--accent);background:#e8f5e9;}.route-step.active{border-color:var(--accent2);background:rgba(255,143,0,0.2)}
+
+#questionBox{position:fixed;left:50%;top:76px;transform:translateX(-50%);max-width:760px;width:calc(100% - 24px);background:var(--card);border-radius:18px;padding:16px 20px;box-shadow:var(--shadow);display:none;z-index:60;border-left:5px solid var(--accent)}
+#questionBox p{font-size:17px;line-height:1.5;margin-top:6px;font-weight:600;}
+.hint{font-family:var(--fontUI);font-size:12px;opacity:.8;margin-top:8px}
+.progress{height:6px;background:var(--bg2);border-radius:999px;overflow:hidden;margin-top:12px}.progress>div{height:100%;width:0;background:var(--accent);transition:width.5s}
+.grid-hud{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:none;gap:8px;z-index:60}
+.kbd{padding:8px 12px;border-radius:10px;background:var(--card);box-shadow:var(--shadow);font-family:var(--fontUI);font-size:12px;font-weight:700;}
+
+.photo-overlay{position:fixed;inset:0;background:rgba(8,19,14,0.92);z-index:200;display:none;align-items:center;justify-content:center;flex-direction:column;padding:16px}
+.viewfinder{position:relative;width:min(92vw,760px);aspect-ratio:4/3;border:3px solid rgba(242,244,238,.7);border-radius:10px;overflow:hidden;box-shadow:0 0 0 4000px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;background:#0c1f16}
+.viewfinder img{width:100%;height:100%;object-fit:cover;display:block}
+.corner{position:absolute;width:24px;height:24px;border-color:#ff8f00}
+.corner.tl{top:-3px;left:-3px;border-top:4px solid;border-left:4px solid}
+.corner.tr{top:-3px;right:-3px;border-top:4px solid;border-right:4px solid}
+.corner.bl{bottom:-3px;left:-3px;border-bottom:4px solid;border-left:4px solid}
+.corner.br{bottom:-3px;right:-3px;border-bottom:4px solid;border-right:4px solid}
+.shutter-btn{margin-top:26px;width:74px;height:74px;border-radius:50%;border:4px solid #f2f4ee;background:#d32f2f;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform 0.1s}
+.shutter-btn:active{transform:scale(.92)}
+.photo-caption{margin-top:20px;font-family:var(--fontDisplay);color:#eef3ec;text-align:center;max-width:600px;font-size:18px;line-height:1.4}
+.flash{position:fixed;inset:0;background:white;opacity:0;pointer-events:none;z-index:300;}
+.flash.go{animation:flashPop .5s ease}
+@keyframes flashPop{0%{opacity:0}15%{opacity:1}100%{opacity:0}}
+
+.video-modal{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:250;display:none;align-items:center;justify-content:center;padding:12px}
+.video-box{width:min(92vw,860px);aspect-ratio:16/9;background:black;border-radius:18px;overflow:hidden;position:relative}
+.video-box iframe{width:100%;height:100%;border:none}.close-x{position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:50%;border:none;background:white;cursor:pointer}
+</style>
+</head>
+<body>
+<div id="canvasWrap"><canvas id="threeCanvas"></canvas></div>
+<div class="topbar">
+  <img id="logo" class="logo" src="orjinal.svg" alt="logo" onerror="this.style.display='none'">
+  <div style="display:flex;gap:8px">
+    <button class="icon-btn" id="videoBtn" title="Videoyu İzle">▶</button>
+    <button class="icon-btn" id="soundBtn" title="Sesi Aç/Kapat">🔊</button>
+    <button class="icon-btn" id="themeBtn" title="Tema Değiştir">🌙</button>
+  </div>
+</div>
+
+<div id="questionBox">
+  <h3 id="qLabel" style="font-family:var(--fontUI);font-size:13px;opacity:.9;color:var(--accent);"></h3>
+  <p id="qText"></p>
+  <div class="hint" id="qHint"></div>
+  <div class="progress"><div id="qProgress"></div></div>
+</div>
+
+<div class="grid-hud" id="gridHud"><div class="kbd" id="gridStatus">Köprü kurmak için kelimelere tıkla</div></div>
+
+<div class="screen active" id="coverScreen">
+  <div class="card cover-card">
+    <div class="badge">🌲 BOLU DOĞA VE MİLLİ PARKLAR • MEB UYUMLU • 3B WebGL</div>
+    <h1>Bolu'nun <span>Gizli Cennetleri</span></h1>
+    <p class="cover-sub">Bolu, yeryüzündeki cenneti andıran gölleri ve tabiat parklarıyla doğa harikası bir şehirdir. Sonbaharda sarı ve kızılın her tonuna bürünen <b>Yedigöller Millî Parkı</b>, nilüfer çiçekleriyle süslü <b>Abant Gölü</b> ve çam ağaçlarının suya yansıdığı <b>Gölcük Tabiat Parkı</b> bu güzelliklerin en bilinenleridir.</p>
+    <div class="map-route"><div class="route-step active" id="r1">1 • Abant</div><div class="route-step" id="r2">2 • Gölcük</div><div class="route-step" id="r3">3 • Yedigöller</div></div>
+    <a class="aylin-btn" href="https://drive.google.com/file/d/1-7jvJCl3qBjisXXz4NqDZPrGlBfJ5fJB/view" target="_blank">Aylin Dinç'in çalışmasının tamamına ulaşmak için tıklayınız.</a>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button class="btn btn-primary btn-large" id="startBtn">📸 Fotoğraf Yolculuğunu Başlat</button>
+      <button class="btn btn-secondary" id="howBtn">Nasıl Oynanır?</button>
+    </div>
+    <p class="hint" style="margin-top:10px;color:white;text-shadow:1px 1px 2px black;">Öğrenci: Aylin Dinç • Türkçe Dil Becerileri: uygun tepki, yazım kuralları, probleme çözüm</p>
+  </div>
+</div>
+
+<div class="screen" id="howScreen"><div class="card"><h2 style="font-family:var(--fontDisplay);font-size:26px">Nasıl Oynanır?</h2><ul style="margin:12px 0 0 18px;line-height:1.8"><li><b>Abant:</b> Raycasting - 3D tabelalara tıkla, yazılı etkileşimde en uygun ve kibar tepkiyi seç.</li><li><b>Gölcük:</b> Doğru yazılmış kelimeleri seçerek karşıya geçmek için bir kütük köprüsü inşa et.</li><li><b>Yedigöller:</b> Ahşap panolardaki cümleleri doğru sıraya koyarak probleme çözüm üret.</li></ul><p style="margin-top:12px">Her görev sonrası fotoğraf moduna geçeceksin. Deklanşöre bas!</p><button class="btn btn-primary" style="margin-top:12px" onclick="document.getElementById('howScreen').classList.remove('active');document.getElementById('coverScreen').classList.add('active')">Geri</button></div></div>
+
+<!-- FOTOĞRAF EKRANI -->
+<div class="photo-overlay" id="photoOverlay">
+  <div class="viewfinder">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <img id="photoImg" src="" alt="">
+  </div>
+  <button class="shutter-btn" id="shutterBtn" title="Fotoğraf Çek"></button>
+  <p id="photoCaption"></p>
+  <button class="btn btn-primary" id="btnPhotoNext" style="margin-top:22px;display:none;font-size:16px;padding:14px 30px;">Devam Et →</button>
+</div>
+<div class="flash" id="flash"></div>
+
+<div class="video-modal" id="videoModal"><div class="video-box"><iframe src="https://www.youtube.com/embed/Vqye442zCHU" allowfullscreen></iframe><button class="close-x" id="closeVideo">✕</button></div></div>
+<div class="screen" id="finalScreen"><div class="card cover-card"><h1 style="font-size:42px">Tebrikler! 📸🌲</h1><p class="cover-sub" id="finalText"></p><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px"><a class="btn btn-primary" href="https://memleketim.github.io/14/index.html" style="text-decoration:none;color:white">Haritaya Dön</a><button class="btn btn-secondary" onclick="location.reload()">Yeniden Oyna</button></div></div></div>
+
+<audio id="bgAudio" loop preload="auto"><source src="sesler/doğa.mp3" type="audio/mpeg"></audio>
+<audio id="shutterAudio" preload="auto"><source src="sesler/fotograf.mp3" type="audio/mpeg"></audio>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const canvas = document.getElementById('threeCanvas');
+let scene, camera, perspCam, renderer, controls, raycaster, pointer;
+let clickable=[], currentStage='cover', soundOn=true, player, lives=3;
+let abantIndex=0, yedigollerOrder=[], collected=[];
+let audioCtx;
+
+const qBox=document.getElementById('questionBox'), qLabel=document.getElementById('qLabel'), qText=document.getElementById('qText'), qProgress=document.getElementById('qProgress'), qHint=document.getElementById('qHint');
+const gridHud=document.getElementById('gridHud'), photoOverlay=document.getElementById('photoOverlay'), photoImg=document.getElementById('photoImg');
+
+function initThree(){
+  scene=new THREE.Scene(); scene.fog=new THREE.Fog(0xcfe8d0,18,60);
+  perspCam=new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 200); perspCam.position.set(0,9,14);
+  camera=perspCam;
+  renderer=new THREE.WebGLRenderer({canvas, antialias:true, alpha:true}); renderer.setSize(innerWidth,innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.shadowMap.enabled=true;
+  controls=new OrbitControls(camera, renderer.domElement); controls.enableDamping=true; controls.maxPolarAngle=Math.PI/2.1;
+  raycaster=new THREE.Raycaster(); pointer=new THREE.Vector2();
+  scene.add(new THREE.AmbientLight(0xffffff,0.85));
+  const d=new THREE.DirectionalLight(0xfff8e1,1.1); d.position.set(6,12,4); d.castShadow=true; scene.add(d);
+  addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); });
+  animate();
+}
+function clearScene(){ const lights=scene.children.filter(c=>c.isLight); scene.clear(); lights.forEach(l=>scene.add(l)); clickable=[]; player=null; }
+
+function createTextTexture(text,w=1024,h=420,bg='#fff8e1', textColor='#1d2a1f'){
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); 
+  ctx.fillStyle=bg; ctx.fillRect(0,0,w,h); 
+  ctx.strokeStyle = '#8d6e63'; ctx.lineWidth = 12; ctx.strokeRect(0,0,w,h);
+  ctx.fillStyle=textColor; ctx.font='bold 52px Lora, sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  const words=text.split(' '); let lines=[], line=''; 
+  for(let n=0;n<words.length;n++){ 
+    const test=line+words[n]+' '; 
+    if(ctx.measureText(test).width>w-80 && n>0){ lines.push(line); line=words[n]+' '; } else line=test; 
+  } 
+  lines.push(line);
+  const lineHeight = 65; const startY=h/2-(lines.length-1)*(lineHeight/2); 
+  lines.forEach((l,i)=>ctx.fillText(l,w/2,startY+i*lineHeight));
+  const t=new THREE.CanvasTexture(c); t.needsUpdate=true; return t;
+}
+
+// Kameraya her zaman bakan ve süper net okunan kelime spriteları
+function createWordSprite(text) {
+    const c = document.createElement('canvas'); c.width = 512; c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillRect(0,0,512,256);
+    ctx.strokeStyle = '#2e7d32'; ctx.lineWidth = 14; ctx.strokeRect(0,0,512,256);
+    ctx.fillStyle = '#1d2a1f'; ctx.font = 'bold 56px Lora, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(text, 256, 128);
+    const tex = new THREE.CanvasTexture(c);
+    const mat = new THREE.SpriteMaterial({map: tex});
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(3, 1.5, 1);
+    return sprite;
+}
+
+function makeForest(cnt=65,radius=20){ for(let i=0;i<cnt;i++){ const ang=Math.random()*Math.PI*2, r=8+Math.random()*radius; const x=Math.cos(ang)*r, z=Math.sin(ang)*r, h=2+Math.random()*3; const trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.18,h,6), new THREE.MeshStandardMaterial({color:0x5d4037})); trunk.position.set(x,h/2-0.5,z); trunk.castShadow=true; scene.add(trunk); const leaves=new THREE.Mesh(new THREE.ConeGeometry(0.9,2,7), new THREE.MeshStandardMaterial({color:0x2e7d32})); leaves.position.set(x,h+0.6,z); scene.add(leaves);} }
+function makeLake(col=0x7ec8e3,size=9){ const lake=new THREE.Mesh(new THREE.CircleGeometry(size,40), new THREE.MeshStandardMaterial({color:col, roughness:0.2, metalness:0.1, transparent:true, opacity:0.9})); lake.rotation.x=-Math.PI/2; lake.position.y=-0.48; lake.receiveShadow=true; scene.add(lake); const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80), new THREE.MeshStandardMaterial({color:0xaed581})); ground.rotation.x=-Math.PI/2; ground.position.y=-0.55; scene.add(ground); }
+
+const abantDialogs=[
+  {npc:"Abant Gölü'nde nilüferler ne zaman açıyor, biliyor musun?", opts:[{t:"Evet, nilüferler yaz başında açar ve gölü beyaza boyar.", ok:true},{t:"Bilmiyorum, sanırım bu konuda bilgim eksik.", ok:false},{t:"Nilüferler sadece kış mevsiminde açar.", ok:false}]},
+  {npc:"Fotoğraf çekmek istiyorum ama çok kalabalık, ne yapmalıyım?", opts:[{t:"Merak etme, sabah erken gelirsek göl daha sakin olur.", ok:true},{t:"Kalabalık olması üzücü, belki başka yere gitmelisin.", ok:false},{t:"Maalesef yapacak bir şey yok.", ok:false}]},
+  {npc:"Doğa yürüyüşünde çöpümü yere atsam olur mu?", opts:[{t:"Hayır, çöpünü yanında götürmeli ve doğayı tertemiz bırakmalısın.", ok:true},{t:"Küçük bir çöp doğaya zarar vermez.", ok:false},{t:"Bir şey olmaz, doğa kendini temizler.", ok:false}]}
+];
+
+function initAbant(){
+  clearScene(); currentStage='abant'; camera=perspCam; controls.object=camera; controls.enabled=true; gridHud.style.display='none';
+  scene.fog=new THREE.Fog(0xcfe8d0,12,45); makeLake(0x7ec8e3,9); makeForest(60,18);
+  for(let i=0;i<16;i++){ const p=new THREE.Mesh(new THREE.CylinderGeometry(0.38,0.38,0.05,10), new THREE.MeshStandardMaterial({color:0x2e7d32})); const a=Math.random()*Math.PI*2, r=Math.random()*5.5; p.position.set(Math.cos(a)*r,-0.4,Math.sin(a)*r); scene.add(p); }
+  
+  clickable=[]; 
+  let opts = [...abantDialogs[abantIndex].opts].sort(() => Math.random() - 0.5);
+  opts.forEach((opt,i)=>{ 
+    const g=new THREE.Group(); 
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.07,0.07,2.2,8), new THREE.MeshStandardMaterial({color:0x8d6e63})); pole.position.y=1.1; 
+    const board=new THREE.Mesh(new THREE.BoxGeometry(3.0,1.4,0.12), new THREE.MeshStandardMaterial({map:createTextTexture(opt.t)})); 
+    board.position.set(0,2.3,0); board.userData=opt; board.castShadow=true; 
+    g.add(pole); g.add(board); g.position.set((i-1)*3.8,0,3.5); 
+    scene.add(g); clickable.push(board); 
+  });
+  
+  qLabel.innerHTML=`🔊 <b>Sesli Yönerge:</b> ABANT ${abantIndex+1}/3 - UYGUN TEPKİ`; 
+  qText.textContent=abantDialogs[abantIndex].npc; 
+  qHint.textContent = "3D tabelalara tıkla / dokun • Türkçe karakterlere dikkat!";
+  qProgress.style.width=`${abantIndex/3*100}%`; qBox.style.display='block';
+  document.getElementById('r1').classList.add('active');
+}
+function advanceAbant(){ abantIndex++; if(abantIndex<abantDialogs.length){ initAbant(); } else { enterPhoto('abant'); } }
+
+// YENİ GÖLCÜK: GERÇEK KÖPRÜ KURMA MEKANİĞİ
+const golcukPairs=[
+  {ok:"Gölcük'te", bad:"Gölcükte"}, {ok:"herkes", bad:"herkez"}, {ok:"yansıma", bad:"yanısıma"},
+  {ok:"pırıl pırıl", bad:"pırılpırıl"}, {ok:"çam ağaçları", bad:"çamağaçları"}
+];
+let bridgeStep = 0;
+let currentBridgeOptions = [];
+
+function initGolcuk(){
+  clearScene(); currentStage='golcuk'; camera=perspCam; controls.enabled=true; lives=3; bridgeStep=0;
+  
+  // Kamera ayarları
+  camera.position.set(0, 4, 12);
+  controls.target.set(0, 0, 5);
+  
+  scene.fog=new THREE.Fog(0xb3d9ff,5,40); makeLake(0x4fc3f7,14);
+  makeForest(40, 22);
+
+  // Başlangıç iskelesi
+  const startPier = new THREE.Mesh(new THREE.BoxGeometry(4, 0.4, 4), new THREE.MeshStandardMaterial({color:0x5d4037}));
+  startPier.position.set(0, -0.2, 9); scene.add(startPier);
+
+  // Hedef ada
+  const endPier = new THREE.Mesh(new THREE.CylinderGeometry(5, 5, 0.4, 32), new THREE.MeshStandardMaterial({color:0x2e7d32}));
+  endPier.position.set(0, -0.2, -4); scene.add(endPier);
+
+  // Karakter
+  player = new THREE.Mesh(new THREE.CapsuleGeometry(0.3, 0.8, 4, 16), new THREE.MeshStandardMaterial({color:0xff8f00}));
+  player.position.set(0, 0.8, 9); scene.add(player);
+  
+  qLabel.innerHTML="🔊 <b>Sesli Yönerge:</b> GÖLCÜK - KÖPRÜ İNŞAATI"; 
+  qText.textContent="Karşıya geçmek için köprü kurmalısın! Suda yüzen doğru yazılmış kütüğe tıkla ve köprüyü inşa et."; 
+  qHint.textContent = "Kamerayı farenle çevirebilirsin, yazılar her zaman sana dönük olacaktır.";
+  qProgress.style.width='0%';
+  qBox.style.display='block'; gridHud.style.display='flex'; document.getElementById('gridStatus').textContent=`Hak: ${lives} • Adım: ${bridgeStep}/5`;
+  document.getElementById('r1').classList.remove('active'); document.getElementById('r1').classList.add('done'); document.getElementById('r2').classList.add('active');
+
+  spawnBridgeOptions();
+}
+
+function spawnBridgeOptions() {
+    if(bridgeStep >= golcukPairs.length) {
+        setTimeout(() => enterPhoto('golcuk'), 800);
+        return;
+    }
+    const pair = golcukPairs[bridgeStep];
+    const isLeftOk = Math.random() > 0.5;
+    const targetZ = 7 - bridgeStep * 2; // Köprünün yeni parçasının oturacağı Z koordinatı
+
+    const createPlank = (word, isOk, isLeft) => {
+        const xPos = isLeft ? -2.5 : 2.5;
+        // Kütük
+        const plank = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.3, 1.8), new THREE.MeshStandardMaterial({color:0x8d6e63}));
+        plank.position.set(xPos, 0, targetZ - 1.5);
+        plank.userData = { ok: isOk, targetX: 0, targetZ: targetZ, isMoving: false };
+        
+        // Sprite (Yazı)
+        const sprite = createWordSprite(word);
+        sprite.position.set(0, 1.4, 0); // Kütüğün üstünde havada dursun
+        plank.add(sprite);
+
+        scene.add(plank);
+        clickable.push(plank);
+        currentBridgeOptions.push(plank);
+    };
+
+    createPlank(isLeftOk ? pair.ok : pair.bad, isLeftOk, true);
+    createPlank(!isLeftOk ? pair.ok : pair.bad, !isLeftOk, false);
+}
+
+function handleBridgeClick(clickedPlank) {
+    if(clickedPlank.userData.isMoving) return;
+    
+    clickable = clickable.filter(c => !currentBridgeOptions.includes(c));
+    const otherPlank = currentBridgeOptions.find(c => c !== clickedPlank);
+    
+    currentBridgeOptions.forEach(p => p.userData.isMoving = true);
+
+    if (clickedPlank.userData.ok) {
+        playSynth(700, 0.2, 'sine');
+        document.getElementById('gridStatus').textContent = `Doğru! Köprü kuruluyor...`;
+        
+        // Animasyon Değişkenleri
+        let t = 0;
+        const startX = clickedPlank.position.x, startZ = clickedPlank.position.z;
+        const targetX = clickedPlank.userData.targetX, targetZ = clickedPlank.userData.targetZ;
+        
+        // Diğerini batır
+        sinkPlank(otherPlank);
+
+        // Doğru kütüğü köprüye oturt
+        const movePlank = () => {
+            t += 0.04;
+            if (t <= 1) {
+                clickedPlank.position.x = startX + (targetX - startX) * t;
+                clickedPlank.position.z = startZ + (targetZ - startZ) * t;
+                clickedPlank.position.y = Math.sin(t * Math.PI) * 1.5; // Kavisli uçuş efekti
+                requestAnimationFrame(movePlank);
+            } else {
+                clickedPlank.position.set(targetX, 0, targetZ);
+                clickedPlank.children[0].visible = false; // Yazıyı gizle, köprü parçası oldu
+                
+                // Oyuncuyu ilerlet
+                let pt = 0;
+                const pStartZ = player.position.z;
+                const movePlayerAnim = () => {
+                    pt += 0.05;
+                    if (pt <= 1) {
+                        player.position.z = pStartZ + (targetZ - pStartZ) * pt;
+                        camera.position.z = player.position.z + 3; // Kamera takip etsin
+                        controls.target.set(0, 0, player.position.z - 4);
+                        requestAnimationFrame(movePlayerAnim);
+                    } else {
+                        bridgeStep++;
+                        qProgress.style.width=`${bridgeStep/5*100}%`;
+                        document.getElementById('gridStatus').textContent = `Hak: ${lives} • Adım: ${bridgeStep}/5`;
+                        currentBridgeOptions = [];
+                        spawnBridgeOptions();
+                    }
+                }
+                movePlayerAnim();
+            }
+        };
+        movePlank();
+
+    } else {
+        // Yanlış!
+        playSynth(150, 0.35, 'square');
+        lives--;
+        document.getElementById('gridStatus').textContent = `Yanlış kelime! Hak: ${lives}`;
+        
+        sinkPlank(clickedPlank);
+        sinkPlank(otherPlank);
+
+        if (lives <= 0) {
+            setTimeout(initGolcuk, 1500);
+        } else {
+            setTimeout(() => {
+                currentBridgeOptions = [];
+                spawnBridgeOptions();
+                document.getElementById('gridStatus').textContent = `Hak: ${lives} • Adım: ${bridgeStep}/5`;
+            }, 1000);
+        }
+    }
+}
+
+function sinkPlank(plank) {
+    let k = 0;
+    if(plank.children[0]) plank.children[0].visible = false; // Batarken yazıyı gizle
+    const s = () => {
+        plank.position.y -= 0.1;
+        k++;
+        if (k < 20) requestAnimationFrame(s);
+        else scene.remove(plank);
+    };
+    s();
+}
+
+const ySentences=[{id:1,t:"Yedigöller'de sonbahar yaprakları yere altın gibi serilir."},{id:2,t:"Ancak bazı ziyaretçiler çöplerini yerde bırakıyor."},{id:3,t:"Bu durum hem hayvanlara zarar veriyor hem de gölleri kirletiyor."},{id:4,t:"Bunun için çöp kutularını kullanmalı ve doğayı temiz tutmalıyız."},{id:5,t:"O zaman Yedigöller hep cennet gibi kalır."}];
+const yExpected=[1,2,3,4,5];
+function initYedigoller(){
+  clearScene(); currentStage='yedigoller'; camera=perspCam; controls.object=camera; controls.enabled=true; yedigollerOrder=[]; gridHud.style.display='none';
+  scene.fog=new THREE.Fog(0xffcc80,10,40); 
+  for(let i=0;i<7;i++){ const s=new THREE.Mesh(new THREE.CircleGeometry(1.2,18), new THREE.MeshStandardMaterial({color:0x4db6ac})); const a=i/7*Math.PI*2; s.position.set(Math.cos(a)*6,-0.45,Math.sin(a)*6); s.rotation.x=-Math.PI/2; scene.add(s); } 
+  makeForest(75,20);
+  
+  const shuffled=[...ySentences].sort(()=>Math.random()-0.5);
+  shuffled.forEach((sent,i)=>{ 
+    const xPos = (i - 2) * 3.2; 
+    const zPos = Math.abs(i - 2) * 1.0 - 2.5; 
+    const pole=new THREE.Mesh(new THREE.CylinderGeometry(0.1,0.1,1.5,8), new THREE.MeshStandardMaterial({color:0x8d6e63})); 
+    pole.position.set(xPos, 0.75, zPos); pole.userData=sent;
+    const label=new THREE.Mesh(new THREE.PlaneGeometry(3.0, 1.4), new THREE.MeshStandardMaterial({map:createTextTexture(sent.t, 1024, 512, '#fff3e0'), transparent:true})); 
+    label.position.set(xPos, 1.8, zPos); label.lookAt(camera.position); label.userData=sent; 
+    scene.add(pole); scene.add(label); clickable.push(pole); clickable.push(label); 
+  });
+  
+  qLabel.innerHTML="🔊 <b>Sesli Yönerge:</b> YEDİGÖLLER - PROBLEME ÇÖZÜM"; 
+  qText.textContent="Panolardaki cümleler karışmış! Paragrafı doğru sıraya koymak için panolara sırayla tıkla. Durum → Problem → Çözüm."; 
+  qHint.textContent = "Seçimi iptal etmek istersen aynı panoya tekrar tıklayabilirsin.";
+  qProgress.style.width='0%'; qBox.style.display='block';
+  document.getElementById('r2').classList.remove('active'); document.getElementById('r2').classList.add('done'); document.getElementById('r3').classList.add('active');
+}
+
+function handleYedigollerClick(obj){
+  const id=obj.userData.id; 
+  if(yedigollerOrder.includes(id)) {
+     yedigollerOrder = yedigollerOrder.filter(item => item !== id);
+     playSynth(200,0.15,'square');
+  } else {
+     yedigollerOrder.push(id);
+     playSynth(400+yedigollerOrder.length*90,0.15,'sine');
+  }
+  
+  if (yedigollerOrder.length === 0) {
+      qText.textContent = "Panolardaki cümleler karışmış! Paragrafı doğru sıraya koymak için panolara sırayla tıkla. Durum → Problem → Çözüm.";
+  } else {
+      qText.innerHTML = `<b>Seçilen Sıra:</b> <br>${yedigollerOrder.map(i=>ySentences.find(s=>s.id===i).t).join(' ')}`; 
+  }
+  qProgress.style.width=`${yedigollerOrder.length/5*100}%`; 
+  
+  if(yedigollerOrder.length===5){ 
+    if(JSON.stringify(yedigollerOrder)===JSON.stringify(yExpected)){ 
+      setTimeout(()=>enterPhoto('yedigoller'),700); 
+    } else { 
+      qText.innerHTML=`<span style="color:#d32f2f;font-weight:bold;">Sıra hatalı! Doğrusu:</span> ${yExpected.map(i=>ySentences.find(s=>s.id===i).t).join(' ')} <br><em>Panolar sıfırlanıyor...</em>`; 
+      setTimeout(initYedigoller, 4500);
+    } 
+  }
+}
+
+function enterPhoto(place){
+  currentStage=place+'_photo'; qBox.style.display='none'; gridHud.style.display='none';
+  const map={
+    abant:{src:'abant.png', cap:'Abant Gölü - Nilüferlerle kaplı göleti fotoğrafladın!'}, 
+    golcuk:{src:'golcuk.png', cap:'Gölcük Tabiat Parkı - Yansıma harikası.'}, 
+    yedigoller:{src:'yedigoller.png', cap:'Yedigöller Millî Parkı - Sonbaharın cenneti.'}
+  };
+  const info=map[place]; 
+  photoImg.src=info.src; 
+  photoImg.onerror=()=>{ photoImg.src='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="#123626"/><text x="50%" y="50%" fill="#e8c477" font-size="28" text-anchor="middle" font-family="serif">${place.toUpperCase()} - (Görsel Bulunamadı)</text></svg>`); };
+  
+  document.getElementById('photoCaption').textContent=info.cap; 
+  document.getElementById('shutterBtn').style.display = 'block';
+  document.getElementById('btnPhotoNext').style.display = 'none';
+  photoOverlay.style.display='flex'; 
+  collected.push(place); 
+}
+
+function doShutter(){
+  const f=document.getElementById('flash'); 
+  f.classList.add('go'); setTimeout(()=>f.classList.remove('go'), 500);
+  playShutter(); 
+  document.getElementById('shutterBtn').style.display = 'none';
+  document.getElementById('btnPhotoNext').style.display = 'inline-block';
+}
+
+document.getElementById('btnPhotoNext').addEventListener('click', () => {
+  photoOverlay.style.display='none';
+  if(collected.includes('abant')&&!collected.includes('golcuk')&&abantIndex>=3){ initGolcuk(); }
+  else if(collected.includes('golcuk')&&collected.length===2){ initYedigoller(); }
+  else if(collected.length===3){ showFinale(); }
+});
+
+function showFinale(){ document.getElementById('finalScreen').classList.add('active'); document.getElementById('finalText').textContent=`3 cenneti de gezdin! Abant'ta uygun tepki, Gölcük'te doğru yazım, Yedigöller'de probleme çözüm ürettin. Aylin Dinç'in çalışmasından ilhamla doğayı koru!`; clearScene(); makeLake(0x81d4fa,9); makeForest(80,20); qBox.style.display='none'; document.getElementById('r3').classList.add('done'); }
+
+function onPointer(e){
+  const rect=renderer.domElement.getBoundingClientRect(); const cx=e.clientX||e.touches?.[0]?.clientX, cy=e.clientY||e.touches?.[0]?.clientY; if(!cx) return;
+  pointer.set((cx-rect.left)/rect.width*2-1, -((cy-rect.top)/rect.height*2-1)); raycaster.setFromCamera(pointer,camera); 
+  
+  // Raycaster sprite'ları ve kütükleri kapsayacak şekilde recursive(true) yapıldı
+  const hits=raycaster.intersectObjects(clickable, true);
+  if(hits.length){ 
+    let o=hits[0].object; 
+    // Eğer tıklanan şey bir yazı (sprite) ise, ebeveynine (kütüğe) işlemi aktar.
+    while(o && !clickable.includes(o)) o = o.parent;
+    if(!o) return;
+
+    if(currentStage==='abant'){ 
+      if(o.userData.ok){ playSynth(880,0.2,'sine'); advanceAbant(); } 
+      else { playSynth(120,0.3,'square'); qText.innerHTML=`<span style="color:#d32f2f;font-weight:bold;">Bu uygun ve kibar bir tepki değil!</span> Daha nazik ve bilgilendirici olanı seçmeyi dene.`; } 
+    } else if(currentStage==='golcuk'){
+      handleBridgeClick(o);
+    } else if(currentStage==='yedigoller'){ 
+      handleYedigollerClick(o); 
+    } 
+  }
+}
+
+function ensureCtx(){ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }
+function playSynth(freq,dur,type){ if(!soundOn) return; try{ ensureCtx(); const o=audioCtx.createOscillator(), g=audioCtx.createGain(); o.type=type; o.frequency.value=freq; o.connect(g); g.connect(audioCtx.destination); g.gain.setValueAtTime(0.18,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur); o.start(); o.stop(audioCtx.currentTime+dur);}catch{} }
+function playShutter(silent){ const a=document.getElementById('shutterAudio'); if(soundOn&&a){ a.currentTime=0; a.play().catch(()=>{ if(!silent) playSynth(1000,0.12,'square'); }); } else if(!silent) playSynth(1000,0.12,'square'); }
+
+function animate(){ requestAnimationFrame(animate); controls?.update(); if(renderer&&scene&&camera) renderer.render(scene,camera); }
+
+function startGame(){
+  document.getElementById('coverScreen').classList.remove('active');
+  document.getElementById('coverScreen').style.display='none';
+  document.getElementById('howScreen').classList.remove('active');
+  document.getElementById('bgAudio').play().catch(()=>{});
+  abantIndex=0; collected=[]; lives=3;
+  initAbant();
+}
+window.startGame=startGame;
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('startBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); startGame(); }, {passive:false});
+document.getElementById('howBtn').addEventListener('click', ()=>{ document.getElementById('coverScreen').classList.remove('active'); document.getElementById('howScreen').classList.add('active'); });
+document.getElementById('videoBtn').addEventListener('click', ()=>document.getElementById('videoModal').style.display='flex');
+document.getElementById('closeVideo').addEventListener('click', ()=>document.getElementById('videoModal').style.display='none');
+document.getElementById('soundBtn').addEventListener('click', ()=>{ soundOn=!soundOn; document.getElementById('soundBtn').textContent=soundOn?'🔊':'🔇'; const bg=document.getElementById('bgAudio'); if(soundOn) bg.play().catch(()=>{}); else bg.pause(); });
+document.getElementById('themeBtn').addEventListener('click', ()=>{ const cur=document.documentElement.getAttribute('data-theme'); const nxt=cur==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',nxt); document.getElementById('themeBtn').textContent=nxt==='dark'?'☀️':'🌙'; });
+document.getElementById('shutterBtn').addEventListener('click', doShutter);
+
+initThree();
+canvas.addEventListener('click', onPointer);
+canvas.addEventListener('touchstart', onPointer, {passive:true});
+</script>
+</body>
+</html>
