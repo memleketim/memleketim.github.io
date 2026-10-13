@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Akşemsettin ve Manevi Miras - Eğitici Macera</title>
+<!-- Google Fonts: Cinzel, Playfair Display, Montserrat -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&amp;family=Montserrat:wght@400;500;600;700;800&amp;family=Playfair+Display:ital,wght@0,600;0,700;1,600&amp;display=swap" rel="stylesheet"/>
+<!-- FontAwesome for rich icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<style>
+:root {
+    --primary-gold: #e5b358;
+    --gold-dark: #b8860b;
+    --gold-light: #fef3c7;
+    --ottoman-teal: #0d3b43;
+    --teal-light: #164e63;
+    --deep-night: #06181b;
+    --card-bg: rgba(13, 59, 67, 0.88);
+    --card-border: rgba(229, 179, 88, 0.35);
+    --text-main: #f8fafc;
+    --text-muted: #cbd5e1;
+    --success: #10b981;
+    --ruby: #e11d48
+}
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none
+}
+body {
+    font-family: "Montserrat", sans-serif;
+    background-color: var(--deep-night);
+    background-image: radial-gradient(circle at 50% 20%, rgba(22, 78, 99, 0.5) 0%, rgba(6, 24, 27, 0.95) 75%), url('orjinal.svg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative
+}
+/* Fixed Brand Logo in Top-Left */
+.brand-logo-fixed {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    z-index: 100;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+.brand-logo-fixed img {
+    height: 48px;
+    width: auto;
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.7))
+}
+.brand-logo-fixed .fallback-badge {
+    display: none;
+    background: rgba(13, 59, 67, 0.85);
+    border: 1px solid var(--primary-gold);
+    color: var(--primary-gold);
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: "Cinzel", serif;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(8px)
+}
+/* Sound Effects & Audio helper bar */
+.sound-controls {
+    position: fixed;
+    top: 14px;
+    right: 16px;
+    z-index: 100;
+    display: flex;
+    gap: 10px
+}
+.btn-icon-hud {
+    background: rgba(13, 59, 67, 0.85);
+    border: 1px solid var(--card-border);
+    color: var(--primary-gold);
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(8px)
+}
+.btn-icon-hud:hover {
+    transform: scale(1.08);
+    border-color: var(--primary-gold);
+    background: var(--ottoman-teal);
+    color: #fff
+}
+/* Main Container */
+.game-viewport {
+    max-width: 1050px; /* Görsel ve video yan yana daha rahat dursun diye genişletildi */
+    width: 100%;
+    margin: 0 auto;
+    padding: 70px 16px 90px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center
+}
+/* Sections / Screens */
+.screen {
+    display: none;
+    animation: fadeIn 0.4s ease forwards
+}
+.screen.active {
+    display: flex;
+    flex-direction: column;
+    gap: 20px
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Card Panels */
+.game-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
+    position: relative
+}
+
+/* Intro Layout Styles (Görsel ve İçeriği Yan Yana Dizmek İçin) */
+.intro-layout {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    align-items: center;
+}
+.intro-image-wrapper {
+    flex: 0 0 28%; /* Sol taraf %28 genişlik alır */
+    max-width: 280px;
+    display: flex;
+    justify-content: center;
+}
+.intro-image-wrapper img {
+    width: 100%;
+    aspect-ratio: 9/16;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 2px solid var(--primary-gold);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+}
+.intro-content-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Headings */
+h1, h2, h3 {
+    font-family: "Cinzel", serif;
+    color: var(--primary-gold);
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5)
+}
+.instruction-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: rgba(6, 24, 27, 0.6);
+    border-left: 4px solid var(--primary-gold);
+    padding: 12px 16px;
+    border-radius: 8px 12px 12px 8px;
+    margin-bottom: 16px
+}
+.instruction-text {
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 500;
+    color: #f1f5f9
+}
+.btn-tts {
+    background: linear-gradient(135deg, var(--gold-dark), var(--primary-gold));
+    color: #06181b;
+    border: none;
+    border-radius: 50%;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(229, 179, 88, 0.4)
+}
+.btn-tts:hover {
+    transform: scale(1.1)
+}
+.btn-tts.speaking {
+    animation: pulse 1s infinite alternate
+}
+@keyframes pulse {
+    from { transform: scale(1); box-shadow: 0 0 5px var(--primary-gold); } 
+    to { transform: scale(1.15); box-shadow: 0 0 20px var(--primary-gold); }
+}
+/* Buttons */
+.btn-action {
+    background: linear-gradient(135deg, #e5b358, #b8860b);
+    color: #06181b;
+    font-family: "Cinzel", serif;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 14px 28px;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 6px 20px rgba(184, 134, 11, 0.4);
+    transition: all 0.25s ease;
+    text-decoration: none
+}
+.btn-action:hover {
+    transform: translatey(-2px);
+    box-shadow: 0 8px 25px rgba(229, 179, 88, 0.6);
+    color: #000
+}
+.btn-action:active {
+    transform: translatey(1px)
+}
+.btn-secondary {
+    background: rgba(22, 78, 99, 0.8);
+    color: #fff;
+    border: 1px solid var(--primary-gold);
+    padding: 10px 20px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s
+}
+.btn-secondary:hover {
+    background: var(--ottoman-teal)
+}
+/* Video Player Screen Styles */
+.video-mockup-wrapper {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    background: #000;
+    border: 2px solid var(--primary-gold);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+    aspect-ratio: 16/9;
+    width: 100%
+}
+.video-mockup-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none
+}
+.video-custom-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(6, 24, 27, 0.9);
+    padding: 10px 16px;
+    border-radius: 12px;
+    margin-top: 10px;
+    border: 1px solid var(--card-border)
+}
+.scrubber-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer
+}
+.scrubber-fill {
+    width: 45%;
+    height: 100%;
+    background: var(--primary-gold);
+    border-radius: 4px;
+    position: relative
+}
+.scrubber-fill::after {
+    content: "";
+    position: absolute;
+    right: -5px;
+    top: -3px;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.5)
+}
+/* Bottom Academic Credit Banner */
+.academic-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 95;
+    background: linear-gradient(90deg, rgba(6, 24, 27, 0.98), rgba(13, 59, 67, 0.98), rgba(6, 24, 27, 0.98));
+    border-top: 1px solid var(--card-border);
+    padding: 10px 16px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.5)
+}
+.academic-banner a {
+    color: var(--primary-gold);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s
+}
+.academic-banner a:hover {
+    color: #fff;
+    text-decoration: underline
+}
+/* Mechanic Selection / Progression Tracker */
+.quest-timeline {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 20px;
+    position: relative
+}
+.quest-step {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    cursor: default
+}
+.quest-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: all 0.3s
+}
+.quest-step.active .quest-dot {
+    background: var(--primary-gold);
+    color: #06181b;
+    border-color: #fff;
+    box-shadow: 0 0 12px var(--primary-gold)
+}
+.quest-step.completed .quest-dot {
+    background: var(--success);
+    color: #fff;
+    border-color: #a7f3d0
+}
+.quest-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted)
+}
+.quest-step.active .quest-label {
+    color: var(--primary-gold);
+    font-weight: 700
+}
+/* GAME 1: Microscope & Microbe Hunter */
+.microscope-lens {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 15px auto;
+    border-radius: 50%;
+    background: radial-gradient(circle, #0e4443 20%, #031518 90%);
+    border: 8px solid #233b43;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), 0 0 25px rgba(229, 179, 88, 0.4);
+    overflow: hidden;
+    cursor: crosshair
+}
+.lens-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(229, 179, 88, 0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(229, 179, 88, 0.15) 1px, transparent 1px);
+    background-size: 25px 25px;
+    pointer-events: none
+}
+.germ-target {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #ef4444, #7f1d1d);
+    border: 2px dashed #fca5a5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+    animation: floatGerm 3s infinite ease-in-out alternate;
+    transition: transform 0.15s
+}
+.germ-target:active {
+    transform: scale(0.6)
+}
+@keyframes floatGerm {
+    0% { transform: translate(0, 0) rotate(0deg); } 
+    100% { transform: translate(15px, 20px) rotate(45deg); }
+}
+/* GAME 2: Moral Mentor */
+.moral-scene {
+    display: flex;
+    flex-direction: column;
+    gap: 15px
+}
+.dialogue-box {
+    background: rgba(6, 24, 27, 0.7);
+    border: 1px solid var(--primary-gold);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    align-items: center
+}
+.avatar-fatih {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: #78350f;
+    border: 2px solid var(--primary-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--primary-gold);
+    flex-shrink: 0
+}
+.dialogue-text {
+    font-style: italic;
+    color: #f8fafc;
+    font-size: 14.5px
+}
+.moral-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+}
+.choice-btn {
+    background: rgba(13, 59, 67, 0.6);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    color: #fff;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px
+}
+.choice-btn:hover {
+    background: rgba(22, 78, 99, 0.9);
+    border-color: var(--primary-gold);
+    transform: translatex(4px)
+}
+/* GAME 3: Sacred Discovery */
+.excavation-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 15px auto;
+    max-width: 360px
+}
+.tile-slot {
+    aspect-ratio: 1;
+    background: #1e293b;
+    border: 2px solid #475569;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.25s;
+    color: var(--primary-gold)
+}
+.tile-slot:hover {
+    border-color: var(--primary-gold);
+    background: #334155
+}
+.tile-slot.revealed {
+    background: #064e3b;
+    border-color: #34d399;
+    cursor: default;
+    animation: flipTile 0.3s ease
+}
+.tile-slot.wrong {
+    background: #450a0a;
+    border-color: #ef4444;
+    opacity: 0.7
+}
+@keyframes flipTile {
+    from { transform: rotateY(90deg); } 
+    to { transform: rotateY(0deg); }
+}
+/* GAME 4: Tabib-ül-Ervah */
+.apothecary-bench {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin: 15px 0
+}
+.ingredient-item {
+    background: rgba(6, 24, 27, 0.8);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    width: 120px;
+    transition: all 0.2s
+}
+.ingredient-item:hover {
+    border-color: var(--primary-gold);
+    transform: translatey(-3px);
+    background: rgba(22, 78, 99, 0.6)
+}
+.ingredient-item.selected {
+    border-color: #10b981;
+    background: rgba(16, 185, 129, 0.2)
+}
+.ingredient-icon {
+    font-size: 26px
+}
+.ingredient-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center
+}
+/* Score and Status displays */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(229, 179, 88, 0.15);
+    border: 1px solid var(--primary-gold);
+    color: var(--primary-gold);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700
+}
+/* Result / Certificate Screen */
+.certificate-frame {
+    border: 3px double var(--primary-gold);
+    border-radius: 16px;
+    padding: 24px;
+    background: radial-gradient(circle, rgba(13, 59, 67, 0.95), rgba(6, 24, 27, 0.98));
+    text-align: center
+}
+.wisdom-quote {
+    font-family: "Playfair Display", serif;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #fef3c7;
+    margin: 16px 0;
+    padding: 12px;
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border)
+}
+/* Feedback Overlay / Toast */
+.toast-msg {
+    position: fixed;
+    top: 70px;
+    left: 50%;
+    transform: translatex(-50%);
+    background: #0f766e;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid #5eead4;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease
+}
+.toast-msg.show {
+    opacity: 1
+}
+
+/* Mobil Cihazlar İçin Uyumluluk */
+@media (max-width: 768px) {
+    .intro-layout { flex-direction: column; gap: 20px; }
+    .intro-image-wrapper { flex: 0 0 auto; max-width: 180px; }
+}
+
+@media (max-width: 600px) {
+    .game-viewport { padding-top: 65px; padding-bottom: 95px }
+    .game-card { padding: 18px 14px }
+    .brand-logo-fixed img { height: 38px }
+    h1 { font-size: 20px !important }
+    .instruction-text { font-size: 13.5px }
+    .microscope-lens { width: 240px; height: 240px }
+}
+</style>
+</head>
+<body>
+
+<!-- Harici Ses Dosyaları (HTML5 Audio) -->
+<audio id="snd-click" src="click.mp3" preload="auto"></audio>
+<audio id="snd-success" src="success.mp3" preload="auto"></audio>
+<audio id="snd-error" src="error.mp3" preload="auto"></audio>
+
+<!-- Brand Fixed Logo -->
+<div class="brand-logo-fixed" id="brandLogoContainer">
+<img alt="Manevi Miras Logo" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';" src="orjinal.svg"/>
+<div class="fallback-badge" id="logoFallback">
+<i class="fa-solid fa-moon me-1"></i> AKŞEMSETTİN
+    </div>
+</div>
+<!-- Sound & TTS Controls (Sağ üst) -->
+<div class="sound-controls">
+<button class="btn-icon-hud" id="toggleSoundBtn" onclick="toggleAudio()" title="Ses Aç/Kapat">
+<i class="fa-solid fa-volume-high"></i>
+</button>
+</div>
+<!-- Feedback Toast -->
+<div class="toast-msg" id="toast">Harika! Doğru adım.</div>
+
+<!-- Main Game Viewport -->
+<main class="game-viewport">
+<!-- 1. GİRİŞ & VİDEO TANITIM EKRANI -->
+<section class="screen active" id="screenIntro">
+<div class="game-card intro-layout">
+    
+    <!-- SOL TARAF: Akşemsettin Portre Görseli -->
+    <div class="intro-image-wrapper">
+        <img src="aksemsettin.png" alt="Akşemsettin Hazretleri">
+    </div>
+
+    <!-- SAĞ TARAF: Oyun ve Video İçerikleri -->
+    <div class="intro-content-wrapper">
+        <div style="text-align: center; margin-bottom: 16px;">
+        <span class="status-badge"><i class="fa-solid fa-star"></i> Türk Kültürü &amp; Bilim Öncüleri</span>
+        <h1 style="font-size: 24px; margin-top: 8px;">🕌 Akşemsettin ve Manevi Miras</h1>
+        <p style="color: var(--text-muted); font-size: 13.5px; margin-top: 4px;">
+                    Fatih Sultan Mehmet’in hocası, hekim, mutasavvıf ve mikrobiyolojinin öncüsü bilge şahsiyeti tanıyalım!
+                </p>
+        </div>
+        <!-- Yönerge & AI TTS Butonu -->
+        <div class="instruction-bar">
+        <div class="instruction-text" id="introTtsText">
+                    Sevgili öğrenciler, maceramıza başlamadan önce büyük bilgemiz Akşemsettin'i anlatan bu kısa videoyu dikkatle izleyiniz. Ardından "İzledim, Oyuna Başla" butonuna tıklayarak keşfe çıkabilirsiniz!
+                </div>
+        <button class="btn-tts" onclick="speakText('introTtsText')" title="Yönergeyi Seslendir">
+        <i class="fa-solid fa-volume-high"></i>
+        </button>
+        </div>
+        <!-- Video Player Alanı -->
+        <div class="video-mockup-wrapper">
+        <iframe allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="" id="videoFrame" src="https://www.youtube.com/embed/QVjApXaufh8?enablejsapi=1" title="Akşemsettin Tanıtım Videosu"></iframe>
+        </div>
+        <!-- Özel Video Kontrol Arayüzü -->
+        <div class="video-custom-controls">
+        <button class="btn-secondary" onclick="simulateVideoAction('play')" style="padding: 6px 12px; font-size: 12px;">
+        <i class="fa-solid fa-play"></i> Oynat
+                </button>
+        <button class="btn-secondary" onclick="simulateVideoAction('pause')" style="padding: 6px 12px; font-size: 12px;">
+        <i class="fa-solid fa-pause"></i> Durdur
+                </button>
+        <div class="scrubber-bar" onclick="scrubVideo(event)">
+        <div class="scrubber-fill" id="scrubberFill"></div>
+        </div>
+        <span style="font-size: 11px; color: var(--text-muted); font-family: monospace;">02:14 / 04:45</span>
+        </div>
+        <!-- Aksiyon Butonu -->
+        <div style="text-align: center; margin-top: 20px;">
+        <button class="btn-action" onclick="startGameFlow()">
+        <i class="fa-solid fa-compass"></i> İzledim, Oyuna Başla!
+                </button>
+        </div>
+    </div>
+
+</div>
+</section>
+<!-- OYUN MEKANİKLERİ ANA ÇERÇEVESİ (4 AŞAMA) -->
+<section class="screen" id="screenGame">
+<!-- İlerleme Takibi (Quest Timeline) -->
+<div class="quest-timeline">
+<div class="quest-step active" id="step1">
+<div class="quest-dot">1</div>
+<div class="quest-label">Mikrop Kaşifi</div>
+</div>
+<div class="quest-step" id="step2">
+<div class="quest-dot">2</div>
+<div class="quest-label">Fatih'e Öğüt</div>
+</div>
+<div class="quest-step" id="step3">
+<div class="quest-dot">3</div>
+<div class="quest-label">Eyüp Sultan</div>
+</div>
+<div class="quest-step" id="step4">
+<div class="quest-dot">4</div>
+<div class="quest-label">Şifacı Hekim</div>
+</div>
+</div>
+<!-- MEKANİK 1: Mikroskobun Öncüsü -->
+<div class="game-card" id="mechanic1">
+<div class="instruction-bar">
+<div class="instruction-text" id="m1TtsText">
+            Akşemsettin, mikroskobun icadından yüzlerce yıl önce hastalıkların "tohum" adı verilen canlı taneciklerle bulaştığını yazmıştır. Merceğin içindeki gizli mikropları bulup üzerlerine tıklayarak etkisiz hale getir! (Kalan: <span id="germsLeft">3</span>)
+          </div>
+<button class="btn-tts" onclick="speakText('m1TtsText')" title="Yönergeyi Seslendir">
+<i class="fa-solid fa-volume-high"></i>
+</button>
+</div>
+<div style="text-align: center;">
+<span class="status-badge"><i class="fa-solid fa-microscope"></i> Maddetü'l-Hayât İncelemesi</span>
+</div>
+<div class="microscope-lens" id="lensArea">
+<div class="lens-grid"></div>
+<!-- Germs placed dynamically -->
+</div>
+<p style="text-align: center; font-size: 13px; color: var(--text-muted);">
+          Mercek odaklandı: Tohum parçacıklarına dokunun!
+        </p>
+</div>
+<!-- MEKANİK 2: Fatih'in Mürşidi -->
+<div class="game-card" id="mechanic2" style="display: none;">
+<div class="instruction-bar">
+<div class="instruction-text" id="m2TtsText">
+            Akşemsettin, genç Şehzade Mehmed'i yetiştirmiş ve İstanbul'un fethinde ordunun manevi fatihi olmuştur. Fatih Sultan Mehmet zorlu bir kuşatma anında hocasından nasihat istiyor. Ona en bilgece ve yüreklendirici öğüdü seç!
+          </div>
+<button class="btn-tts" onclick="speakText('m2TtsText')" title="Yönergeyi Seslendir">
+<i class="fa-solid fa-volume-high"></i>
+</button>
+</div>
+<div class="moral-scene">
+<div class="dialogue-box">
+<div class="avatar-fatih"><i class="fa-solid fa-crown"></i></div>
+<div class="dialogue-text">
+              "Kıymetli Hocam Akşemsettin, surlar çok çetin, ordu yoruldu. Bu kutlu fetihte bize yol gösterecek hikmetli sözünüz nedir?"
+            </div>
+</div>
+<div class="moral-choices">
+<button class="choice-btn" onclick="handleMentorChoice(false)">
+<i class="fa-solid fa-circle-xmark" style="color: #94a3b8;"></i>
+              "Geri çekilip şansımızı seneye denemeliyiz hünkarım."
+            </button>
+<button class="choice-btn" onclick="handleMentorChoice(true)">
+<i class="fa-solid fa-star" style="color: var(--primary-gold);"></i>
+              "Gayret bizden, zafer Allah’tandır! Azimle devam edenler müjdelenmiş fethin kutlu neferleri olacaktır!"
+            </button>
+<button class="choice-btn" onclick="handleMentorChoice(false)">
+<i class="fa-solid fa-circle-xmark" style="color: #94a3b8;"></i>
+              "Sadece kılıcın keskinliğine güvenin, ilim ve duaya lüzum yoktur."
+            </button>
+</div>
+</div>
+</div>
+<!-- MEKANİK 3: Eyüp Sultan'ın Kayıp Kabrini Keşif -->
+<div class="game-card" id="mechanic3" style="display: none;">
+<div class="instruction-bar">
+<div class="instruction-text" id="m3TtsText">
+            İstanbul fethinden sonra Akşemsettin, sahabe Ebu Eyyûb el-Ensârî'nin kayıp kabrini manevi sezgisiyle tespit etmiştir. Aşağıdaki tarihi alan parselinde doğru nur saçan kandil taşını keşfet!
+          </div>
+<button class="btn-tts" onclick="speakText('m3TtsText')" title="Yönergeyi Seslendir">
+<i class="fa-solid fa-volume-high"></i>
+</button>
+</div>
+<div style="text-align: center; margin-bottom: 10px;">
+<span class="status-badge"><i class="fa-solid fa-monument"></i> Eyüpsultan Manevi Keşif Alanı</span>
+</div>
+<div class="excavation-grid" id="eyupGrid">
+<!-- 12 slots -->
+</div>
+<p id="tombClue" style="text-align: center; font-size: 13px; color: var(--text-muted);">
+          İpucu: Manevi huzurun ve ışığın yoğunlaştığı taşı arayın.
+        </p>
+</div>
+<!-- MEKANİK 4: Tabib-ül-Ervah -->
+<div class="game-card" id="mechanic4" style="display: none;">
+<div class="instruction-bar">
+<div class="instruction-text" id="m4TtsText">
+            Akşemsettin sadece bedeni değil, ruhları da iyileştirdiği için 'Tabib-ül-ervah' olarak anılırdı. Şifahanede hem gönle hem bedene iyi gelecek 3 şifalı unsuru seçerek denge macununu hazırla!
+          </div>
+<button class="btn-tts" onclick="speakText('m4TtsText')" title="Yönergeyi Seslendir">
+<i class="fa-solid fa-volume-high"></i>
+</button>
+</div>
+<div class="apothecary-bench">
+<div class="ingredient-item" onclick="toggleIngredient(this, 'şifa-bal')">
+<div class="ingredient-icon">🍯</div>
+<div class="ingredient-title">Karakovan Balı (Beden Gücü)</div>
+</div>
+<div class="ingredient-item" onclick="toggleIngredient(this, 'dua-huzur')">
+<div class="ingredient-icon">🕊️</div>
+<div class="ingredient-title">Gönül Huzuru &amp; Sabır</div>
+</div>
+<div class="ingredient-item" onclick="toggleIngredient(this, 'şifalı-ot')">
+<div class="ingredient-icon">🌿</div>
+<div class="ingredient-title">Göynük Adaçayı (Mikrop Kırıcı)</div>
+</div>
+<div class="ingredient-item" onclick="toggleIngredient(this, 'zehirli-mantar')">
+<div class="ingredient-icon">🍄</div>
+<div class="ingredient-title">Acı Yabani Mantar</div>
+</div>
+</div>
+<div style="text-align: center; margin-top: 15px;">
+<button class="btn-action" onclick="brewPotion()">
+<i class="fa-solid fa-mortar-pestle"></i> Şifayı Tamamla!
+          </button>
+</div>
+</div>
+</section>
+<!-- 3. BİTİŞ & TEBRİK EKRANI -->
+<section class="screen" id="screenFinish">
+<div class="game-card certificate-frame">
+<span class="status-badge" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399;">
+<i class="fa-solid fa-award"></i> Miras Muhafızı Başarısı
+        </span>
+<h2 style="font-size: 26px; margin-top: 10px;">Tebrikler Genç Bilge!</h2>
+<p style="font-size: 14.5px; color: var(--text-muted); margin-top: 8px;">
+          Akşemsettin Hazretleri'nin tıp, maneviyat, ilim ve fetih yolundaki kutlu mirasını başarıyla öğrendin.
+        </p>
+<div class="wisdom-quote">
+          "Hastalıklar insandan insana gözle görülmeyecek kadar küçük tohumlar vasıtasıyla geçer..."<br/>
+<small style="color: var(--primary-gold); font-weight: 700;">— Maddetü'l-Hayât, Akşemsettin</small>
+</div>
+<div style="background: rgba(6, 24, 27, 0.6); padding: 14px; border-radius: 12px; margin-bottom: 24px; text-align: left; font-size: 13px; line-height: 1.6;">
+<strong>Öğrendiklerimiz:</strong>
+<ul style="padding-left: 20px; margin-top: 6px; color: var(--text-muted);">
+<li>🔬 Mikrobiyolojinin ilk temellerini attı.</li>
+<li>👑 Fatih Sultan Mehmed'in hocası ve fethin manevi mimarı oldu.</li>
+<li>🕌 Eyüp Sultan (Ebu Eyyûb el-Ensârî) kabrini keşfetti.</li>
+<li>🌿 Tabib-ül-Ervah olarak Göynük'te ebedi istirahatgahında yatmaktadır.</li>
+</ul>
+</div>
+<a class="btn-action" href="https://memleketim.github.io/14/index.html" style="font-size: 17px; padding: 16px 36px;">
+<i class="fa-solid fa-map-location-dot"></i> Haritaya Dön
+        </a>
+</div>
+</section>
+</main>
+<!-- Academic Banner -->
+<footer class="academic-banner">
+<a href="https://drive.google.com/file/d/1-7jvJCl3qBjisXXz4NqDZPrGlBfJ5fJB/view" rel="noopener noreferrer" target="_blank">
+<i class="fa-solid fa-graduation-cap"></i>
+<span>Aylin Dinç'in çalışmasının tamamına ulaşmak için tıklayınız.</span>
+<i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
+</a>
+</footer>
+<!-- Oyun Mantığı -->
+<script>
+    let currentStep = 1;
+    let audioEnabled = true;
+    let germsRemaining = 3;
+    let targetEyupIndex = Math.floor(Math.random() * 12);
+    let selectedIngredients = [];
+
+    // Web Speech API (TTS) 
+    function speakText(elementId) {
+      if (!('speechSynthesis' in window)) {
+        showToast('Cihazınız ses sentezini desteklemiyor.');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const text = document.getElementById(elementId).innerText;
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'tr-TR';
+      utterance.rate = 0.95;
+      utterance.pitch = 1.05;
+
+      const ttsBtns = document.querySelectorAll('.btn-tts');
+      ttsBtns.forEach(b => b.classList.add('speaking'));
+      utterance.onend = () => ttsBtns.forEach(b => b.classList.remove('speaking'));
+      utterance.onerror = () => ttsBtns.forEach(b => b.classList.remove('speaking'));
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // Sound toggle
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const btn = document.getElementById('toggleSoundBtn');
+      if (audioEnabled) {
+        btn.innerHTML = '<i class="fa-solid fa-volume-high"></i>';
+        showToast('Ses efektleri açık');
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+        window.speechSynthesis.cancel();
+        showToast('Ses kapatıldı');
+      }
+    }
+
+    // Yeni Ses Çalma Fonksiyonu (Harici .mp3 dosyalarını kullanır)
+    function playSound(type) {
+      if (!audioEnabled) return;
+      let soundEl = null;
+
+      if (type === 'success') {
+        soundEl = document.getElementById('snd-success');
+      } else if (type === 'pop' || type === 'click') {
+        soundEl = document.getElementById('snd-click');
+      } else if (type === 'error') {
+        soundEl = document.getElementById('snd-error');
+      }
+
+      if (soundEl) {
+        soundEl.currentTime = 0;
+        soundEl.play().catch(e => console.warn("Ses çalma izni engellendi veya dosya bulunamadı:", e));
+      }
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // Video Simulator
+    function simulateVideoAction(action) {
+      showToast(action === 'play' ? 'Video Oynatılıyor...' : 'Video Duraklatıldı');
+      playSound('click');
+    }
+
+    function scrubVideo(e) {
+      const bar = e.currentTarget;
+      const rect = bar.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const percent = Math.max(5, Math.min(100, (clickX / rect.width) * 100));
+      document.getElementById('scrubberFill').style.width = percent + '%';
+      showToast('Süre: %' + Math.round(percent));
+    }
+
+    // Start Main Quest
+    function startGameFlow() {
+      window.speechSynthesis.cancel();
+      document.getElementById('screenIntro').classList.remove('active');
+      document.getElementById('screenGame').classList.add('active');
+      setupMechanic1();
+      playSound('success');
+      showToast('1. Aşama Başladı: Mikrop Avı!');
+    }
+
+    // MEKANİK 1
+    function setupMechanic1() {
+      germsRemaining = 3;
+      document.getElementById('germsLeft').innerText = germsRemaining;
+      const lens = document.getElementById('lensArea');
+      const existing = lens.querySelectorAll('.germ-target');
+      existing.forEach(e => e.remove());
+
+      const positions = [
+        { top: '35px', left: '70px' },
+        { top: '150px', left: '160px' },
+        { top: '80px', left: '180px' }
+      ];
+
+      positions.forEach((pos) => {
+        const germ = document.createElement('div');
+        germ.className = 'germ-target';
+        germ.style.top = pos.top;
+        germ.style.left = pos.left;
+        germ.innerHTML = '<i class="fa-solid fa-virus"></i>';
+        germ.onclick = (e) => {
+          e.stopPropagation();
+          popGerm(germ);
+        };
+        lens.appendChild(germ);
+      });
+    }
+
+    function popGerm(el) {
+      el.style.transform = 'scale(0)';
+      el.style.opacity = '0';
+      playSound('pop');
+      setTimeout(() => el.remove(), 200);
+
+      germsRemaining--;
+      document.getElementById('germsLeft').innerText = germsRemaining;
+
+      if (germsRemaining <= 0) {
+        playSound('success');
+        showToast('Maddetü\'l-Hayât ilmiyle mikroplar keşfedildi!');
+        setTimeout(() => advanceToStep(2), 1200);
+      }
+    }
+
+    // MEKANİK 2
+    function handleMentorChoice(isCorrect) {
+      if (isCorrect) {
+        playSound('success');
+        showToast('Muhteşem! Fatih Sultan Mehmed bu öğütle güç kazandı!');
+        setTimeout(() => advanceToStep(3), 1200);
+      } else {
+        playSound('error');
+        showToast('Bu söz bir bilgenin fetihteki azmine uymaz, tekrar düşün!');
+      }
+    }
+
+    // MEKANİK 3
+    function setupMechanic3() {
+      const grid = document.getElementById('eyupGrid');
+      grid.innerHTML = '';
+      targetEyupIndex = Math.floor(Math.random() * 12);
+
+      for (let i = 0; i < 12; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile-slot';
+        tile.innerHTML = '<i class="fa-solid fa-gem" style="opacity: 0.3;"></i>';
+        tile.onclick = () => revealEyupTile(tile, i);
+        grid.appendChild(tile);
+      }
+    }
+
+    function revealEyupTile(tile, index) {
+      if (tile.classList.contains('revealed')) return;
+
+      if (index === targetEyupIndex) {
+        tile.classList.add('revealed');
+        tile.innerHTML = '<i class="fa-solid fa-mosque" style="color: #fef08a; font-size: 24px;"></i>';
+        playSound('success');
+        document.getElementById('tombClue').innerHTML = '<span style="color: #34d399; font-weight: 700;">Mübarek kabir keşfedildi! Eyüpsultan manevi merkezi doğdu!</span>';
+        showToast('Manevi keşif tamamlandı!');
+        setTimeout(() => advanceToStep(4), 1400);
+      } else {
+        tile.classList.add('wrong');
+        tile.innerHTML = '<i class="fa-solid fa-leaf" style="color: #94a3b8;"></i>';
+        playSound('error');
+        showToast('Burada yeşil çınar yaprakları var, başka yeri araştır.');
+      }
+    }
+
+    // MEKANİK 4
+    function toggleIngredient(card, key) {
+      playSound('pop');
+      if (card.classList.contains('selected')) {
+        card.classList.remove('selected');
+        selectedIngredients = selectedIngredients.filter(k => k !== key);
+      } else {
+        card.classList.add('selected');
+        selectedIngredients.push(key);
+      }
+    }
+
+    function brewPotion() {
+      const hasBal = selectedIngredients.includes('şifa-bal');
+      const hasHuzur = selectedIngredients.includes('dua-huzur');
+      const hasOt = selectedIngredients.includes('şifalı-ot');
+      const hasZehir = selectedIngredients.includes('zehirli-mantar');
+
+      if (hasZehir) {
+        playSound('error');
+        showToast('Zehirli mantar şifayı bozar! Onu çıkarınız.');
+        return;
+      }
+
+      if (hasBal && hasHuzur && hasOt) {
+        playSound('success');
+        showToast('Tabib-ül-Ervah şifası hazırlandı!');
+        setTimeout(() => finishGame(), 1200);
+      } else {
+        playSound('error');
+        showToast('Hem ruha hem bedene iyi gelecek 3 mübarek unsuru da seçmelisin!');
+      }
+    }
+
+    // Advance Stepper
+    function advanceToStep(nextStep) {
+      window.speechSynthesis.cancel();
+      document.getElementById('mechanic' + currentStep).style.display = 'none';
+      document.getElementById('step' + currentStep).classList.remove('active');
+      document.getElementById('step' + currentStep).classList.add('completed');
+
+      currentStep = nextStep;
+      document.getElementById('mechanic' + currentStep).style.display = 'block';
+      document.getElementById('step' + currentStep).classList.add('active');
+
+      if (currentStep === 3) {
+        setupMechanic3();
+      }
+    }
+
+    function finishGame() {
+      window.speechSynthesis.cancel();
+      document.getElementById('screenGame').classList.remove('active');
+      document.getElementById('screenFinish').classList.add('active');
+      playSound('success');
+      showToast('Oyun Başarıyla Tamamlandı!');
+    }
+  </script>
+</body>
+</html>
