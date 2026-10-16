@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ocağın Başında: Cağ Kebap ve Kadayıf Dolması</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;700&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2a1c14;--paper:#f4e9d0;--paper2:#ead9b4;--wal:#6b3f22;--ember:#e8622a;--gold:#e0a42b;--snow:#f6f3ec;--night:#1b1411;--teal:#2f7f79;--ok:#2e7d3a;--soft:#c9742f}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Nunito',system-ui,'Segoe UI',Arial,sans-serif;color:var(--snow);background:var(--night);min-height:100vh;min-height:100dvh;overflow-x:hidden;
+background-image:radial-gradient(ellipse at 50% 125%,rgba(232,98,42,.38),transparent 60%),repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0 2px,transparent 2px 46px),repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 92px)}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(2px 2px at 20px 30px,rgba(255,255,255,.55),transparent),radial-gradient(2px 2px at 90px 120px,rgba(255,255,255,.4),transparent),radial-gradient(1.5px 1.5px at 150px 60px,rgba(255,255,255,.5),transparent);background-size:180px 180px;animation:snow 16s linear infinite}
+@keyframes snow{to{background-position:-40px 180px}}
+h1,h2,h3{font-family:'Lora',Georgia,'Times New Roman',serif;margin:.2em 0}
+
+/* LOGO KUTUSU (Görünmez divlerin tıklamayı engellememesi için pointer-events:none yapıldı) */
+#logoWrap{
+  position:fixed;top:6px;left:10px;z-index:35;pointer-events:none;
+  background:rgba(255,255,255,0.85);backdrop-filter:blur(4px);
+  border:2px solid #dfd7cc;border-radius:12px;padding:4px 8px;
+  box-shadow:0 3px 10px rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;
+}
+#logoWrap img{height:42px;width:auto;display:block}
+
+#top{position:sticky;top:0;z-index:20;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 14px 10px 120px;min-height:64px;background:rgba(27,20,17,.96);border-bottom:3px solid var(--wal)}
+#pills{display:flex;gap:6px;flex-wrap:wrap}
+.pill{padding:5px 12px;border-radius:999px;border:2px solid var(--wal);font-size:.8rem;font-weight:700;white-space:nowrap}
+.pill.on{background:var(--ember);border-color:var(--ember);color:#fff}
+.pill.done{background:var(--teal);border-color:var(--teal);color:#fff}
+.tools{display:flex;gap:6px}
+.tb{font:700 .8rem 'Nunito',sans-serif;background:transparent;color:var(--snow);border:2px solid var(--wal);border-radius:10px;padding:6px 12px;min-height:40px;cursor:pointer}
+#app{position:relative;z-index:1;max-width:1000px;margin:0 auto;padding:16px 14px 60px;display:grid;gap:16px}
+.card{background:var(--paper);color:var(--ink);border:3px solid var(--wal);border-radius:14px;padding:18px;box-shadow:0 6px 0 rgba(0,0,0,.35)}
+.card h2{font-size:1.45rem}
+.card p{line-height:1.55;margin:.4em 0}
+.task{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--paper2)}
+.tag{display:inline-block;background:var(--wal);color:#fff;border-radius:6px;padding:3px 10px;font-size:.78rem;font-weight:800}
+
+/* Ses İkonlu Okuma Yardım Butonları */
+.audio-btn{display:inline-flex;align-items:center;gap:6px;background:#fff;border:2px solid var(--wal);color:var(--ink);border-radius:999px;padding:4px 12px;font-size:.85rem;font-weight:800;cursor:pointer;margin:4px 0;transition:transform .15s}
+.audio-btn:hover{transform:scale(1.04);background:#fef7ea}
+.audio-btn:active{transform:scale(0.97)}
+
+.btn{font:800 1.05rem 'Nunito',sans-serif;background:var(--ember);color:#fff;border:0;border-bottom:4px solid #a33d12;border-radius:12px;padding:12px 20px;min-height:48px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.alt{background:var(--teal);border-bottom-color:#1d524e}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink);border-bottom-width:4px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn:active:not([disabled]){transform:translateY(2px)}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:4px solid var(--gold);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+.msg{min-height:1.6em;font-weight:700}
+.msg.ok{color:var(--ok)}
+.msg.hint{color:#8a3a10}
+.rnd{font-weight:800;color:var(--wal);font-size:.9rem}
+.scene{width:100%;height:auto;display:block;background:#2b1f19;border-radius:10px;border:3px solid var(--wal);margin:8px 0}
+.scene text.lb{fill:#f6f3ec;font:800 18px 'Nunito',sans-serif;text-anchor:middle}
+.scene text.bd{fill:#f4b73c;font:800 34px 'Nunito',sans-serif;text-anchor:middle}
+.fl{animation:fl .9s ease-in-out infinite alternate;transform-origin:bottom;transform-box:fill-box}
+@keyframes fl{to{transform:scaleY(1.18) skewX(5deg)}}
+#mv{transition:transform 1s ease}
+#mv>g,.pu{transform-box:fill-box;transform-origin:center}
+.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.pulse{animation:pulse .7s 2}
+@keyframes pulse{50%{transform:scale(1.3)}}
+.sent{font-size:1.45rem;line-height:2.5;font-weight:700}
+.blank{font:inherit;color:inherit;display:inline-block;min-width:120px;background:#fff7;border:0;border-bottom:4px dashed var(--ember);border-radius:8px;padding:0 10px;cursor:pointer}
+.blank.f{border-bottom-style:solid;border-bottom-color:var(--teal)}
+.blank.act{box-shadow:0 0 0 3px var(--gold)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.chip{font:800 1.1rem 'Nunito',sans-serif;padding:10px 16px;min-height:48px;border-radius:999px;border:3px solid var(--wal);background:#fff;color:var(--ink);cursor:pointer}
+.chip small{display:block;font-size:.7rem;font-weight:700;color:var(--soft)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.bubble{background:#fff;border:3px solid var(--wal);border-radius:14px;padding:12px;font-size:1.1rem;margin:8px 0}
+.hid{display:none}
+.tray{min-height:70px;background:#d9b98a;border:3px solid var(--wal);border-radius:10px;padding:8px;margin:8px 0}
+.sis{display:inline-block;width:78px;height:14px;margin:6px;border-radius:7px;background:linear-gradient(90deg,#d9d9d9 0 10%,#a8452a 10% 90%,#d9d9d9 90%)}
+.drow{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:1.05rem}
+.drow b{flex:1}
+.mini{width:44px;height:44px;border-radius:50%;border:3px solid var(--wal);background:#fff;font:800 1.3rem 'Nunito',sans-serif;cursor:pointer;color:var(--ink)}
+.cup{display:inline-block;width:22px;height:28px;border-radius:3px 3px 9px 9px;border:2px solid #7a6b50}
+.c-ayran{background:#fffdf5}.c-salgam{background:#8e2b5c}.c-su{background:#bfe3f0}
+.recipe{list-style:none;padding:0;margin:0}
+.recipe li{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin:6px 0;border-radius:10px;background:#fff;border:2px solid var(--paper2);font-size:1.05rem}
+.recipe li.done{background:#dff0d8;border-color:var(--ok)}
+.recipe li.nx{border-color:var(--ember);background:#ffe9d8}
+.toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:8px 0}
+.tool{display:flex;align-items:center;gap:8px;font:800 1rem 'Nunito',sans-serif;padding:10px;min-height:52px;border-radius:12px;border:3px solid var(--wal);background:#fff;color:var(--ink);cursor:pointer}
+.tool i{width:22px;height:22px;border-radius:50%;border:2px solid var(--ink);flex:none}
+#dish>g{opacity:0;transition:opacity .5s}
+#dish.s1 .L1,#dish.s2 .L2{opacity:1}
+#dish.s3 .L1,#dish.s3 .L2{opacity:0}
+#dish.s3 .L3,#dish.s4 .L4,#dish.s5 .L5,#dish.s6 .L6{opacity:1}
+textarea,input[type=text]{width:100%;font:700 1.1rem 'Nunito',sans-serif;padding:10px;border:3px solid var(--wal);border-radius:10px;background:#fff;color:var(--ink)}
+.ans{min-height:64px;background:#fff;border:3px dashed var(--wal);border-radius:12px;padding:8px;display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.banner{display:flex;align-items:center;gap:10px;padding:14px 16px;border-radius:12px;background:linear-gradient(100deg,#7a4a2b,#b36a2a,#7a4a2b);background-size:200% 100%;animation:shine 4s linear infinite;color:#fff7e6;text-decoration:none;font-weight:800;border:3px solid var(--gold);margin:10px 0}
+.banner::before{content:'★';color:var(--gold);font-size:1.4rem}
+@keyframes shine{to{background-position:-200% 0}}
+.hero h1{font-size:clamp(1.7rem,6vw,2.5rem);color:var(--wal)}
+.ev{line-height:1.7}
+#cert{width:100%;height:auto;border:3px solid var(--wal);border-radius:8px;background:#fff;margin:10px 0}
+#toast{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:#000c;color:#fff;padding:10px 16px;border-radius:12px;z-index:40;pointer-events:none;opacity:0;transition:opacity .3s;max-width:90vw;text-align:center}
+#toast.on{opacity:1}
+#conf{position:fixed;inset:0;pointer-events:none;z-index:35;width:100%;height:100%}
+
+/* Medya & Kapak Alanları */
+.intro-cover{width:100%;max-height:320px;object-fit:cover;border-radius:12px;border:3px solid var(--wal);margin:10px 0;box-shadow:0 4px 10px rgba(0,0,0,0.15)}
+.video-box{background:#110b08;border:3px solid var(--wal);border-radius:14px;padding:12px;margin:14px 0;color:#fff}
+.video-frame{width:100%;max-height:360px;border-radius:8px;background:#000;display:block}
+.video-controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
+
+@media (max-width:560px){
+  .sent{font-size:1.2rem}
+  #logoWrap{top:4px;left:6px;padding:3px 6px}
+  #logoWrap img{height:34px}
+  #top{padding-left:72px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="logoWrap"><img src="orjinal.svg" alt="Ülkem Yanımda logosu" onerror="this.parentNode.style.display='none'"></div>
+<header id="top">
+  <div id="pills" aria-label="Aşamalar"></div>
+  <div class="tools">
+    <button class="tb" id="bSnd" data-act="snd" aria-pressed="true">Ses: Açık</button>
+    <button class="tb" id="bSup" data-act="sup" aria-pressed="true">Destek: Açık</button>
+  </div>
+</header>
+<main id="app"></main>
+<div id="toast" role="status" aria-live="polite"></div>
+<canvas id="conf" aria-hidden="true"></canvas>
+<noscript><p style="padding:20px">Bu oyun için JavaScript gerekir.</p></noscript>
+
+<script>
+'use strict';
+/* ====== SABİTLER ====== */
+var MAP_URL='https://memleketim.github.io/25/index.html';
+var WORK_URL='https://drive.google.com/file/d/1JFIPBxUKShtXg35W_jCMbCF6NQHjd4d4/view';
+var STUDENT='Selim Can';
+var BANNER_TXT="Selim Can'ın çalışmasının tamamına ulaşmak için tıklayınız.";
+var $=function(s,r){return (r||document).querySelector(s);};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+var capTr=function(s){return s.charAt(0).toLocaleUpperCase('tr')+s.slice(1);};
+var shuffle=function(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;};
+var RM=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var app=$('#app');
+var S={stage:-1,view:'intro',support:true,name:'',sentence:'',res:{s1:0,s2:0,s3:0,s4:0}};
+var G={};
+var ST=['Ocak Başı','Sipariş','Tatlı Atölyesi','Misafir Sofrası'];
+var VO={
+ giris:'Merhaba! Ben Usta. Bugün Erzurum ocağında cağ kebap ve kadayıf dolmasının sırrını birlikte keşfedeceğiz. Hazır mısın?',
+ asama1:'Usta işi yapacak ama senin sözünle! Cümleyi hâl ekleriyle tamamla. Ben de götüreyim, getireyim ya da yerinde bırakayım.',
+ asama2:'Müşteri geldi! Siparişi dikkatle dinle. Cağdan şiş sayısı kadar et kes, içeceği seç ve servis et.',
+ asama3:'Şimdi tatlı zamanı. Tarifi oku ve kadayıf dolmasını sırayla hazırla.',
+ asama4:'Misafirimiz sorular soruyor. Kelimeleri sıraya koyarak ona Türkçe anlat.',
+ final:'Tebrikler! Erzurum sofrasını hazırladın. Afiyet olsun!',
+ afiyet:'Buyurun, afiyet olsun!'
+};
+
+/* ====== SES YÖNETİMİ (Öncelik Harici MP3, Yedek TTS) ====== */
+var Snd={
+ on:true,ctx:null,missing:{},cache:{},cur:null,
+ init:function(){if(this.ctx)return;try{var C=window.AudioContext||window.webkitAudioContext;if(C)this.ctx=new C();}catch(e){}},
+ resume:function(){try{if(this.ctx&&this.ctx.state==='suspended')this.ctx.resume();}catch(e){}},
+ stop:function(){try{if(this.cur){this.cur.pause();this.cur=null;}}catch(e){}try{if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}},
+ file:function(name,voice){
+   var self=this;
+   return new Promise(function(res){
+     if(self.missing[name])return res(false);
+     var a=self.cache[name];
+     if(!a){
+       try{a=new Audio('ses/'+name+'.mp3');}catch(e){return res(false);}
+       self.cache[name]=a;
+     }
+     if(voice)self.cur=a;
+     var fin=false;
+     var done=function(v){if(!fin){fin=true;res(v);}};
+     a.onerror=function(){self.missing[name]=true;done(false);};
+     a.onplaying=function(){done(true);};
+     try{a.currentTime=0;}catch(e){}
+     try{
+       var p=a.play();
+       if(p&&p.catch)p.catch(function(){self.missing[name]=true;done(false);});
+     }catch(e){done(false);}
+     setTimeout(function(){done(false);},2500);
+   });
+ },
+ tts:function(text){
+   return new Promise(function(res){
+     try{
+       if(!('speechSynthesis' in window)||!window.SpeechSynthesisUtterance)return res(false);
+       var vs=speechSynthesis.getVoices();
+       var u=new SpeechSynthesisUtterance(text);
+       u.lang='tr-TR';u.rate=0.9;
+       var v=vs.filter(function(v){return /^tr/i.test(v.lang);})[0];if(v)u.voice=v;
+       u.onstart=function(){res(true);};u.onerror=function(){res(false);};
+       speechSynthesis.speak(u);
+       setTimeout(function(){res(false);},2000);
+     }catch(e){res(false);}
+   });
+ },
+ say:function(name,text){
+   if(!this.on)return Promise.resolve(false);
+   var self=this;this.stop();
+   return this.file(name,true).then(function(ok){
+     return ok?true:self.tts(text);
+   });
+ },
+ sayText:function(text,audioKey){
+   if(!this.on)return Promise.resolve(false);
+   var self=this;this.stop();
+   if(audioKey){
+     return this.file(audioKey,true).then(function(ok){
+       return ok?true:self.tts(text);
+     });
+   }
+   return this.tts(text);
+ },
+ tone:function(f,d,t,v,at){
+   if(!this.ctx)return;
+   try{
+     var c=this.ctx,o=c.createOscillator(),g=c.createGain(),t0=c.currentTime+(at||0);
+     o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(0.0001,t0);
+     g.gain.exponentialRampToValueAtTime(v||0.07,t0+0.02);
+     g.gain.exponentialRampToValueAtTime(0.0001,t0+d);
+     o.connect(g);g.connect(c.destination);o.start(t0);o.stop(t0+d+0.05);
+   }catch(e){}
+ },
+ sfx:function(name){
+   if(!this.on)return;var self=this;this.resume();
+   this.file(name,false).then(function(ok){
+     if(ok)return;
+     if(name==='dogru'){self.tone(523,.18,'triangle',.07,0);self.tone(659,.18,'triangle',.07,.12);self.tone(784,.3,'triangle',.07,.24);}
+     else if(name==='tekrar'){self.tone(300,.22,'sine',.05,0);self.tone(262,.28,'sine',.05,.16);}
+     else if(name==='final'){[523,659,784,1047].forEach(function(f,i){self.tone(f,.3,'triangle',.07,i*.14);});}
+     else{self.tone(440,.08,'sine',.04,0);}
+   });
+ }
+};
+try{if('speechSynthesis' in window)speechSynthesis.getVoices();}catch(e){}
+
+/* ====== ORTAK BİLEŞENLER ====== */
+function toast(t){var e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(function(){e.classList.remove('on');},2600);}
+function msg(t,cls){var e=$('#msg');if(e){e.textContent=t;e.className='msg '+(cls||'');}}
+function setPills(){$('#pills').innerHTML=ST.map(function(n,i){return '<span class="pill '+(i===S.stage?'on':'')+' '+(i<S.stage?'done':'')+'">'+(i+1)+'. '+n+'</span>';}).join('');}
+
+function strip(n,title,text,key){
+  return '<div class="card task">'+
+    '<div><span class="tag">Aşama '+n+'</span><h2>'+title+'</h2>'+
+    '<p><b>Görev:</b> '+text+'</p></div>'+
+    '<button class="btn alt" data-act="replay" data-k="'+key+'">🔊 Yönergeyi Dinle</button>'+
+  '</div>';
+}
+function banner(){return '<a class="banner" href="'+WORK_URL+'" target="_blank" rel="noopener noreferrer">'+esc(BANNER_TXT)+'</a>';}
+function stageDone(n,text,label){
+  app.innerHTML='<div class="card hero"><span class="tag">Aşama '+n+' tamamlandı</span><h2>Tebrikler, Güzel İş!</h2><p>'+text+'</p><div class="row"><button class="btn" data-act="gonext" data-n="'+n+'">'+label+'</button></div></div>';
+  window.scrollTo(0,0);
+}
+
+/* ====== GİRİŞ EKRANI ====== */
+function intro(){
+  S.stage=-1;S.view='intro';setPills();
+  app.innerHTML=
+  '<div class="card hero">'+
+    '<h1>Ocağın Başında</h1>'+
+    '<p style="font-size:1.2rem;font-weight:700;color:var(--wal)">Cağ Kebap ve Kadayıf Dolması</p>'+
+    '<img src="cagkadayif.png" alt="Erzurum Cağ Kebabı ve Kadayıf Dolması" class="intro-cover" onerror="this.style.display=\'none\'">'+
+    '<p>Erzurum’un usta ocağında çırak olmaya hazır mısın? Odunu taşır, cağdan ince ince et keser, çıtır kadayıf dolmasını sarar ve gelen misafirine Erzurum lezzetlerini Türkçe anlatırsın. Dört aşama boyunca ocağın başında ustana yardım edeceksin.</p>'+
+    
+    '<!-- Erzurum Belgesel Video Oynatıcı -->'+
+    '<div class="video-box">'+
+      '<h3 style="color:var(--gold);margin-top:0">📺 Bu Lezzetleri Yakından Tanı: Belgesel</h3>'+
+      '<p style="font-size:.95rem;color:#f0e4d4">Erzurum’un eşsiz cağ kebabı ve kadayıf dolması ustalığını izlemek için videoyu başlatabilirsin:</p>'+
+      '<video id="docVideo" class="video-frame" preload="metadata" poster="cagkadayif.png">'+
+        '<source src="erzurum.mp4" type="video/mp4">'+
+        'Tarayıcınız video etiketini desteklemiyor.'+
+      '</video>'+
+      '<div class="video-controls">'+
+        '<button class="btn alt" id="vPlay" data-act="vPlay">▶ Başlat</button>'+
+        '<button class="btn ghost" style="color:#fff;border-color:#fff" id="vMute" data-act="vMute">Sesi Kapat</button>'+
+        '<span style="font-size:.85rem;color:#ccc">erzurum.mp4</span>'+
+      '</div>'+
+    '</div>'+
+
+    banner()+
+    '<div class="row">'+
+      '<button class="btn" data-act="start">Ocağa Git ve Başla</button>'+
+      '<button class="btn ghost" data-act="introSay">🔊 Usta’yı Dinle</button>'+
+    '</div>'+
+    '<p style="font-size:.9rem;opacity:.9">Yazıların yanındaki hoparlör (🔊) butonlarına dokunarak seslendirmeleri dinleyebilirsin. Sürükleme gerekmez; dokunarak ya da tıklayarak kolayca oynanır.</p>'+
+  '</div>';
+}
+
+/* ====== AŞAMA 1: HÂL EKLERİYLE USTAYA SÖYLE ====== */
+var FORMS={
+ odun:['odunu','oduna','odunda','odundan'],depo:['depoyu','depoya','depoda','depodan'],ocak:['ocağı','ocağa','ocakta','ocaktan'],
+ kebap:['kebabı','kebaba','kebapta','kebaptan'],masa:['masayı','masaya','masada','masadan'],ayran:['ayranı','ayrana','ayranda','ayrandan'],
+ 'tezgâh':['tezgâhı','tezgâha','tezgâhta','tezgâhtan'],tabak:['tabağı','tabağa','tabakta','tabaktan']
+};
+var ROLE={obj:0,dst:1,loc:2,src:3};
+var QW=['Neyi?','Nereye?','Nerede?','Nereden?'];
+var SUF=['-ı, -i, -u, -ü','-a, -e','-da, -de, -ta, -te','-dan, -den, -tan, -ten'];
+var PL=[{n:'Depo',k:'depo',x:100},{n:'Tezgâh',k:'tezgâh',x:300},{n:'Ocak',k:'ocak',x:500},{n:'Masa',k:'masa',x:700}];
+var PERM=[[2,0,3,1],[3,1,0,2],[1,3,2,0],[0,2,1,3]];
+var R1=[
+ {mover:'odun',from:0,to:2,parts:[0,1,2,'götür.'],bl:[['odun','obj'],['depo','src'],['ocak','dst']]},
+ {mover:'kebap',from:2,to:3,parts:[0,1,2,'getir.'],bl:[['kebap','obj'],['ocak','src'],['masa','dst']]},
+ {mover:'ayran',from:1,to:3,parts:[0,1,2,'getir.'],bl:[['ayran','obj'],['tezgâh','src'],['masa','dst']]},
+ {stay:[['kebap',2],['tabak',3]],parts:['Kebap',0,'pişiyor,','tabak',1,'bekliyor.'],bl:[['ocak','loc'],['masa','loc']]}
+];
+
+function it(n){
+ if(n==='odun')return '<rect x="-26" y="-4" width="52" height="16" rx="8" fill="#8a5a35"/><circle cx="26" cy="4" r="8" fill="#c99a62"/><rect x="-20" y="-18" width="44" height="16" rx="8" fill="#74492a"/><circle cx="24" cy="-10" r="8" fill="#c99a62"/>';
+ if(n==='kebap')return '<line x1="-34" y1="0" x2="34" y2="0" stroke="#d9d9d9" stroke-width="4" stroke-linecap="round"/><rect x="-28" y="-10" width="14" height="20" rx="5" fill="#a8452a"/><rect x="-10" y="-10" width="14" height="20" rx="5" fill="#b9573a"/><rect x="8" y="-10" width="14" height="20" rx="5" fill="#a8452a"/>';
+ if(n==='ayran')return '<path d="M-14 -22 L14 -22 L10 16 L-10 16Z" fill="#fffdf5" stroke="#cdbf9e" stroke-width="2"/><rect x="-14" y="-26" width="28" height="7" rx="3" fill="#fff"/>';
+ return '<ellipse cx="0" cy="6" rx="30" ry="9" fill="#e8e1d2" stroke="#b9ad92" stroke-width="2"/><ellipse cx="0" cy="3" rx="20" ry="5" fill="#f7f2e6"/>';
+}
+function scene1(R){
+ var s='<svg class="scene" viewBox="0 0 800 300" role="img" aria-label="Depo, tezgâh, ocak ve masa olan kebapçı atölyesi">';
+ s+='<rect x="0" y="254" width="800" height="46" fill="#3b2a20"/>';
+ s+='<g transform="translate(100,0)"><rect x="-50" y="214" width="50" height="40" fill="#8a5a35" stroke="#4a2c17" stroke-width="3"/><rect x="0" y="214" width="50" height="40" fill="#8a5a35" stroke="#4a2c17" stroke-width="3"/><rect x="-25" y="174" width="50" height="40" fill="#9b6a40" stroke="#4a2c17" stroke-width="3"/></g>';
+ s+='<g transform="translate(300,0)"><rect x="-70" y="214" width="140" height="14" rx="3" fill="#b98a55"/><rect x="-60" y="228" width="10" height="26" fill="#6b3f22"/><rect x="50" y="228" width="10" height="26" fill="#6b3f22"/></g>';
+ s+='<g transform="translate(500,0)"><path d="M-62 254 V190 Q-62 140 0 140 Q62 140 62 190 V254Z" fill="#4b4039" stroke="#2b221d" stroke-width="4"/><path d="M-38 254 V200 Q-38 170 0 170 Q38 170 38 200 V254Z" fill="#1a0f0a"/><path class="fl" d="M-20 254 Q-28 228 -8 212 Q-10 232 2 226 Q14 238 6 254Z" fill="#e8622a"/><path class="fl" d="M8 254 Q4 238 16 230 Q24 242 20 254Z" fill="#f4b73c"/><line x1="-70" y1="206" x2="70" y2="206" stroke="#cfcfcf" stroke-width="5"/><rect x="-36" y="192" width="72" height="22" rx="10" fill="#a8452a"/></g>';
+ s+='<g transform="translate(700,0)"><rect x="-70" y="214" width="140" height="14" rx="3" fill="#c0392b"/><rect x="-60" y="228" width="10" height="26" fill="#6b3f22"/><rect x="50" y="228" width="10" height="26" fill="#6b3f22"/></g>';
+ PL.forEach(function(p,i){s+='<text class="lb" x="'+p.x+'" y="284">'+p.n+'</text><text class="bd" id="bd'+i+'" x="'+p.x+'" y="60"></text>';});
+ if(R.stay){R.stay.forEach(function(o,i){s+='<g style="transform:translate('+PL[o[1]].x+'px,160px)"><g class="pu" id="st'+i+'">'+it(o[0])+'</g></g>';});}
+ else{s+='<g id="mv" style="transform:translate('+PL[R.from].x+'px,160px)"><g id="mvi">'+it(R.mover)+'</g></g>';}
+ return s+'</svg>';
+}
+function s1(){S.stage=0;S.view='r1';setPills();G={ri:0,ok:0};r1();Snd.say('asama1',VO.asama1);}
+function r1(){
+ var R=R1[G.ri];G.sel=R.bl.map(function(){return null;});G.act=0;G.tries=0;G.done=false;
+ app.innerHTML=strip(1,'Usta Senin Sözünle Çalışır','Cümleyi hâl ekleriyle tamamla. Usta cümleni uygular: götürür, getirir ya da yerinde bırakır.','asama1')+
+ '<div class="card"><div class="rnd">Tur '+(G.ri+1)+' / '+R1.length+'</div>'+scene1(R)+
+ '<p class="sent" id="sent"></p><div id="chips" class="chips"></div>'+
+ '<div class="row"><button class="btn" id="run" data-act="r1run" disabled>Usta’ya Söyle</button><button class="btn ghost" data-act="r1reset">Temizle</button></div>'+
+ '<p id="msg" class="msg" aria-live="polite"></p></div>';
+ r1ui();
+}
+function r1sentence(){var R=R1[G.ri];return R.parts.map(function(p,pi){if(typeof p!=='number')return p;var t=FORMS[R.bl[p][0]][G.sel[p]];return pi===0?capTr(t):t;}).join(' ');}
+function r1ui(){
+ var R=R1[G.ri];
+ $('#sent').innerHTML=R.parts.map(function(p,pi){
+   if(typeof p!=='number')return esc(p);
+   var stem=R.bl[p][0],s=G.sel[p];var t=s===null?'________':FORMS[stem][s];if(pi===0&&s!==null)t=capTr(t);
+   return '<button class="blank '+(s!==null?'f':'')+' '+(G.act===p?'act':'')+'" data-act="r1blank" data-i="'+p+'" aria-label="Boşluk '+(p+1)+'">'+esc(t)+'</button>';
+ }).join(' ');
+ var stem=R.bl[G.act][0];
+ $('#chips').innerHTML=PERM[(G.ri+G.act)%4].map(function(o){
+   return '<button class="chip" data-act="r1opt" data-o="'+o+'">'+esc(FORMS[stem][o])+(S.support?'<small>'+QW[o]+'</small>':'')+'</button>';
+ }).join('');
+ for(var i=0;i<PL.length;i++){var b=$('#bd'+i);if(b)b.textContent='';}
+ R.bl.forEach(function(b,i){if(b[1]!=='obj'&&G.sel[i]!==null){var pi=PL.findIndex(function(p){return p.k===b[0];});var e=$('#bd'+pi);if(e)e.textContent=['','→','●','←'][G.sel[i]];}});
+ var run=$('#run');if(run&&run.dataset.act==='r1run')run.disabled=G.sel.some(function(x){return x===null;});
+}
+function r1done(){var run=$('#run');run.textContent=(G.ri===R1.length-1)?'Aşamayı bitir':'Sonraki tur';run.dataset.act='r1next';run.disabled=false;run.focus();}
+
+/* ====== AŞAMA 2: CAĞDAN KES, SERVİS ET ====== */
+var DR=[['ayran','Ayran'],['salgam','Şalgam suyu'],['su','Su']];
+var ORD=[
+ {k:'siparis1',say:'Merhaba usta! Üç şiş cağ kebap ve bir ayran istiyorum.',txt:'Merhaba usta! <u>Üç</u> şiş cağ kebap ve <u>bir ayran</u> istiyorum.',n:3,d:{ayran:1}},
+ {k:'siparis2',say:'İyi akşamlar! Bana iki şiş cağ kebap ve bir şalgam suyu lütfen.',txt:'İyi akşamlar! Bana <u>iki</u> şiş cağ kebap ve <u>bir şalgam suyu</u> lütfen.',n:2,d:{salgam:1}},
+ {k:'siparis3',say:'Selam! Dört şiş cağ kebap ve iki ayran alabilir miyim?',txt:'Selam! <u>Dört</u> şiş cağ kebap ve <u>iki ayran</u> alabilir miyim?',n:4,d:{ayran:2}}
+];
+function cagSVG(){
+ return '<svg class="scene" id="cag" viewBox="0 0 420 180" role="img" aria-label="Yatay şişte odun ateşinde pişen cağ kebap eti"><rect x="0" y="146" width="420" height="34" fill="#3b2a20"/>'+
+ '<path class="fl" d="M50 156 Q40 126 68 112 Q64 136 82 128 Q96 144 86 156Z" fill="#e8622a"/><path class="fl" d="M130 156 Q122 130 146 118 Q144 140 158 134 Q170 148 160 156Z" fill="#f4b73c"/><path class="fl" d="M210 156 Q200 128 228 114 Q224 138 242 130 Q256 146 246 156Z" fill="#e8622a"/><path class="fl" d="M290 156 Q282 132 304 120 Q302 142 316 136 Q326 148 318 156Z" fill="#f4b73c"/>'+
+ '<line x1="14" y1="92" x2="406" y2="92" stroke="#cfcfcf" stroke-width="6" stroke-linecap="round"/>'+
+ '<rect x="44" y="56" width="290" height="72" rx="34" fill="#a8452a" stroke="#6e2a17" stroke-width="4"/>'+
+ '<g stroke="#7d321d" stroke-width="3" opacity=".55" fill="none"><path d="M84 66 L96 118"/><path d="M130 62 L140 122"/><path d="M178 62 L186 122"/><path d="M226 62 L234 122"/><path d="M274 66 L282 118"/></g>'+
+ '<g id="knife" style="transform-box:fill-box;transform-origin:bottom"><rect x="346" y="54" width="9" height="62" fill="#ddd" stroke="#888"/><rect x="342" y="114" width="17" height="24" rx="3" fill="#6b3f22"/></g></svg>';
+}
+function s2(){S.stage=1;S.view='r2';setPills();G={i:0,ok:0};r2();Snd.say('asama2',VO.asama2);}
+function r2(){
+ var O=ORD[G.i];G.n=0;G.d={ayran:0,salgam:0,su:0};G.tries=0;G.served=false;
+ app.innerHTML=strip(2,'Cağdan Kes, Tepsiyi Hazırla','Müşteriyi dinle. Söylediği sayıda şiş için cağdan et kes, içeceği seç ve servis et.','asama2')+
+ '<div class="grid2"><div class="card"><div class="rnd">Müşteri '+(G.i+1)+' / '+ORD.length+'</div>'+
+ '<div class="bubble"><b>Müşteri:</b> <span id="otxt" class="hid">“'+O.txt+'”</span><span id="ohid">Yazı gizli, dinle!</span></div>'+
+ '<div class="row"><button class="btn alt" data-act="orderSay">🔊 Siparişi Dinle</button><button class="btn ghost" data-act="orderTxt">Yazıyı Göster</button></div>'+
+ cagSVG()+
+ '<div class="row"><button class="btn" data-act="cut">Cağdan Et Kes</button><button class="btn ghost" data-act="uncut">Geri Al</button></div></div>'+
+ '<div class="card"><h3>Tepsi</h3><div id="tray" class="tray" aria-live="polite"></div><p><b>İçecek dolabı</b></p>'+
+ DR.map(function(d){return '<div class="drow"><span class="cup c-'+d[0]+'"></span><b>'+d[1]+'</b><button class="mini" data-act="dm" data-k="'+d[0]+'" aria-label="'+d[1]+' azalt">−</button><span id="dc-'+d[0]+'" aria-live="polite">0</span><button class="mini" data-act="dp" data-k="'+d[0]+'" aria-label="'+d[1]+' arttır">+</button></div>';}).join('')+
+ '<div class="row"><button class="btn" id="srv" data-act="serve">Servis Et</button></div><p id="msg" class="msg" aria-live="polite"></p><div id="spk"></div></div></div>';
+ upd2();setTimeout(orderSay,350);
+}
+function upd2(){
+ $('#tray').innerHTML=G.n?new Array(G.n+1).join('<span class="sis"></span>'):'<span style="opacity:.6">Tepsi boş</span>';
+ DR.forEach(function(d){$('#dc-'+d[0]).textContent=G.d[d[0]];});
+}
+function revealTxt(){var a=$('#otxt'),b=$('#ohid');if(a)a.classList.remove('hid');if(b)b.classList.add('hid');}
+function orderSay(){var O=ORD[G.i];Snd.say(O.k,O.say).then(function(ok){if(!ok){revealTxt();toast('Ses dosyası bulunamadı, sipariş yazıyla gösterildi.');}});}
+
+/* ====== AŞAMA 3: KADAYIF DOLMASI ====== */
+var TL=[{k:'kadayif',n:'Tel kadayıf',c:'#f0d27a'},{k:'ceviz',n:'Ceviz içi',c:'#a9784a'},{k:'sar',n:'Sar',c:'#e8622a'},{k:'yumurta',n:'Yumurta',c:'#f7e3a1'},{k:'tava',n:'Tava',c:'#3a3a3a'},{k:'serbet',n:'Şerbet',c:'#e0a42b'}];
+var TORD=[4,1,5,0,3,2];
+var ST3=[
+ {k:'kadayif',t:'<b>Önce</b> tel kadayıfı tezgâha ser.',raw:'Önce tel kadayıfı tezgâha ser.',sk:'t_kadayif',ok:'Tel kadayıf tezgâhta.'},
+ {k:'ceviz',t:'<b>Sonra</b> kadayıfın ucuna ceviz içi koy.',raw:'Sonra kadayıfın ucuna ceviz içi koy.',sk:'t_ceviz',ok:'Ceviz içi yerinde.'},
+ {k:'sar',t:'<b>Ardından</b> kadayıfı sıkıca sar.',raw:'Ardından kadayıfı sıkıca sar.',sk:'t_sar',ok:'Dolma sarıldı.'},
+ {k:'yumurta',t:'<b>Daha sonra</b> dolmayı yumurtaya batır.',raw:'Daha sonra dolmayı yumurtaya batır.',sk:'t_yumurta',ok:'Dolma yumurtaya bulandı.'},
+ {k:'tava',t:'<b>Sonra</b> dolmayı sıcak tavada kızart.',raw:'Sonra dolmayı sıcak tavada kızart.',sk:'t_tava',ok:'Dolma altın rengine döndü.'},
+ {k:'serbet',t:'<b>En son</b> dolmayı şerbete koy.',raw:'En son dolmayı şerbete koy.',sk:'t_serbet',ok:'Şerbet çekti. Dolma hazır!'}
+];
+function dishSVG(){
+ var strands='';for(var i=0;i<14;i++){strands+='<path d="M'+(70+i*12)+' 96 q'+(i%2?8:-8)+' 24 0 50"/>';}
+ return '<svg class="scene" viewBox="0 0 300 200" role="img" aria-label="Kadayıf dolması tabağı"><rect width="300" height="200" fill="#3a2a20"/>'+
+ '<ellipse cx="150" cy="168" rx="125" ry="26" fill="#cdbf9e" stroke="#9c8f72" stroke-width="3"/>'+
+ '<g id="dishWrap"></g><g id="dish" class="">'+
+ '<g class="L1" stroke="#e8c45c" stroke-width="3" fill="none">'+strands+'</g>'+
+ '<g class="L2" fill="#8a5a35" stroke="#5b3a20" stroke-width="2"><circle cx="86" cy="122" r="9"/><circle cx="104" cy="112" r="9"/><circle cx="98" cy="136" r="9"/><circle cx="118" cy="126" r="9"/></g>'+
+ '<g class="L3"><rect x="65" y="100" width="170" height="56" rx="28" fill="#f0d27a" stroke="#c99a35" stroke-width="3"/><g stroke="#d9b24a" stroke-width="2"><path d="M90 104 V152"/><path d="M115 104 V152"/><path d="M140 104 V152"/><path d="M165 104 V152"/><path d="M190 104 V152"/><path d="M215 108 V148"/></g></g>'+
+ '<g class="L4"><rect x="65" y="100" width="170" height="56" rx="28" fill="#f7e08a" opacity=".6"/><path d="M90 112 Q150 104 210 112" stroke="#fff" stroke-width="4" fill="none" opacity=".7"/></g>'+
+ '<g class="L5"><rect x="65" y="100" width="170" height="56" rx="28" fill="#b8721f" stroke="#7a4313" stroke-width="3"/><circle cx="100" cy="92" r="4" fill="#fff" opacity=".6"/><circle cx="150" cy="86" r="5" fill="#fff" opacity=".6"/><circle cx="200" cy="92" r="4" fill="#fff" opacity=".6"/></g>'+
+ '<g class="L6"><rect x="65" y="100" width="170" height="56" rx="28" fill="#e0a42b" opacity=".5"/><path d="M90 112 Q150 104 210 112" stroke="#fff" stroke-width="4" fill="none" opacity=".8"/><circle cx="90" cy="160" r="4" fill="#e0a42b"/><circle cx="150" cy="164" r="4" fill="#e0a42b"/><circle cx="210" cy="160" r="4" fill="#e0a42b"/></g>'+
+ '</g></svg>';
+}
+function s3(){
+ S.stage=2;S.view='r3';setPills();G={step:0,wrong:0,lock:false};
+ app.innerHTML=strip(3,'Kadayıf Dolmasını Sar','Tarifi oku veya dinle. Aletlere sırayla dokunarak dolmayı tarifteki sıraya göre hazırla.','asama3')+
+ '<div class="grid2"><div class="card"><h3>Tarif Defteri</h3><ul class="recipe" id="rec">'+
+   ST3.map(function(s,i){
+     return '<li id="ln'+i+'"><span>'+s.t+'</span><button class="audio-btn" data-act="sayLine" data-i="'+i+'" aria-label="Adımı dinle">🔊 Dinle</button></li>';
+   }).join('')+
+ '</ul></div>'+
+ '<div class="card"><h3>Tatlı Atölyesi</h3>'+dishSVG()+
+ '<div class="toolbar">'+TORD.map(function(i){var t=TL[i];return '<button class="tool" data-act="tool" data-k="'+t.k+'"><i style="background:'+t.c+'"></i>'+t.n+'</button>';}).join('')+'</div>'+
+ '<p id="msg" class="msg" aria-live="polite"></p></div></div><div id="wp"></div>';
+ Snd.say('asama3',VO.asama3);
+}
+var WORDS=['Kadayıf dolması','tel kadayıf','ceviz içi','yumurtaya batırılır','kızartılır','şerbetlenir','önce','sonra','en son','tatlıdır'];
+function writePanel(){
+ $('#wp').innerHTML='<div class="card"><h3>Tarif defterine bir cümle yaz</h3><p>Dolmayı kendi sözlerinle anlat. Kelime kutusundan seçebilir ya da kendin yazabilirsin (en az 3 sözcük).</p>'+
+ '<div class="chips">'+WORDS.map(function(w){return '<button class="chip" data-act="chipw" data-w="'+esc(w)+'">'+esc(w)+'</button>';}).join('')+'</div>'+
+ '<label for="wr" style="font-weight:800">Cümlem:</label><textarea id="wr" rows="2" maxlength="120" placeholder="Örnek: Önce tel kadayıfa ceviz konur."></textarea>'+
+ '<div class="row"><button class="btn" data-act="saveWrite">Deftere Yaz</button></div><p id="msg2" class="msg" aria-live="polite"></p></div>';
+ $('#wp').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'});
+}
+
+/* ====== AŞAMA 4: MİSAFİRE ANLAT ====== */
+var Q4=[
+ {sk:'q_1',q:'Cağ kebap nasıl pişirilir?',a:['Et','yatay','şişte','odun','ateşinde','pişirilir.'],x:['dikey','fırında']},
+ {sk:'q_2',q:'Kadayıf dolmasının içine ne konur?',a:['Tel','kadayıfın','içine','ceviz','konur.'],x:['şeker','kıyma']},
+ {sk:'q_3',q:'Kadayıf dolması hangi aşamalardan geçer?',a:['Önce','kızartılır,','sonra','şerbetlenir.'],x:['soğutulur,','haşlanır,']},
+ {sk:'q_4',q:'Kadayıf dolmasının Erzurum için özel bir yanı nedir?',a:['Kadayıf','dolması',"Erzurum'un",'coğrafi','işaretli','tatlısıdır.'],x:["Ankara'nın",'kebabıdır.']}
+];
+function s4(){S.stage=3;S.view='r4';setPills();G={i:0,ok:0};r4();Snd.say('asama4',VO.asama4);}
+function r4(){
+ var Q=Q4[G.i];G.tries=0;G.ans=[];G.done=false;G.bank=shuffle(Q.a.concat(Q.x));
+ app.innerHTML=strip(4,'Misafire Türkçe Anlat','Misafirin sorusunu dinle ve oku. Kelimeleri doğru sıraya dizerek cevap ver.','asama4')+
+ '<div class="card"><div class="rnd">Soru '+(G.i+1)+' / '+Q4.length+'</div>'+
+ '<div class="bubble"><b>Misafir:</b> “'+esc(Q.q)+'”</div>'+
+ '<div class="row"><button class="btn alt" data-act="qsay">🔊 Soruyu Dinle</button></div>'+
+ '<p><b>Cevap cümlen:</b></p><div class="ans" id="ans" aria-live="polite"></div>'+
+ '<p><b>Kelime kutusu:</b> (İki kelime fazla, onları kullanma.)</p><div class="chips" id="bank"></div>'+
+ '<div class="row"><button class="btn" id="chk" data-act="chk4">Misafire Cevapla</button><button class="btn ghost" data-act="clr4">Temizle</button></div>'+
+ '<p id="msg" class="msg" aria-live="polite"></p><div id="spk"></div></div>';
+ ui4();
+}
+function ui4(){
+ $('#ans').innerHTML=G.ans.length?G.ans.map(function(i){return '<button class="chip" data-act="a4" data-i="'+i+'">'+esc(G.bank[i])+'</button>';}).join(''):'<span style="opacity:.55">Kelimelere dokun, buraya dizilsin.</span>';
+ $('#bank').innerHTML=G.bank.map(function(w,i){return G.ans.indexOf(i)>=0?'':'<button class="chip" data-act="b4" data-i="'+i+'">'+esc(w)+'</button>';}).join('');
+}
+
+/* ====== FİNAL & SERTİFİKA ====== */
+function final(){
+ S.stage=4;S.view='final';setPills();Snd.say('final',VO.final);Snd.sfx('final');
+ app.innerHTML='<div class="card hero"><h1>Afiyet olsun, Usta!</h1><p>Erzurum ocağında odunu taşıdın, cağdan et kestin, kadayıf dolmasını sardın ve misafirine Türkçe anlattın.</p>'+banner()+'</div>'+
+ '<div class="card"><h2>Neler keşfettin?</h2><ul class="ev">'+
+ '<li><b>Hâl ekleri:</b> '+S.res.s1+' / '+R1.length+' turu ilk denemede tamamladın. (-ı, -a, -da, -dan)</li>'+
+ '<li><b>Dinleme ve söz varlığı:</b> '+S.res.s2+' / '+ORD.length+' siparişi ilk servisinde doğru hazırladın.</li>'+
+ '<li><b>Okuma ve yazma:</b> Kadayıf dolması tarifini okuyup sırayla uyguladın'+(S.sentence?' ve şu cümleyi yazdın: “'+esc(S.sentence)+'”':'')+'.</li>'+
+ '<li><b>Konuşma ve cümle kurma:</b> '+S.res.s4+' / '+Q4.length+' cevabı ilk denemede kurdun.</li></ul></div>'+
+ '<div class="card"><h2>Sertifikan</h2><label for="nm" style="font-weight:800">Adını yaz:</label><input type="text" id="nm" maxlength="30" autocomplete="off" value="'+esc(S.name)+'" placeholder="Adın ve soyadın">'+
+ '<canvas id="cert" width="1200" height="850" aria-label="Başarı sertifikası önizlemesi"></canvas>'+
+ '<div class="row"><button class="btn" data-act="dl">Sertifikayı JPG İndir</button><a class="btn alt" id="mapBtn" href="'+MAP_URL+'">Haritaya Dön</a><button class="btn ghost" data-act="again">Baştan Oyna</button></div>'+
+ '<p id="msg" class="msg" aria-live="polite"></p></div>';
+ drawCert();
+ try{if(document.fonts&&document.fonts.ready)document.fonts.ready.then(drawCert);}catch(e){}
+ confetti();window.scrollTo(0,0);
+}
+function wrapText(c,text,x,y,maxW,lh){var words=text.split(' '),line='';for(var i=0;i<words.length;i++){var t=line?line+' '+words[i]:words[i];if(c.measureText(t).width>maxW&&line){c.fillText(line,x,y);line=words[i];y+=lh;}else line=t;}c.fillText(line,x,y);return y;}
+function drawCert(){
+ var cv=$('#cert');if(!cv)return;var c=cv.getContext('2d');var W=1200,H=850;
+ c.fillStyle='#f4e9d0';c.fillRect(0,0,W,H);
+ c.strokeStyle='#6b3f22';c.lineWidth=16;c.strokeRect(30,30,W-60,H-60);
+ c.strokeStyle='#e0a42b';c.lineWidth=4;c.strokeRect(58,58,W-116,H-116);
+ c.fillStyle='#e8622a';c.beginPath();c.moveTo(560,170);c.quadraticCurveTo(540,125,585,100);c.quadraticCurveTo(580,140,605,130);c.quadraticCurveTo(640,150,620,170);c.closePath();c.fill();
+ c.fillStyle='#f4b73c';c.beginPath();c.moveTo(585,170);c.quadraticCurveTo(582,148,598,140);c.quadraticCurveTo(612,152,606,170);c.closePath();c.fill();
+ c.strokeStyle='#8c8c8c';c.lineWidth=6;c.beginPath();c.moveTo(430,172);c.lineTo(770,172);c.stroke();
+ c.textAlign='center';c.fillStyle='#6b3f22';
+ c.font='700 56px Lora, Georgia, serif';c.fillText('Usta Çırak Belgesi',W/2,260);
+ c.fillStyle='#2a1c14';c.font='600 28px Nunito, Arial, sans-serif';c.fillText('Bu belge, Erzurum ocağında başarıyla çalışan',W/2,330);
+ var nm=(S.name||'').trim()||'Küçük Usta';var fs=84;
+ do{c.font='italic 700 '+fs+'px Lora, Georgia, serif';fs-=4;}while(c.measureText(nm).width>W-260&&fs>32);
+ c.fillStyle='#e8622a';c.fillText(nm,W/2,440);
+ c.strokeStyle='#e0a42b';c.lineWidth=3;c.beginPath();c.moveTo(300,465);c.lineTo(W-300,465);c.stroke();
+ c.fillStyle='#2a1c14';c.font='600 28px Nunito, Arial, sans-serif';
+ var y=wrapText(c,'adlı çırağa verilmiştir. Cağ kebap ve kadayıf dolmasını Türkçe dinleyerek, okuyarak, yazarak ve konuşarak keşfetti.',W/2,520,W-300,42);
+ if(S.sentence){c.font='italic 600 26px Nunito, Arial, sans-serif';c.fillStyle='#6b3f22';wrapText(c,'Tarif cümlem: “'+S.sentence+'”',W/2,y+64,W-340,38);}
+ c.fillStyle='#2a1c14';c.font='700 26px Nunito, Arial, sans-serif';
+ c.fillText('Hazırlayan: '+STUDENT+'  •  Ülkem Yanımda',W/2,H-130);
+ c.font='600 22px Nunito, Arial, sans-serif';c.fillText(new Date().toLocaleDateString('tr-TR'),W/2,H-92);
+}
+function confetti(){
+ if(RM)return;var cv=$('#conf');if(!cv)return;cv.width=window.innerWidth;cv.height=window.innerHeight;var c=cv.getContext('2d');
+ var cols=['#e8622a','#e0a42b','#2f7f79','#f6f3ec','#b36a2a'];
+ var P=Array.from({length:90},function(){return {x:Math.random()*cv.width,y:-20-Math.random()*cv.height*.5,r:4+Math.random()*5,vy:2+Math.random()*3,vx:-1+Math.random()*2,c:cols[Math.floor(Math.random()*cols.length)]};});
+ var t0=performance.now();
+ (function f(t){var el=t-t0;c.clearRect(0,0,cv.width,cv.height);P.forEach(function(p){p.x+=p.vx;p.y+=p.vy;c.fillStyle=p.c;c.fillRect(p.x,p.y,p.r,p.r*1.6);});
+  if(el<3800)requestAnimationFrame(f);else c.clearRect(0,0,cv.width,cv.height);})(t0);
+}
+
+/* ====== TÜM EYLEMLER ====== */
+var GO=[s1,s2,s3,s4,final];
+var ACT={
+ start:function(){
+   var v=$('#docVideo');if(v){v.pause();}
+   GO[0]();
+ },
+ introSay:function(){Snd.say('giris',VO.giris).then(function(ok){if(!ok)toast('Ses çalışmadı. Yazılı yönergeleri okuyabilirsin.');});},
+ replay:function(t){var k=t.dataset.k;Snd.say(k,VO[k]).then(function(ok){if(!ok)toast('Ses çalışmadı. Yazılı görevi okuyabilirsin.');});},
+ sayLine:function(t){
+   var i=+t.dataset.i;var s=ST3[i];
+   Snd.sayText(s.raw,s.sk);
+ },
+ gonext:function(t){GO[+t.dataset.n]();},
+ snd:function(t){Snd.on=!Snd.on;if(!Snd.on)Snd.stop();t.textContent='Ses: '+(Snd.on?'Açık':'Kapalı');t.setAttribute('aria-pressed',Snd.on);},
+ sup:function(t){S.support=!S.support;t.textContent='Destek: '+(S.support?'Açık':'Kapalı');t.setAttribute('aria-pressed',S.support);if(S.view==='r1'&&G.sel)r1ui();},
+ 
+ /* Video Oynatıcı Kontrolleri */
+ vPlay:function(t){
+   var v=$('#docVideo');if(!v)return;
+   if(v.paused){v.play();t.textContent='⏸ Duraklat';t.classList.add('alt');}
+   else{v.pause();t.textContent='▶ Başlat';t.classList.remove('alt');}
+ },
+ vMute:function(t){
+   var v=$('#docVideo');if(!v)return;
+   v.muted=!v.muted;
+   t.textContent=v.muted?'Sesi Aç':'Sesi Kapat';
+ },
+
+ /* Aşama 1 */
+ r1blank:function(t){if(G.done)return;G.act=+t.dataset.i;r1ui();},
+ r1opt:function(t){if(G.done)return;G.sel[G.act]=+t.dataset.o;Snd.sfx('ui');var nx=G.sel.findIndex(function(x){return x===null;});if(nx>=0)G.act=nx;r1ui();},
+ r1reset:function(){if(G.done)return;G.sel=G.sel.map(function(){return null;});G.act=0;msg('');r1ui();},
+ r1run:function(){
+   if(G.done)return;var R=R1[G.ri];
+   var wrong=R.bl.map(function(b,i){return G.sel[i]===ROLE[b[1]]?-1:i;}).filter(function(i){return i>=0;});
+   if(!wrong.length){
+     G.done=true;if(G.tries===0)G.ok++;Snd.sfx('dogru');
+     if(R.stay){R.stay.forEach(function(o,i){var e=$('#st'+i);if(e)e.classList.add('pulse');});}
+     else{$('#mv').style.transform='translate('+PL[R.to].x+'px,160px)';}
+     msg('Usta cümleni uyguladı: “'+r1sentence()+'”','ok');r1done();
+   }else{
+     G.tries++;Snd.sfx('tekrar');var m=$('#sent');m.classList.add('shake');setTimeout(function(){m.classList.remove('shake');},450);
+     var b=R.bl[wrong[0]],r=ROLE[b[1]];
+     var tx='Usta bu sözü anlayamadı. “'+b[0]+'” sözü için “'+QW[r]+'” sorusunu sor. Bu soruya '+SUF[r]+' ekleri cevap verir.';
+     if(G.tries>=3)tx+=' Yardım: “'+FORMS[b[0]][r]+'”.';
+     wrong.forEach(function(i){G.sel[i]=null;});G.act=wrong[0];r1ui();msg(tx,'hint');
+   }
+ },
+ r1next:function(){G.ri++;if(G.ri>=R1.length){S.res.s1=G.ok;stageDone(1,'Usta, hâl ekleriyle verdiğin her emri anladı: “Nereye?”, “Nereden?”, “Nerede?” ve “Neyi?” sorularını başarıyla kullandın.','Sipariş zamanı');}else r1();},
+ 
+ /* Aşama 2 */
+ orderSay:function(){orderSay();},
+ orderTxt:function(){revealTxt();},
+ cut:function(){if(G.served)return;if(G.n>=8){msg('Tepsiye en fazla 8 şiş sığar.','hint');return;}G.n++;upd2();Snd.sfx('ui');var k=$('#knife');if(k&&!RM){k.style.transition='transform .2s';k.style.transform='translateX(-34px) rotate(-10deg)';setTimeout(function(){k.style.transform='';},220);}},
+ uncut:function(){if(G.served)return;if(G.n>0){G.n--;upd2();}},
+ dp:function(t){if(G.served)return;var k=t.dataset.k;if(G.d[k]<4){G.d[k]++;upd2();Snd.sfx('ui');}},
+ dm:function(t){if(G.served)return;var k=t.dataset.k;if(G.d[k]>0){G.d[k]--;upd2();}},
+ serve:function(){
+   if(G.served)return;var O=ORD[G.i];var nOk=G.n===O.n;var dOk=DR.every(function(d){return G.d[d[0]]===(O.d[d[0]]||0);});
+   if(nOk&&dOk){
+     G.served=true;if(G.tries===0)G.ok++;Snd.sfx('dogru');msg('Müşteri: “Teşekkürler usta, ellerine sağlık!”','ok');
+     $('#srv').disabled=true;
+     $('#spk').innerHTML='<div class="bubble"><p>Şimdi sen söyle: <b>“Buyurun, afiyet olsun!”</b></p><div class="row"><button class="btn alt" data-act="phrase">🔊 Nasıl söylenir? Dinle</button><button class="btn" data-act="said">Söyledim</button></div></div>';
+   }else{
+     G.tries++;Snd.sfx('tekrar');
+     var tx=!nOk?'Müşteri şiş sayısını farklı söylemişti. Siparişi bir kez daha dinleyelim.':'Müşteri içeceği ya da kaç tane istediğini farklı söylemişti. Bir kez daha dinleyelim.';
+     if(G.tries>=2)tx+=' “Yazıyı göster” düğmesi yardımcı olur.';
+     msg(tx,'hint');
+   }
+ },
+ phrase:function(){Snd.say('afiyet',VO.afiyet).then(function(ok){if(!ok)toast('Ses çalışmadı. Cümleyi yüksek sesle sen oku.');});},
+ said:function(){G.i++;if(G.i>=ORD.length){S.res.s2=G.ok;stageDone(2,'Üç müşteriyi dinledin, cağdan et kestin ve her siparişi eksiksiz servis ettin.','Tatlı atölyesine geç');}else r2();},
+ 
+ /* Aşama 3 */
+ tool:function(t){
+   if(G.lock)return;var k=t.dataset.k;var need=ST3[G.step];if(!need)return;
+   [].forEach.call(document.querySelectorAll('.recipe li.nx'),function(e){e.classList.remove('nx');});
+   if(k===need.k){
+     $('#ln'+G.step).classList.add('done');G.step++;$('#dish').setAttribute('class','s'+G.step);
+     var cl=['s1','s2','s3','s4','s5','s6'].slice(0,G.step).join(' ');$('#dish').setAttribute('class',cl);
+     Snd.sfx('ui');msg(need.ok,'ok');
+     if(k==='tava'){G.lock=true;msg('Dolma kızarıyor…','ok');setTimeout(function(){G.lock=false;msg(need.ok,'ok');},RM?200:1400);}
+     if(G.step===ST3.length){Snd.sfx('dogru');S.res.s3=G.wrong;setTimeout(writePanel,RM?100:1500);}
+   }else{
+     G.wrong++;Snd.sfx('tekrar');t.classList.add('shake');setTimeout(function(){t.classList.remove('shake');},450);
+     msg('Henüz sırası gelmedi. Tarifte sıradaki cümleyi bul ve yeniden oku.','hint');
+     if(S.support){var n=$('#ln'+G.step);if(n)n.classList.add('nx');}
+   }
+ },
+ chipw:function(t){var w=$('#wr');if(!w)return;w.value=(w.value?w.value.replace(/\s*$/,' '):'')+t.dataset.w+' ';w.focus();},
+ saveWrite:function(){
+   var w=$('#wr');var v=(w.value||'').replace(/\s+/g,' ').trim();var n=v?v.split(' ').length:0;
+   var m=$('#msg2');
+   if(n<3){m.textContent='Cümlen en az 3 sözcük olsun. Kelime kutusundan yardım alabilirsin.';m.className='msg hint';return;}
+   S.sentence=v;Snd.sfx('dogru');m.textContent='Deftere yazıldı!';m.className='msg ok';
+   setTimeout(function(){stageDone(3,'Tarifi okuyarak dolmayı sırayla hazırladın ve kendi cümleni deftere yazdın.','Misafir sofrasına geç');},700);
+ },
+ 
+ /* Aşama 4 */
+ qsay:function(){
+   var Q=Q4[G.i];
+   Snd.sayText(Q.q,Q.sk).then(function(ok){if(!ok)toast('Ses çalışmadı. Soruyu sen oku.');});
+ },
+ b4:function(t){if(G.done)return;G.ans.push(+t.dataset.i);Snd.sfx('ui');ui4();},
+ a4:function(t){if(G.done)return;var i=+t.dataset.i;G.ans=G.ans.filter(function(x){return x!==i;});ui4();},
+ clr4:function(){if(G.done)return;G.ans=[];msg('');ui4();},
+ chk4:function(){
+   if(G.done)return;var Q=Q4[G.i];var s=G.ans.map(function(i){return G.bank[i];}).join(' ');
+   if(s===Q.a.join(' ')){
+     G.done=true;if(G.tries===0)G.ok++;Snd.sfx('dogru');msg('Misafir: “Çok güzel anlattın, teşekkür ederim!”','ok');
+     $('#chk').disabled=true;
+     $('#spk').innerHTML='<div class="row"><button class="btn alt" data-act="say4">🔊 Misafire söyle (dinle ve tekrar et)</button><button class="btn" data-act="next4">'+(G.i===Q4.length-1?'Sofrayı tamamla':'Sonraki soru')+'</button></div>';
+   }else{
+     G.tries++;Snd.sfx('tekrar');
+     var tx='Cümle henüz anlaşılır bir sıraya girmedi. Önce neyi anlattığını, sonra nasıl olduğunu düşün ve bir daha dene.';
+     if(G.tries>=2&&S.support)tx+=' İlk sözcük: “'+Q.a[0]+'”.';
+     if(G.tries>=3)tx+=' İkinci sözcük: “'+Q.a[1]+'”.';
+     msg(tx,'hint');
+   }
+ },
+ say4:function(){Snd.sayText(Q4[G.i].a.join(' ')).then(function(ok){if(!ok)toast('Ses çalışmadı. Cümleyi yüksek sesle sen oku.');});},
+ next4:function(){G.i++;if(G.i>=Q4.length){S.res.s4=G.ok;final();}else r4();},
+ 
+ /* Final */
+ dl:function(){
+   try{
+     drawCert();var cv=$('#cert');var url=cv.toDataURL('image/jpeg',0.92);
+     var a=document.createElement('a');a.href=url;a.download='sertifika-'+((S.name||'usta').replace(/[^A-Za-z0-9ğüşıöçĞÜŞİÖÇ_-]+/g,'-'))+'.jpg';
+     document.body.appendChild(a);a.click();a.remove();msg('Sertifika indirildi.','ok');
+   }catch(e){msg('Sertifika indirilemedi. Görsele basılı tutarak kaydedebilirsin.','hint');}
+ },
+ again:function(){S.name='';S.sentence='';S.res={s1:0,s2:0,s3:0,s4:0};intro();window.scrollTo(0,0);}
+};
+
+document.addEventListener('click',function(e){
+ var t=e.target.closest('[data-act]');if(!t||t.disabled)return;
+ Snd.init();Snd.resume();var f=ACT[t.dataset.act];if(f)f(t,e);
+});
+document.addEventListener('input',function(e){
+  if(e.target&&e.target.id==='nm'){S.name=e.target.value.trim().slice(0,30);drawCert();}
+});
+
+intro();
+</script>
+</body>
+</html>
