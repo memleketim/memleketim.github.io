@@ -3,29 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa 25</title>
+    <title>Erzurum'un Kültürel ve Doğal Zenginlikleri</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0; padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
         }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+
+        .container {
+            max-width: 1200px; width: 95%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        a:hover {
-            background-color: #2980b9;
+
+        h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+
+        .instructions {
+            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
+            background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
+        .map-container {
+            position: relative; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: white; padding: 15px;
+            max-width: 800px; margin: 0 auto;
+        }
+
+        .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
+
+        .quiz-point {
+            position: absolute; width: 75px; height: 75px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px); border: 2px solid white;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5;
+        }
+
+        .quiz-point:hover { transform: scale(1.2); z-index: 10; background: rgba(255, 255, 255, 0.5); }
+
+        .quiz-point-icon {
+            width: 90px; height: 90px; object-fit: contain;
+            animation: bounce 1.2s infinite alternate;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+        .tooltip {
+            position: absolute; background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: bold;
+            top: -40px; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+        }
+        .quiz-point:hover .tooltip { opacity: 1; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; max-width: 550px; width: 90%; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+        .modal-content h2 { color: #764ba2; margin-bottom: 15px; font-size: 1.8em; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .modal-content p { color: #444; line-height: 1.7; text-align: justify; font-size: 1.1em; margin-bottom: 25px; }
+        
+        .btn { padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4); }
+        .btn-secondary { background: #eee; color: #555; border: none; margin-left: 10px; }
+
+        /* 🗺️ Koordinatlar - Turuncu Erzurum İl Sınırları İçerisine Dağılım */
+        #p1 { top: 40%; left: 20%; } /* Cağ Kebabı ve Kadayıf Dolması (Batı-Orta) */
+        #p2 { top: 50%; left: 45%; } /* Erzurum Kalesi ve Çifte Minareli Medrese (Tam Merkez) */
+        #p3 { top: 70%; left: 55%; } /* Palandöken (Güney-Merkez) */
+        #p4 { top: 25%; left: 65%; } /* Oltu Taşı (Kuzey-Doğu) */
+        #p5 { top: 45%; left: 75%; } /* Narman ve Tortum Şelalesi (Doğu) */
+        #p6 { top: 60%; left: 35%; } /* Erzurum Kongresi (Güney-Batı) */
     </style>
 </head>
 <body>
-    <h1>Bu sayfa henüz tasarım aşamasında: 25</h1>
-    <a href="http://memleketim.github.io/">Anasayfaya Dön</a>
+
+<div class="container">
+    <div style="width: 100%; position: relative;">
+        <h1>Erzurum'un Kültürel ve Doğal Zenginlikleri</h1>
+        <a href="https://memleketim.github.io" class="btn btn-primary" style="position: absolute; top: 0; right: 0;">Ana Sayfa</a>
+    </div>
+
+    <div class="instructions">Haritadaki ikonlara tıklayarak Dadaşlar diyarı Erzurum'un eşsiz lezzetlerini, tarihini ve doğasını keşfedebilirsiniz. 🏔️</div>
+
+    <div class="map-container">
+        <img src="map.png" alt="Erzurum Haritası" class="map-image">
+
+        <div class="quiz-point" id="p1" 
+             data-title="🍢 Cağ Kebabı ve Kadayıf Dolması" 
+             data-description="Erzurum'un dillere destan mutfağının en nadide incileri olan cağ kebabı ve kadayıf dolması, damaklarda unutulmaz bir tat bırakır. Odun ateşinde ağır ağır pişen, özel baharatlarla marine edilmiş cağ kebabı etin en lezzetli halini sunarken; içi ceviz dolu, dışı çıtır çıtır kadayıf dolması bu muhteşem ziyafeti taçlandırır. Yüzyıllardır süregelen bu köklü gastronomi geleneği, Erzurum'un soğuk iklimini ısıtan eşsiz bir kültürel mirastır."
+             data-link="1.html">
+            <div class="tooltip">Yöresel Lezzetler</div>
+            <img src="1.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p2" 
+             data-title="🕌 Erzurum Kalesi ve Çifte Minareli Medrese" 
+             data-description="Şehrin kalbinde yükselen Erzurum Kalesi, asırlara meydan okuyan surları ve saat kulesiyle tarihin sessiz tanığıdır. Hemen yanı başında yer alan, Selçuklu mimarisinin şaheseri Çifte Minareli Medrese ise gökyüzüne uzanan oymalı minareleri ve muazzam taş işçiliğiyle büyüleyicidir. Anadolu'nun en büyük medreselerinden biri olan bu tarihi yapı, Erzurum'un köklü ilim ve irfan geçmişini günümüze taşıyan görkemli bir abidedir."
+             data-link="2.html">
+            <div class="tooltip">Tarihi Miras</div>
+            <img src="2.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p3" 
+             data-title="⛷️ Palandöken" 
+             data-description="Dünyanın en uzun ve en dik kayak pistlerinden bazılarına ev sahipliği yapan Palandöken Dağı, kış sporları tutkunlarının vazgeçilmez rotasıdır. Aylarca erimeyen toz kar yapısı ve uluslararası standartlardaki modern tesisleriyle kayak ve snowboard severlere eşsiz bir heyecan sunar. Çam ormanları ve bembeyaz zirveleriyle çevrili bu doğa harikası, dondurucu soğuğuna rağmen sunduğu sıcak misafirperverliğiyle unutulmaz bir kış tatili vadeder."
+             data-link="3.html">
+            <div class="tooltip">Kış Turizmi</div>
+            <img src="3.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p4" 
+             data-title="📿 Oltu Taşı" 
+             data-description="Erzurum'un Oltu ilçesinde toprak altından binbir emekle çıkarılan Oltu taşı, 'kara kehribar' olarak da bilinen eşsiz bir doğal zenginliktir. Usta ellerde sabırla işlenerek tespih, yüzük, kolye ve çeşitli takılara dönüşen bu kıymetli taş, kullandıkça parlayan yapısıyla meşhurdur. Yüzyıllardır süregelen geleneksel el sanatlarımızın en zarif örneklerinden biri olan Oltu taşı işlemeciliği, şehrin kültürel mirasının en değerli parçalarındandır."
+             data-link="4.html">
+            <div class="tooltip">Oltu Taşı</div>
+            <img src="4.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p5" 
+             data-title="🌊 Narman ve Tortum Şelalesi" 
+             data-description="Doğanın Erzurum'a armağan ettiği kızıl masal diyarı Narman Peribacaları, 'Kırmızı Periler Diyarı' olarak bilinir ve rüzgarın sanata dönüştüğü eşsiz kaya oluşumlarıdır. Diğer yanda ise Avrupa'nın en yüksek, dünyanın ise sayılı şelalelerinden biri olan Tortum Şelalesi, coşkuyla akan suları ve oluşturduğu gökkuşaklarıyla nefes kesici bir manzara sunar. Bu iki eşsiz doğa harikası, macera ve huzur arayan doğa tutkunları için paha biçilemez bir rotadır."
+             data-link="5.html">
+            <div class="tooltip">Doğa Harikaları</div>
+            <img src="5.png" class="quiz-point-icon">
+        </div>
+
+        <div class="quiz-point" id="p6" 
+             data-title="📜 Erzurum Kongresi" 
+             data-description="Milli Mücadele'nin ateşinin yakıldığı, Cumhuriyet'in temellerinin atıldığı Erzurum Kongresi, Türk milletinin bağımsızlık yolundaki en önemli dönüm noktalarından biridir. 23 Temmuz 1919'da Mustafa Kemal Atatürk liderliğinde toplanan bu tarihi kongre, 'Milli sınırlar içinde vatan bir bütündür, parçalanamaz' kararıyla tarihe geçmiştir. Kongreye ev sahipliği yapan tarihi bina, bugün o destansı günlerin ruhunu yaşatan gurur dolu bir müze olarak ziyaretçilerini ağırlar."
+             data-link="6.html">
+            <div class="tooltip">Erzurum Kongresi</div>
+            <img src="6.png" class="quiz-point-icon">
+        </div>
+    </div>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div class="modal-buttons">
+            <a href="#" id="activityLinkBtn" class="btn btn-primary">Etkinliğe Git</a>
+            <button class="btn btn-secondary" id="closeModalBtn">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const quizPoints = document.querySelectorAll('.quiz-point');
+    const modal = document.getElementById('infoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const activityLinkBtn = document.getElementById('activityLinkBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    quizPoints.forEach(point => {
+        point.addEventListener('click', function() {
+            modalTitle.textContent = this.getAttribute('data-title');
+            modalText.textContent = this.getAttribute('data-description');
+            activityLinkBtn.href = this.getAttribute('data-link');
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+</script>
+
 </body>
 </html>
