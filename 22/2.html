@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>2. Oyun: Meşhur Edirne Lezzetleri — Trakya Lezzet Mutfağı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,600;0,700;1,500&family=Montserrat:wght@600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --cream-bg: #fff9f0;
+  --tile-bg: #fef3c7;
+  --copper: #c2410c;
+  --copper-dark: #7c2d12;
+  --saffron: #f59e0b;
+  --herb: #15803d;
+  --pepper: #dc2626;
+  --ink: #29150c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+html, body {
+  width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background:
+    radial-gradient(circle at 15% 15%, #fde68a 0%, transparent 35%),
+    radial-gradient(circle at 85% 80%, #fed7aa 0%, transparent 40%),
+    url('gorseller/mutfak_cini_bg.png') center/cover no-repeat,
+    var(--cream-bg);
+  color: var(--ink);
+}
+
+#logo {
+  position: fixed; top: 10px; left: 14px; height: 46px; width: auto;
+  z-index: 950; pointer-events: none !important;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+}
+#confetti { position: fixed; inset: 0; pointer-events: none !important; z-index: 900; }
+
+/* Aydınlık Mutfak Tezgâhı Düzeni: Üst Raf + Orta Mutfak Tezgâhı + Alt Masa Örtüsü Şeridi */
+.kitchen-app {
+  width: 100vw; height: 100dvh;
+  display: grid;
+  grid-template-rows: 64px auto 1fr 48px;
+  gap: 8px;
+}
+
+/* Üst Ahşap Mutfak Rafı */
+.wooden-shelf {
+  background: linear-gradient(180deg, #78350f, #451a03);
+  border-bottom: 4px solid var(--saffron);
+  padding: 0 18px 0 165px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  color: #fff; box-shadow: 0 6px 16px rgba(120,53,15,0.3);
+}
+.recipe-steps {
+  display: flex; gap: 8px; align-items: center; overflow-x: auto;
+}
+.r-pill {
+  padding: 6px 13px; border-radius: 999px;
+  background: rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(255,255,255,0.25);
+  font-size: 12px; font-weight: 800; color: #fde68a; white-space: nowrap;
+}
+.r-pill.active { background: var(--saffron); color: var(--ink); border-color: #fff; transform: scale(1.05); }
+.r-pill.done { background: var(--herb); color: #fff; border-color: #86efac; }
+
+.shelf-stats { display: flex; gap: 8px; align-items: center; }
+.k-stat {
+  background: #fff; color: var(--ink);
+  border: 2px solid var(--ink); border-radius: 999px;
+  padding: 4px 12px; font-weight: 800; font-size: 13.5px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.k-iconbtn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--saffron); color: var(--ink);
+  border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--ink);
+  font-size: 16px; cursor: pointer;
+}
+
+/* Aşçı Yönerge Tepsisi */
+.chef-banner {
+  margin: 0 18px;
+  background: #fff;
+  border: 2.5px solid var(--copper);
+  border-radius: 18px;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 5px 0 rgba(194,65,12,0.25);
+}
+.chef-badge {
+  background: var(--copper); color: #fff;
+  font-weight: 800; font-size: 12px;
+  padding: 5px 11px; border-radius: 10px; white-space: nowrap;
+}
+.chef-text {
+  flex: 1; font-family: 'Lora', serif; font-size: clamp(15px, 1.9vw, 19px);
+  font-weight: 700; color: var(--ink);
+}
+.spk-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--saffron); color: var(--ink);
+  border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--ink);
+  font-size: 16px; cursor: pointer; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.spk-btn:hover { transform: scale(1.1); }
+
+/* Orta Mutfak Tezgâhı */
+.counter-stage {
+  margin: 0 18px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 3px solid var(--copper-dark);
+  border-radius: 26px;
+  padding: 14px 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  box-shadow: 0 12px 30px rgba(124,45,18,0.16);
+}
+
+/* Alt Pötikare Masa Örtüsü Şeridi */
+.tablecloth-footer {
+  background: repeating-linear-gradient(90deg, #dc2626 0 24px, #fef2f2 24px 48px);
+  border-top: 3px solid var(--copper-dark);
+  padding: 0 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.footer-inner {
+  width: 100%; background: rgba(255,255,255,0.94);
+  border: 2px solid var(--copper-dark); border-radius: 999px;
+  padding: 4px 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+}
+.fb-msg { font-weight: 800; font-size: 13.5px; color: var(--copper-dark); }
+.mesut-link {
+  color: var(--copper); font-weight: 800; font-size: 12.5px;
+  text-decoration: underline;
+}
+
+.copper-btn {
+  background: linear-gradient(180deg, #ea580c, #c2410c);
+  color: #fff; border: 2.5px solid var(--ink);
+  border-radius: 16px; padding: 12px 24px;
+  font-weight: 800; font-size: 17px; cursor: pointer;
+  box-shadow: 0 5px 0 var(--ink); transition: transform 0.1s;
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+}
+.copper-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+
+/* MEKANİK 1: 3B BAKIR TAVA KAYDIRMA */
+.pan-3d-arena {
+  width: min(740px, 100%); height: 100%; min-height: 240px;
+  display: grid; grid-template-rows: auto 1fr auto; gap: 8px;
+  align-items: center; justify-items: center;
+}
+#pan3dCanvas {
+  width: 100%; height: 195px;
+  border-radius: 18px; border: 2.5px solid var(--copper);
+  background: radial-gradient(circle at 50% 20%, #451a03, #1c0a04);
+  display: block;
+}
+.pan-controls { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.dish-option-btn {
+  background: #fffbeb; border: 2.5px solid var(--ink);
+  border-radius: 14px; padding: 10px 20px;
+  font-weight: 800; font-size: 17px; color: var(--ink);
+  box-shadow: 0 4px 0 var(--ink); cursor: pointer;
+}
+.dish-option-btn:hover { background: var(--saffron); transform: translateY(-2px); }
+
+/* MEKANİK 2: ÇİFT KEFELİ BAKIR TERAZİ */
+.scale-arena {
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  width: min(680px, 100%);
+}
+.scale-beam-wrap {
+  width: 340px; height: 110px; position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+}
+.scale-beam {
+  width: 280px; height: 10px; background: var(--copper);
+  border: 2px solid var(--ink); border-radius: 8px;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.scale-pan {
+  width: 86px; height: 36px; background: var(--saffron);
+  border: 2px solid var(--ink); border-radius: 0 0 45px 45px;
+  transform: translateY(20px);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 12px;
+}
+.scale-pillar {
+  width: 18px; height: 65px; background: var(--copper-dark);
+  border: 2px solid var(--ink); border-radius: 6px 6px 0 0;
+}
+.spice-bags-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+/* MEKANİK 3: MERMER BADEM HAVANI TOKMAĞI */
+.mortar-arena {
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px;
+  width: min(720px, 100%); align-items: center;
+}
+.mortar-bowl-card {
+  background: #fef3c7; border: 2.5px solid var(--ink);
+  border-radius: 22px; padding: 16px; text-align: center;
+  box-shadow: 0 6px 0 var(--ink);
+}
+.pestle-anim {
+  font-size: 62px; display: inline-block;
+  transition: transform 0.12s;
+}
+.pestle-anim.hit { transform: translateY(16px) rotate(-18deg) scale(1.12); }
+
+/* MEKANİK 4: AŞÇI VE MİSAFİR KONUŞMA BALONLARI */
+.restaurant-scene {
+  width: min(720px, 100%);
+  display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; align-items: center;
+}
+.dialogue-card {
+  background: #fffbeb; border: 2.5px solid var(--ink);
+  border-radius: 20px; padding: 16px;
+  box-shadow: 0 6px 0 var(--ink);
+  display: flex; flex-direction: column; gap: 10px;
+}
+.speech-bub {
+  background: #fff; border: 2px solid var(--copper);
+  border-radius: 16px; padding: 12px 14px;
+  font-family: 'Lora', serif; font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+
+@media (max-width: 780px) {
+  .wooden-shelf { padding-left: 70px; }
+  .mortar-arena, .restaurant-scene { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<img id="logo" src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+<canvas id="confetti"></canvas>
+
+<div class="kitchen-app">
+  <!-- ÜST AHŞAP MUTFAK RAFI -->
+  <header class="wooden-shelf">
+    <div class="recipe-steps" id="shelfSteps">
+      <span class="r-pill active">1. 🍳 Tava (Zıt Anlam)</span>
+      <span class="r-pill">2. ⚖️ Terazi (Hâl Ekleri)</span>
+      <span class="r-pill">3. 🥣 Havan (Eş Anlam)</span>
+      <span class="r-pill">4. 💬 Sofra (Fiil Kipleri)</span>
+    </div>
+    <div class="shelf-stats">
+      <div class="k-stat">🥘 <b id="scoreVal">0</b></div>
+      <div class="k-stat" id="heartsVal">❤️❤️❤️</div>
+      <button type="button" class="k-iconbtn" id="btnMute" title="Ses">🔊</button>
+    </div>
+  </header>
+
+  <!-- AŞÇI YÖNERGE TEPSİSİ -->
+  <div class="chef-banner">
+    <span class="chef-badge" id="dirTag">BAŞAŞÇI</span>
+    <p class="chef-text" id="dirText">Meşhur Edirne Mutfağına hoş geldin! Önce adını yazıp ocağı yakalım.</p>
+    <button type="button" class="spk-btn" id="dirSpk" title="Yönergeyi Dinle">🔊</button>
+  </div>
+
+  <!-- ORTA MUTFAK TEZGÂHI -->
+  <main class="counter-stage" id="counterStage"></main>
+
+  <!-- ALT MASA ÖRTÜSÜ ŞERİDİ -->
+  <footer class="tablecloth-footer">
+    <div class="footer-inner">
+      <span class="fb-msg" id="fbMsg">🌶️ Tava Ciğeri, Edirne Köftesi ve Badem Ezmesi seni bekliyor!</span>
+      <a href="https://drive.google.com/file/d/1kxCICPL_ENF9BNPMESnTYBul8WplTHeY/view?usp=drive_link"
+         target="_blank" rel="noopener noreferrer" class="mesut-link">
+        📜 Mesut Küçük'ün çalışmasının tamamına ulaşmak için tıklayın. ↗
+      </a>
+    </div>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  const S = { name: '', score: 0, lives: 3, stage: 0, qIdx: 0, mute: false, cleanups: [] };
+
+  let AC = null;
+  function getAC() {
+    try {
+      if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+      if (AC && AC.state === 'suspended') AC.resume();
+    } catch (e) {}
+    return AC;
+  }
+  function tone(f1, f2, d, type = 'triangle', v = 0.18, delay = 0) {
+    if (S.mute) return;
+    const c = getAC(); if (!c) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f2, 20), t + d * 0.9);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + d + 0.02);
+  }
+  const fxCache = {};
+  function playFX(file, fbFn) {
+    if (S.mute) return;
+    const a = fxCache[file] || (fxCache[file] = new Audio(file));
+    let done = false;
+    const fb = () => { if (!done) { done = true; fbFn(); } };
+    a.onerror = fb;
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play(); if (p && p.catch) p.catch(fb);
+  }
+  const SFX = {
+    sizzle() { playFX('sesler/cizirti.mp3', () => tone(680, 420, 0.11, 'sine', 0.12)); },
+    ok() { playFX('sesler/dogru.mp3', () => [523, 659, 784].forEach((f, i) => tone(f, f, 0.15, 'triangle', 0.2, i * 0.08))); },
+    bad() { playFX('sesler/yanlis.mp3', () => tone(210, 115, 0.28, 'sawtooth', 0.15)); },
+    win() { playFX('sesler/alkis.mp3', () => [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.2, 'triangle', 0.22, i * 0.1))); }
+  };
+
+  const bgm = new Audio('sesler/mutfak_fon.mp3');
+  bgm.loop = true; bgm.volume = 0.14;
+  bgm.addEventListener('error', () => {});
+
+  let voice = null;
+  function say(file, text) {
+    if (S.mute) return;
+    if (voice) { try { voice.pause(); } catch (e) {} voice = null; }
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    const tts = () => {
+      try {
+        if (!text || !window.speechSynthesis) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'tr-TR'; u.rate = 0.92;
+        window.speechSynthesis.speak(u);
+      } catch (e) {}
+    };
+    if (!file) { tts(); return; }
+    const a = new Audio(file); voice = a;
+    a.addEventListener('error', tts, { once: true });
+    const p = a.play(); if (p && p.catch) p.catch(tts);
+  }
+  const spk = (file, txt) => `<button type="button" class="spk-btn" data-a="${file}" data-t="${String(txt).replace(/"/g, '&quot;')}">🔊</button>`;
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.spk-btn[data-t]');
+    if (b) { e.stopPropagation(); say(b.dataset.a, b.dataset.t); }
+  }, true);
+
+  function runCleanups() {
+    S.cleanups.forEach(fn => { try { fn(); } catch (e) {} });
+    S.cleanups = [];
+  }
+
+  function updateHUD() {
+    $('scoreVal').textContent = S.score;
+    $('heartsVal').textContent = [0, 1, 2].map(i => i < S.lives ? '❤️' : '🖤').join('');
+    document.querySelectorAll('#shelfSteps .r-pill').forEach((el, idx) => {
+      el.classList.toggle('active', idx === S.stage - 1);
+      el.classList.toggle('done', idx < S.stage - 1);
+    });
+  }
+
+  function setDir(tag, txt, file) {
+    $('dirTag').textContent = tag;
+    $('dirText').textContent = txt;
+    $('dirSpk').onclick = () => say(file, txt);
+  }
+
+  function good(pts, msg) {
+    SFX.ok(); S.score += pts; updateHUD();
+    $('fbMsg').innerHTML = `✅ ${msg}`;
+  }
+  function bad(msg) {
+    SFX.bad(); S.lives = Math.max(1, S.lives - 1); updateHUD();
+    $('fbMsg').innerHTML = `💡 ${msg}`;
+  }
+
+  /* --- KAPAK EKRANI --- */
+  function showIntro() {
+    runCleanups(); S.stage = 0;
+    setDir('SARAY MUTFAĞI', 'Edirne’nin meşhur tava ciğerini, köftesini ve badem ezmesini pişirmeye hazır mısın?', 'sesler/mutfak_giris.mp3');
+    $('counterStage').innerHTML = `
+      <div style="max-width:650px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div style="font-size:52px;">🥘 🌶️ 🍬</div>
+        <h1 style="font-family:'Playfair Display',serif; font-size:clamp(26px,4vw,42px); color:var(--copper-dark);">
+          Meşhur Edirne Lezzetleri
+        </h1>
+        <p style="font-family:'Lora',serif; font-size:17px; line-height:1.45; background:#fef3c7; border:2px solid var(--ink); border-radius:16px; padding:12px 18px; box-shadow:0 4px 0 var(--ink);">
+          Edirne’de yaprak gibi ince <b>Tava Ciğeri</b>, <b>Edirne Köftesi</b> ve tatlı <b>Badem Ezmesi</b> çok ünlüdür!
+          ${spk('sesler/mutfak_bilgi.mp3', 'Edirnede yaprak gibi ince Tava Ciğeri, Edirne Köftesi ve tatlı Badem Ezmesi çok ünlüdür!')}
+        </p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center; align-items:center;">
+          <input id="inName" type="text" maxlength="24" placeholder="Aşçı adını yaz…"
+                 style="padding:12px 16px; border:2.5px solid var(--ink); border-radius:14px; font-weight:800; font-size:17px; width:220px;">
+          <button type="button" class="copper-btn" id="btnStart">OCAĞI YAK ▶</button>
+        </div>
+      </div>
+    `;
+    $('btnStart').onclick = () => {
+      getAC();
+      S.name = $('inName').value.trim() || 'Usta Aşçı';
+      if (!S.mute) bgm.play().catch(() => {});
+      startStage1();
+    };
+  }
+
+  /* --- 1. MEKANİK: 3B BAKIR TAVA KAYDIRMA (ZIT ANLAMLI KELİMELER) --- */
+  function startStage1() {
+    runCleanups(); S.stage = 1; S.qIdx = 0; updateHUD();
+    setDir('1. OYUN · 3B BAKIR TAVA', 'Kelimenin ZIT (KARŞIT) anlamlısını seçerek 3B Bakır Tavayı o malzemeye kaydır!', 'sesler/mutfak_y1.mp3');
+    const items = [
+      { w: 'İNCE dilim', ans: 'KALIN', opts: ['KALIN', 'ZARİF', 'KISA'], a: 'sesler/m1_ince.mp3', hint: 'İnce kelimesinin tam karşıtı KALIN kelimesidir.' },
+      { w: 'SICAK ciğer', ans: 'SOĞUK', opts: ['ILIK', 'SOĞUK', 'ACI'], a: 'sesler/m1_sicak.mp3', hint: 'Sıcak kelimesinin zıt anlamlısı SOĞUK kelimesidir.' },
+      { w: 'KURU biber', ans: 'YAŞ', opts: ['TATLI', 'KIRMIZI', 'YAŞ'], a: 'sesler/m1_kuru.mp3', hint: 'Kuru kelimesinin zıt anlamlısı YAŞ kelimesidir.' },
+      { w: 'TAZE badem', ans: 'BAYAT', opts: ['BAYAT', 'YENİ', 'BEYAZ'], a: 'sesler/m1_taze.mp3', hint: 'Taze kelimesinin zıt anlamlısı BAYAT kelimesidir.' }
+    ];
+
+    $('counterStage').innerHTML = `
+      <div class="pan-3d-arena">
+        <div style="display:flex; align-items:center; gap:10px; font-family:'Playfair Display',serif; font-size:24px; color:var(--copper-dark);">
+          <span id="panTargetWord">“İNCE” → Zıt Anlamlısı?</span>
+          <span id="panSpkWrap"></span>
+        </div>
+        <canvas id="pan3dCanvas"></canvas>
+        <div class="pan-controls" id="panBtns"></div>
+      </div>
+    `;
+
+    // Three.js 3B Bakır Tava Sahnesi
+    const cvs = $('pan3dCanvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 3, 0.1, 100);
+    camera.position.set(0, 6.5, 13);
+    camera.lookAt(0, 0, 0);
+    const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dl = new THREE.DirectionalLight(0xffd580, 1.3);
+    dl.position.set(5, 12, 8);
+    scene.add(dl);
+
+    const copperMat = new THREE.MeshStandardMaterial({ color: 0xc2410c, metalness: 0.75, roughness: 0.25 });
+    const panGroup = new THREE.Group();
+    const panBody = new THREE.Mesh(new THREE.CylinderGeometry(2.1, 1.6, 0.65, 28), copperMat);
+    const oilMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.9, 1.9, 0.15, 24), new THREE.MeshStandardMaterial({ color: 0xf59e0b }));
+    oilMesh.position.y = 0.32;
+    panGroup.add(panBody, oilMesh);
+    scene.add(panGroup);
+
+    const foodOrbs = [-4.5, 0, 4.5].map((xPos, idx) => {
+      const m = new THREE.Mesh(
+        new THREE.SphereGeometry(0.75, 20, 20),
+        new THREE.MeshStandardMaterial({ color: idx === 0 ? 0xdc2626 : (idx === 1 ? 0x15803d : 0xd97706) })
+      );
+      m.position.set(xPos, 2.2, 0);
+      scene.add(m);
+      return m;
+    });
+
+    let targetPanX = 0, rafId = 0, t = 0;
+    function resizePan() {
+      const r = cvs.getBoundingClientRect();
+      if (r.width && r.height) {
+        camera.aspect = r.width / r.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(r.width, r.height);
+      }
+    }
+    resizePan();
+    function loop3D() {
+      rafId = requestAnimationFrame(loop3D);
+      t += 0.05;
+      panGroup.position.x += (targetPanX - panGroup.position.x) * 0.15;
+      panGroup.position.y = -1.2 + Math.sin(t * 2) * 0.1;
+      foodOrbs.forEach((orb, i) => {
+        orb.position.y = 1.6 + Math.sin(t * 1.8 + i) * 0.35;
+        orb.rotation.y += 0.03;
+      });
+      renderer.render(scene, camera);
+    }
+    loop3D();
+    S.cleanups.push(() => cancelAnimationFrame(rafId));
+
+    function renderQ() {
+      if (S.qIdx >= items.length) { startStage2(); return; }
+      const cur = items[S.qIdx];
+      $('panTargetWord').textContent = `“${cur.w}” → ZIT anlamlısı hangisi?`;
+      $('panSpkWrap').innerHTML = spk(cur.a, cur.w + '. Zıt anlamlısı hangisi?');
+      say(cur.a, cur.w);
+      const lanes = [-4.5, 0, 4.5];
+      $('panBtns').innerHTML = cur.opts.map((o, idx) =>
+        `<button type="button" class="dish-option-btn" data-idx="${idx}">🥘 ${o}</button>`
+      ).join('');
+      $('panBtns').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          const idx = +b.dataset.idx;
+          targetPanX = lanes[idx];
+          SFX.sizzle();
+          const picked = cur.opts[idx];
+          if (picked === cur.ans) {
+            good(25, `Harika kızartma! “${cur.w}” ↔ “${cur.ans}” zıt anlamlıdır.`);
+            S.qIdx++;
+            setTimeout(renderQ, 850);
+          } else {
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    renderQ();
+  }
+
+  /* --- 2. MEKANİK: ÇİFT KEFELİ BAKIR TERAZİ (İSİM HÂL EKLERİ -i, -e, -de, -den) --- */
+  function startStage2() {
+    runCleanups(); S.stage = 2; S.qIdx = 0; updateHUD();
+    setDir('2. OYUN · BAKIR TERAZİ', 'Soruya uygun HÂL EKİ almış kelime kesesini seçerek Edirne Köftesi terazisini dengele!', 'sesler/mutfak_y2.mp3');
+    const items = [
+      { q: 'Köfteleri NEREYE dizdik? (Yönelme: -a / -e)', ans: 'Izgaraya', opts: ['Izgaraya', 'Izgarada', 'Izgaradan'], a: 'sesler/m2_1.mp3', hint: 'Nereye? → Izgara-ya (-a yönelme hâl ekidir).' },
+      { q: 'Badem ezmesi NEREDE yapıldı? (Bulunma: -da / -de)', ans: 'Edirne’de', opts: ['Edirne’yi', 'Edirne’de', 'Edirne’den'], a: 'sesler/m2_2.mp3', hint: 'Nerede? → Edirne’de (-de bulunma hâl ekidir).' },
+      { q: 'Mesut NEREDEN geldi? (Ayrılma: -dan / -den)', ans: 'Bulgaristan’dan', opts: ['Bulgaristan’a', 'Bulgaristan’da', 'Bulgaristan’dan'], a: 'sesler/m2_3.mp3', hint: 'Nereden? → Bulgaristan’dan (-dan ayrılma hâl ekidir).' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage3(); return; }
+      const cur = items[S.qIdx];
+      $('counterStage').innerHTML = `
+        <div class="scale-arena">
+          <div style="font-family:'Lora',serif; font-size:21px; font-weight:700; text-align:center;">
+            ⚖️ ${cur.q} ${spk(cur.a, cur.q)}
+          </div>
+          <div class="scale-beam-wrap">
+            <div class="scale-beam" id="scaleBeam" style="transform:rotate(-14deg);">
+              <div class="scale-pan">🥩 Köfte</div>
+              <div class="scale-pan" id="rightPan">?</div>
+            </div>
+            <div class="scale-pillar"></div>
+          </div>
+          <div class="spice-bags-row" id="bagRow">
+            ${cur.opts.map(o => `<button type="button" class="dish-option-btn" data-v="${o}"> sack 🧂 ${o}</button>`.replace('sack ', '')).join('')}
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.q);
+      $('bagRow').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          const v = b.dataset.v;
+          $('rightPan').textContent = v;
+          if (v === cur.ans) {
+            $('scaleBeam').style.transform = 'rotate(0deg)';
+            good(30, `Terazi dengelendi! “${v}” doğru hâl eki.`);
+            S.qIdx++;
+            setTimeout(render, 950);
+          } else {
+            $('scaleBeam').style.transform = 'rotate(16deg)';
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    render();
+  }
+
+  /* --- 3. MEKANİK: MERMER HAVAN TOKMAĞI (EŞ ANLAMLI SÖZCÜKLER) --- */
+  function startStage3() {
+    runCleanups(); S.stage = 3; S.qIdx = 0; updateHUD();
+    setDir('3. OYUN · BADEM HAVANI', 'Önce 🔨 HAVANI DÖV düğmesine bas, sonra kelimenin EŞ ANLAMLISINI (anlamdaşını) seç!', 'sesler/mutfak_y3.mp3');
+    const items = [
+      { w: 'MEŞHUR', ans: 'Ünlü', opts: ['Ünlü', 'Gizli', 'Acı'], a: 'sesler/m3_meshur.mp3', hint: 'Meşhur ve Ünlü eş anlamlıdır.' },
+      { w: 'LEZZET', ans: 'Tat', opts: ['Koku', 'Tat', 'Renk'], a: 'sesler/m3_lezzet.mp3', hint: 'Lezzet ve Tat eş anlamlıdır.' },
+      { w: 'MİSAFİR', ans: 'Konuk', opts: ['Komşu', 'Yolcu', 'Konuk'], a: 'sesler/m3_misafir.mp3', hint: 'Misafir ve Konuk eş anlamlıdır.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage4(); return; }
+      const cur = items[S.qIdx];
+      $('counterStage').innerHTML = `
+        <div class="mortar-arena">
+          <div class="mortar-bowl-card">
+            <div class="pestle-anim" id="pestleIcon">🥣</div>
+            <div style="margin:8px 0; font-weight:800;">Saray Badem Havanı</div>
+            <button type="button" class="copper-btn" id="btnHitMortar" style="font-size:14px; padding:8px 16px;">🔨 HAVANI DÖV!</button>
+          </div>
+          <div style="text-align:center; display:flex; flex-direction:column; gap:12px;">
+            <div style="font-family:'Playfair Display',serif; font-size:26px; color:var(--copper-dark);">
+              “${cur.w}” = Eş Anlamlısı? ${spk(cur.a, cur.w + ' kelimesinin eş anlamlısı nedir?')}
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;" id="mortarOpts">
+              ${cur.opts.map(o => `<button type="button" class="dish-option-btn" data-v="${o}">🍬 ${o}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.w);
+      $('btnHitMortar').onclick = () => {
+        SFX.sizzle();
+        const ic = $('pestleIcon');
+        ic.classList.add('hit');
+        setTimeout(() => ic.classList.remove('hit'), 180);
+      };
+      $('mortarOpts').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          $('btnHitMortar').click();
+          if (b.dataset.v === cur.ans) {
+            good(30, `Badem ezmesi hazır! “${cur.w}” = “${cur.ans}”`);
+            S.qIdx++;
+            setTimeout(render, 850);
+          } else {
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    render();
+  }
+
+  /* --- 4. MEKANİK: AŞÇI VE MİSAFİR KONUŞMA BALONLARI (EMİR vs İSTEK KİPİ) --- */
+  function startStage4() {
+    runCleanups(); S.stage = 4; S.qIdx = 0; updateHUD();
+    setDir('4. OYUN · SOFRA SOHBETİ', 'Konuşma balonundaki altı çizili fiil buyruk bildiriyorsa EMİR KİPİ, arzu/davet bildiriyorsa İSTEK KİPİ düğmesini seç!', 'sesler/mutfak_y4.mp3');
+    const items = [
+      { speaker: '👨‍🍳 Başaşçı', line: 'Ciğeri yaprak gibi ince DOĞRAYIN!', kip: 'emir', a: 'sesler/m4_1.mp3', hint: '“Doğrayın!” buyruk verdiği için Emir Kipidir.' },
+      { speaker: '🧒 Misafir Çocuk', line: 'Haydi birlikte sıcak badem ezmesi TADALIM!', kip: 'istek', a: 'sesler/m4_2.mp3', hint: '“Tad-alım” (-alım/-elim) birlikte yapma isteği bildirdiği için İstek Kipidir.' },
+      { speaker: '👨‍🍳 Başaşçı', line: 'Tava ciğerinin yanına kuru biber de KOYUN!', kip: 'emir', a: 'sesler/m4_3.mp3', hint: '“Koyun!” tarif komutu verdiği için Emir Kipidir.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { showCertificate(); return; }
+      const cur = items[S.qIdx];
+      $('counterStage').innerHTML = `
+        <div class="restaurant-scene">
+          <div class="dialogue-card">
+            <b style="color:var(--copper); font-size:15px;">${cur.speaker}</b>
+            <div class="speech-bub">
+              <span>“${cur.line}”</span>
+              ${spk(cur.a, cur.line)}
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <button type="button" class="dish-option-btn" id="btnEmir">🔪 EMİR KİPİ (Buyruk / Komut)</button>
+            <button type="button" class="dish-option-btn" id="btnIstek">🍽️ İSTEK KİPİ (-alım / -elim)</button>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.line);
+      const check = (k) => {
+        if (k === cur.kip) {
+          good(35, `Harika sunum! Doğru kip seçildi.`);
+          S.qIdx++;
+          setTimeout(render, 850);
+        } else {
+          bad(cur.hint);
+        }
+      };
+      $('btnEmir').onclick = () => check('emir');
+      $('btnIstek').onclick = () => check('istek');
+    }
+    render();
+  }
+
+  /* --- SERTİFİKA EKRANI --- */
+  function showCertificate() {
+    runCleanups(); SFX.win(); launchConfetti();
+    setDir('TEBRİKLER!', 'Edirne Saray Mutfağı Başaşçılık Beratını kazandın!', 'sesler/mutfak_final.mp3');
+    $('counterStage').innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+        <canvas id="certCanvas" width="840" height="460" style="max-width:520px; width:100%; height:auto; border:3px solid var(--copper-dark); border-radius:16px;"></canvas>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="copper-btn" id="btnDlCert" style="font-size:15px; padding:10px 20px;">⬇ Sertifikayı İndir (JPG)</button>
+          <a href="index.html" class="copper-btn" style="font-size:15px; padding:10px 20px; background:var(--herb);">🗺️ Haritaya Dön (index.html)</a>
+        </div>
+      </div>
+    `;
+    const c = $('certCanvas'), ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff9f0'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#c2410c'; ctx.lineWidth = 8; ctx.strokeRect(18, 18, c.width - 36, c.height - 36);
+    ctx.fillStyle = '#c2410c'; ctx.font = '800 18px Montserrat, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('ÜLKEM YANIMDA · TÜRKÇE VE TÜRK KÜLTÜRÜ DERSİ', c.width / 2, 70);
+    ctx.fillStyle = '#29150c'; ctx.font = '800 32px "Playfair Display", serif';
+    ctx.fillText('EDİRNE LEZZETLERİ BAŞAŞÇILIK BERATI', c.width / 2, 125);
+    ctx.fillStyle = '#d97706'; ctx.font = '800 38px Montserrat, sans-serif';
+    ctx.fillText(S.name, c.width / 2, 200);
+    ctx.fillStyle = '#451a03'; ctx.font = '600 17px Lora, serif';
+    ctx.fillText('Zıt Anlam, İsim Hâl Ekleri, Eş Anlam ve Fiil Kipleri görevlerini', c.width / 2, 260);
+    ctx.fillText('başarıyla tamamlayarak Edirne Mutfağı Başaşçısı olmuştur.', c.width / 2, 290);
+    ctx.fillStyle = '#15803d'; ctx.font = '800 20px Montserrat, sans-serif';
+    ctx.fillText(`Toplam Puan: ${S.score} ⭐  |  Öğrenci Katkısı: Mesut Küçük`, c.width / 2, 365);
+
+    $('btnDlCert').onclick = () => {
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/jpeg', 0.95);
+      a.download = `Edirne_Lezzetleri_${S.name.replace(/\s+/g, '_')}.jpg`;
+      a.click();
+    };
+  }
+
+  function launchConfetti() {
+    const cv = $('confetti'), cx = cv.getContext('2d');
+    cv.width = innerWidth; cv.height = innerHeight;
+    const p = Array.from({ length: 85 }, () => ({
+      x: Math.random() * cv.width, y: -20 - Math.random() * 120,
+      vx: (Math.random() - 0.5) * 4, vy: 2.5 + Math.random() * 3.5,
+      c: ['#c2410c', '#f59e0b', '#15803d', '#dc2626'][Math.floor(Math.random() * 4)], s: 6 + Math.random() * 6
+    }));
+    let f = 0;
+    function loop() {
+      f++; cx.clearRect(0, 0, cv.width, cv.height);
+      p.forEach(i => { i.x += i.vx; i.y += i.vy; cx.fillStyle = i.c; cx.fillRect(i.x, i.y, i.s, i.s); });
+      if (f < 160) requestAnimationFrame(loop); else cx.clearRect(0, 0, cv.width, cv.height);
+    }
+    loop();
+  }
+
+  $('btnMute').onclick = () => {
+    S.mute = !S.mute;
+    $('btnMute').textContent = S.mute ? '🔇' : '🔊';
+    if (S.mute) bgm.pause(); else bgm.play().catch(() => {});
+  };
+
+  showIntro();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>1. Oyun: Selimiye Camii — Mimar Sinan'ın Eskiz Defteri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Lora:ital,wght@0,500;0,700;1,500&family=Montserrat:wght@500;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --bp-dark: #071324;
+  --bp-mid: #0d2340;
+  --bp-line: rgba(100, 181, 246, 0.14);
+  --gold: #e5c158;
+  --gold-bright: #ffd966;
+  --turq: #14b8a6;
+  --cream: #f8f5ec;
+  --coral: #ef4444;
+  --emerald: #10b981;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+html, body {
+  width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background-color: var(--bp-dark);
+  background-image:
+    linear-gradient(var(--bp-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bp-line) 1px, transparent 1px),
+    url('gorseller/selimiye_eskiz_bg.png');
+  background-size: 36px 36px, 36px 36px, cover;
+  background-position: center;
+  color: var(--cream);
+}
+
+/* Sol Üst Sabit Logo */
+#logo {
+  position: fixed; top: 12px; left: 14px; height: 46px; width: auto;
+  z-index: 950; pointer-events: none !important;
+  filter: drop-shadow(0 4px 10px rgba(0,0,0,0.6));
+}
+#confetti { position: fixed; inset: 0; pointer-events: none !important; z-index: 900; }
+
+/* Mimari İskelet: Sol Dikey Pergel Sütunu + Sağ Çalışma Masası */
+.studio-shell {
+  width: 100vw; height: 100dvh;
+  display: grid;
+  grid-template-columns: 270px 1fr;
+  gap: 14px;
+  padding: 68px 16px 14px 16px;
+}
+
+/* Sol Mimari Sütun */
+.architect-sidebar {
+  background: linear-gradient(180deg, rgba(13,35,64,0.94), rgba(7,19,36,0.96));
+  border: 2px solid var(--gold);
+  border-radius: 20px;
+  padding: 14px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 14px 35px rgba(0,0,0,0.55);
+  overflow: hidden;
+}
+.sinan-card {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(229,193,88,0.12);
+  border: 1px solid rgba(229,193,88,0.4);
+  border-radius: 14px; padding: 10px;
+}
+.sinan-avatar {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--gold);
+  background: #1e3a5f url('gorseller/mimar_sinan.png') center/cover no-repeat;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; flex-shrink: 0;
+}
+.sinan-title b { font-family: 'Cinzel', serif; color: var(--gold); font-size: 14px; display: block; }
+.sinan-title small { font-size: 11px; color: #93c5fd; }
+
+/* 3B Mini/Canlı Kubbe Penceresi */
+.dome-3d-box {
+  position: relative;
+  flex: 1; min-height: 150px;
+  margin: 10px 0;
+  border-radius: 16px;
+  border: 1.5px dashed rgba(229,193,88,0.5);
+  background: radial-gradient(circle, rgba(20,184,166,0.18), rgba(7,19,36,0.9));
+  overflow: hidden;
+}
+#threeCanvas { width: 100%; height: 100%; display: block; }
+.dome-badge {
+  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+  background: rgba(7,19,36,0.88); border: 1px solid var(--gold);
+  padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; color: var(--gold);
+  white-space: nowrap; pointer-events: none;
+}
+
+/* Sol Menü Aşama Adımları */
+.blueprint-steps { display: flex; flex-direction: column; gap: 6px; }
+.bp-step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 11px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  font-size: 12px; font-weight: 700; color: #94a3b8;
+}
+.bp-step.active {
+  background: rgba(229,193,88,0.22);
+  border-color: var(--gold); color: #fff;
+}
+.bp-step.done {
+  background: rgba(16,185,129,0.22);
+  border-color: var(--emerald); color: #a7f3d0;
+}
+
+/* Sağ Ana Oyun Masası */
+.blueprint-desk {
+  position: relative;
+  background: linear-gradient(145deg, rgba(13,35,64,0.88), rgba(8,22,42,0.94));
+  border: 2px solid var(--gold);
+  border-radius: 24px;
+  padding: 18px 22px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.6), inset 0 0 40px rgba(229,193,88,0.06);
+  overflow: hidden;
+}
+
+/* Üst Bilgi Şeridi */
+.top-bar {
+  position: fixed; top: 12px; right: 16px; left: 200px;
+  z-index: 800; pointer-events: none;
+  display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+}
+.hud-chip {
+  pointer-events: auto;
+  background: rgba(13,35,64,0.92);
+  border: 1.5px solid var(--gold);
+  color: var(--cream);
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 13px; font-weight: 800;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.icon-btn {
+  pointer-events: auto;
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  background: var(--bp-mid); color: var(--gold);
+  font-size: 16px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.icon-btn:hover { background: var(--gold); color: var(--bp-dark); }
+
+/* Ses Dinleme Hoparlör Butonu */
+.spk-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid var(--bp-dark);
+  background: var(--gold-bright); color: var(--bp-dark);
+  font-size: 16px; font-weight: 800;
+  cursor: pointer; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 0 #9a781c;
+  transition: transform 0.12s;
+}
+.spk-btn:hover { transform: scale(1.1); }
+.spk-btn:active { transform: translateY(2px); box-shadow: none; }
+
+/* Yönerge Bandı */
+.directive-banner {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(20,184,166,0.16);
+  border: 1.5px solid var(--turq);
+  border-radius: 16px; padding: 10px 16px;
+}
+.directive-tag {
+  background: var(--gold); color: var(--bp-dark);
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 12px;
+  padding: 4px 10px; border-radius: 8px; white-space: nowrap;
+}
+.directive-text {
+  flex: 1; font-family: 'Lora', serif; font-size: clamp(15px, 1.9vw, 20px);
+  font-weight: 700; color: #fff;
+}
+
+/* Sahne İçeriği */
+.stage-workspace {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 10px 0; position: relative;
+}
+
+/* Alt Durum & Öğrenci Şeridi */
+.desk-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  border-top: 1px dashed rgba(229,193,88,0.35);
+  padding-top: 10px;
+}
+.feedback-pill {
+  font-family: 'Lora', serif; font-size: 15px; font-weight: 700;
+  color: var(--gold-bright);
+}
+.student-strip {
+  background: rgba(229,193,88,0.15);
+  border: 1px solid var(--gold);
+  border-radius: 999px; padding: 6px 14px;
+  color: var(--gold-bright); font-size: 12.5px; font-weight: 700;
+  text-decoration: none; transition: 0.2s;
+}
+.student-strip:hover { background: var(--gold); color: var(--bp-dark); }
+
+/* Butonlar */
+.gold-cta {
+  background: linear-gradient(135deg, #ffd966, #c99c2e);
+  color: var(--bp-dark);
+  border: 2px solid #fff; border-radius: 16px;
+  padding: 13px 28px;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 18px;
+  cursor: pointer; box-shadow: 0 6px 0 #7c5c10;
+  transition: transform 0.1s;
+  display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
+}
+.gold-cta:active { transform: translateY(4px); box-shadow: 0 2px 0 #7c5c10; }
+
+/* MEKANİK 1: KEMER KİLİT TAŞI SÜRÜKLE/DOKUN */
+.arches-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  width: min(680px, 100%); margin-bottom: 16px;
+}
+.arch-dropzone {
+  background: rgba(255,255,255,0.05);
+  border: 2.5px dashed var(--gold);
+  border-radius: 90px 90px 18px 18px;
+  padding: 20px 16px; text-align: center;
+  cursor: pointer; transition: 0.2s;
+  min-height: 150px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+}
+.arch-dropzone:hover { background: rgba(20,184,166,0.25); transform: translateY(-3px); }
+.arch-dropzone h3 { font-family: 'Cinzel', serif; color: var(--gold-bright); font-size: 19px; }
+.arch-dropzone p { font-size: 13px; color: #cbd5e1; }
+.active-stone-card {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #1e3a5f, #0f2542);
+  border: 3px solid var(--gold-bright);
+  border-radius: 18px; padding: 14px 26px;
+  font-size: 26px; font-weight: 800; color: #fff;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+/* MEKANİK 2: 4 MİNARE KANDİL ANAHTARI */
+.minarets-stage {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px;
+  width: min(640px, 100%);
+}
+.minaret-tower-btn {
+  background: linear-gradient(180deg, rgba(20,184,166,0.22), rgba(13,35,64,0.9));
+  border: 2px solid var(--gold);
+  border-radius: 22px; padding: 18px;
+  text-align: center; cursor: pointer; transition: 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.minaret-tower-btn:hover { background: rgba(229,193,88,0.28); transform: scale(1.03); }
+.candle-icon { font-size: 42px; filter: drop-shadow(0 0 14px #ffd966); }
+
+/* MEKANİK 3: TERS LALE MERMER BÜYÜTEÇ & MÜHÜR */
+.marble-inspection {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  width: min(650px, 100%);
+}
+.lale-lens {
+  width: 100%; padding: 20px;
+  border-radius: 22px;
+  border: 3px solid var(--gold-bright);
+  background: radial-gradient(circle, rgba(20,184,166,0.28), rgba(7,19,36,0.95));
+  text-align: center;
+  font-family: 'Lora', serif; font-size: 24px; font-weight: 700;
+}
+.seal-stamps-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+.seal-btn {
+  padding: 14px 24px; border-radius: 16px;
+  border: 2px solid var(--gold);
+  background: #163052; color: #fff;
+  font-size: 18px; font-weight: 800; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 10px;
+  transition: 0.2s;
+}
+.seal-btn:hover { background: var(--gold); color: var(--bp-dark); transform: translateY(-3px); }
+
+/* MEKANİK 4: KUBBE AKUSTİK RADYO KADRANI */
+.acoustic-console {
+  width: min(640px, 100%);
+  background: rgba(7,19,36,0.9);
+  border: 2px solid var(--gold);
+  border-radius: 22px; padding: 18px 22px;
+  text-align: center; display: flex; flex-direction: column; gap: 12px;
+}
+.freq-bars {
+  display: flex; justify-content: center; align-items: flex-end; gap: 6px;
+  height: 52px; background: #030b14; border-radius: 12px; padding: 8px;
+}
+.freq-bars i {
+  width: 14px; height: 25%; background: #1e3a5f; border-radius: 4px; transition: 0.15s;
+}
+.freq-bars i.lit { background: var(--turq); box-shadow: 0 0 10px var(--turq); }
+.dial-slider { width: 100%; accent-color: var(--gold-bright); height: 26px; cursor: pointer; }
+.dial-labels {
+  display: flex; justify-content: space-between; font-weight: 800; font-size: 14px; color: var(--gold-bright);
+}
+
+/* Sertifika Görünümü */
+#certCanvas {
+  max-width: 520px; width: 100%; height: auto;
+  border: 2px solid var(--gold); border-radius: 14px;
+}
+
+@media (max-width: 850px) {
+  .studio-shell { grid-template-columns: 1fr; padding-top: 62px; }
+  .architect-sidebar { display: none; }
+}
+</style>
+</head>
+<body>
+
+<img id="logo" src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+<canvas id="confetti"></canvas>
+
+<header class="top-bar">
+  <div class="hud-chip">🕌 Kubbe Puanı: <b id="scoreVal" style="color:var(--gold-bright)">0</b></div>
+  <div class="hud-chip" id="heartsVal">❤️❤️❤️</div>
+  <button type="button" class="icon-btn" id="btnMute" title="Sesi Aç/Kapat">🔊</button>
+</header>
+
+<div class="studio-shell">
+  <!-- SOL MİMARİ PERGEL SÜTUNU -->
+  <aside class="architect-sidebar">
+    <div class="sinan-card">
+      <div class="sinan-avatar">👳‍♂️</div>
+      <div class="sinan-title">
+        <b>MİMAR SİNAN</b>
+        <small>Başmimarın Eskiz Defteri</small>
+      </div>
+    </div>
+
+    <div class="dome-3d-box">
+      <canvas id="threeCanvas"></canvas>
+      <div class="dome-badge" id="domeStatusBadge">3B Kubbe: %0</div>
+    </div>
+
+    <div class="blueprint-steps" id="sidebarSteps">
+      <div class="bp-step active"><span>1.</span> 🧱 Kubbe Taşları (Ekler)</div>
+      <div class="bp-step"><span>2.</span> 🕯️ 4 Minare (Sıfatlar)</div>
+      <div class="bp-step"><span>3.</span> 🌷 Ters Lale (Özel Adlar)</div>
+      <div class="bp-step"><span>4.</span> 🔔 Akustik (Neden / Amaç)</div>
+    </div>
+  </aside>
+
+  <!-- SAĞ ÇALIŞMA MASASI -->
+  <main class="blueprint-desk">
+    <div class="directive-banner">
+      <span class="directive-tag" id="dirTag">SELİMİYE CAMİİ</span>
+      <p class="directive-text" id="dirText">Mimar Sinan’ın ustalık eseri Selimiye Camii’ni birlikte inşa edelim!</p>
+      <button type="button" class="spk-btn" id="dirSpk" title="Yönergeyi Dinle">🔊</button>
+    </div>
+
+    <div class="stage-workspace" id="workspace"></div>
+
+    <footer class="desk-footer">
+      <div class="feedback-pill" id="feedbackText">✨ Sesleri dinlemek için 🔊 düğmelerine dokunabilirsin.</div>
+      <a href="https://drive.google.com/file/d/1m5tY36QfCURJ-peon9Z9YkyLN7qBx-on/view?usp=drive_link"
+         target="_blank" rel="noopener noreferrer" class="student-strip">
+        📜 Pırıl Güreller'in çalışmasının tamamına ulaşmak için tıklayın. ↗
+      </a>
+    </footer>
+  </main>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+
+  const S = {
+    name: '',
+    score: 0,
+    lives: 3,
+    stage: 0,
+    qIdx: 0,
+    mute: false,
+    domeProgress: 0
+  };
+
+  /* --- HARİCİ SES + WEB AUDIO + TTS YEDEKLİ SES SİSTEMİ --- */
+  let AC = null;
+  function getAC() {
+    try {
+      if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+      if (AC && AC.state === 'suspended') AC.resume();
+    } catch (e) {}
+    return AC;
+  }
+  function tone(f1, f2, d, type = 'triangle', v = 0.18, delay = 0) {
+    if (S.mute) return;
+    const c = getAC(); if (!c) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f2, 20), t + d * 0.9);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + d + 0.02);
+  }
+  const audioCache = {};
+  function playFX(file, fallbackFn) {
+    if (S.mute) return;
+    const a = audioCache[file] || (audioCache[file] = new Audio(file));
+    let called = false;
+    const fb = () => { if (!called) { called = true; fallbackFn(); } };
+    a.onerror = fb;
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play();
+    if (p && p.catch) p.catch(fb);
+  }
+  const SFX = {
+    click() { playFX('sesler/tik.mp3', () => tone(980, 520, 0.06)); },
+    ok() { playFX('sesler/dogru.mp3', () => [523, 659, 784].forEach((f, i) => tone(f, f, 0.15, 'triangle', 0.2, i * 0.08))); },
+    bad() { playFX('sesler/yanlis.mp3', () => tone(220, 120, 0.28, 'sawtooth', 0.15)); },
+    win() { playFX('sesler/alkis.mp3', () => [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.2, 'triangle', 0.22, i * 0.1))); }
+  };
+
+  const bgm = new Audio('sesler/selimiye_fon.mp3');
+  bgm.loop = true; bgm.volume = 0.14;
+  bgm.addEventListener('error', () => {});
+
+  let activeVoice = null;
+  function say(file, text) {
+    if (S.mute) return;
+    if (activeVoice) { try { activeVoice.pause(); } catch (e) {} activeVoice = null; }
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    const speakTTS = () => {
+      try {
+        if (!text || !window.speechSynthesis) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'tr-TR'; u.rate = 0.92;
+        window.speechSynthesis.speak(u);
+      } catch (e) {}
+    };
+    if (!file) { speakTTS(); return; }
+    const a = new Audio(file);
+    activeVoice = a;
+    a.addEventListener('error', speakTTS, { once: true });
+    const p = a.play();
+    if (p && p.catch) p.catch(speakTTS);
+  }
+
+  function spkHTML(file, text) {
+    const clean = String(text).replace(/"/g, '&quot;');
+    return `<button type="button" class="spk-btn" data-a="${file}" data-t="${clean}" aria-label="Dinle">🔊</button>`;
+  }
+
+  document.addEventListener('click', (e) => {
+    const sb = e.target.closest('.spk-btn[data-t]');
+    if (sb) {
+      e.stopPropagation();
+      say(sb.dataset.a, sb.dataset.t);
+    }
+  }, true);
+
+  /* --- THREE.JS 3B SELİMİYE MODELİ (Sol Sütunda Canlı İnşa Edilen Kubbe & 4 Minare) --- */
+  const cvs = $('threeCanvas');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+  camera.position.set(0, 7, 17);
+  camera.lookAt(0, 1.5, 0);
+  const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.85));
+  const dLight = new THREE.DirectionalLight(0xffe082, 1.3);
+  dLight.position.set(8, 16, 12);
+  scene.add(dLight);
+
+  const mosque = new THREE.Group();
+  scene.add(mosque);
+
+  const stoneMat = new THREE.MeshStandardMaterial({ color: 0xe5dec9, roughness: 0.45 });
+  const domeMat = new THREE.MeshStandardMaterial({ color: 0x14b8a6, metalness: 0.35, roughness: 0.25 });
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xe5c158, metalness: 0.85, roughness: 0.15 });
+
+  const baseMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 3.8, 2.8, 8), stoneMat);
+  baseMesh.position.y = -0.6;
+  mosque.add(baseMesh);
+
+  const domeMesh = new THREE.Mesh(new THREE.SphereGeometry(3.3, 28, 18, 0, Math.PI * 2, 0, Math.PI * 0.52), domeMat);
+  domeMesh.position.y = 0.8;
+  mosque.add(domeMesh);
+
+  const alemMesh = new THREE.Mesh(new THREE.ConeGeometry(0.24, 1.1, 12), goldMat);
+  alemMesh.position.y = 4.4;
+  mosque.add(alemMesh);
+
+  const minaretRings = [];
+  [[-4.4, -4.4], [4.4, -4.4], [-4.4, 4.4], [4.4, 4.4]].forEach(([mx, mz]) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.34, 8.2, 12), stoneMat);
+    m.position.set(mx, 2.0, mz);
+    mosque.add(m);
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(0.26, 1.6, 12), domeMat);
+    spire.position.set(mx, 6.8, mz);
+    mosque.add(spire);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.09, 10, 20), goldMat);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(mx, 4.2, mz);
+    mosque.add(ring);
+    minaretRings.push(ring);
+  });
+
+  function resize3D() {
+    const box = cvs.parentElement.getBoundingClientRect();
+    if (box.width > 0 && box.height > 0) {
+      camera.aspect = box.width / box.height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(box.width, box.height);
+    }
+  }
+  window.addEventListener('resize', resize3D);
+  setTimeout(resize3D, 80);
+
+  function anim3D() {
+    requestAnimationFrame(anim3D);
+    mosque.rotation.y += 0.008;
+    const sc = 0.55 + (S.domeProgress / 100) * 0.45;
+    domeMesh.scale.setScalar(sc);
+    renderer.render(scene, camera);
+  }
+  anim3D();
+
+  function updateHUD() {
+    $('scoreVal').textContent = S.score;
+    $('heartsVal').textContent = [0, 1, 2].map(i => i < S.lives ? '❤️' : '🖤').join('');
+    $('domeStatusBadge').textContent = `3B Kubbe: %${Math.min(100, S.domeProgress)}`;
+    document.querySelectorAll('#sidebarSteps .bp-step').forEach((el, idx) => {
+      el.classList.toggle('active', idx === S.stage - 1);
+      el.classList.toggle('done', idx < S.stage - 1);
+    });
+  }
+
+  function setDirective(tag, text, audioFile) {
+    $('dirTag').textContent = tag;
+    $('dirText').textContent = text;
+    $('dirSpk').onclick = () => say(audioFile, text);
+  }
+
+  function reward(pts, msg) {
+    SFX.ok();
+    S.score += pts;
+    S.domeProgress = Math.min(100, S.domeProgress + 8);
+    updateHUD();
+    $('feedbackText').innerHTML = `✅ ${msg}`;
+  }
+
+  function penalize(msg) {
+    SFX.bad();
+    S.lives = Math.max(1, S.lives - 1);
+    updateHUD();
+    $('feedbackText').innerHTML = `💡 ${msg}`;
+  }
+
+  /* --- GİRİŞ KAPAK EKRANI --- */
+  function showIntro() {
+    S.stage = 0;
+    setDirective('HOŞ GELDİN', 'Mimar Sinan’ın 80 yaşında yaptığı ustalık eseri Selimiye Camii’ni tanıyalım!', 'sesler/selimiye_giris.mp3');
+    $('workspace').innerHTML = `
+      <div style="max-width:640px; width:100%; text-align:center; display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div style="font-size:48px;">🕌 📐 ✨</div>
+        <h1 style="font-family:'Cinzel',serif; font-size:clamp(24px,3.5vw,38px); color:var(--gold-bright);">
+          SELİMİYE CAMİİ MİMARLIK ATÖLYESİ
+        </h1>
+        <p style="font-family:'Lora',serif; font-size:17px; line-height:1.5; color:#e2e8f0; background:rgba(255,255,255,0.06); padding:12px 18px; border-radius:14px; border:1px solid rgba(229,193,88,0.35);">
+          Edirne’nin sembolü <b>Selimiye Camii</b>, <b>UNESCO Dünya Mirası</b> listesindedir. Dört zarif minaresi ve dev kubbesi vardır.
+          ${spkHTML('sesler/selimiye_bilgi.mp3', 'Edirnenin sembolü Selimiye Camii, UNESCO Dünya Mirası listesindedir. Dört zarif minaresi ve dev kubbesi vardır.')}
+        </p>
+        <div style="display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; width:100%;">
+          <input id="inStudentName" type="text" maxlength="24" placeholder="Adını buraya yaz…"
+                 style="padding:12px 18px; border-radius:14px; border:2px solid var(--gold); background:#fff; color:#071324; font-weight:800; font-size:17px; width:240px;">
+          <button type="button" class="gold-cta" id="btnStart">ATÖLYEYE BAŞLA ▶</button>
+        </div>
+      </div>
+    `;
+    $('btnStart').onclick = () => {
+      getAC();
+      const val = $('inStudentName').value.trim();
+      S.name = val || 'Genç Mimar';
+      if (!S.mute) bgm.play().catch(() => {});
+      startStage1();
+    };
+  }
+
+  /* --- 1. MEKANİK: KUBBE TAŞLARI (YAPIM EKİ vs ÇEKİM EKİ) --- */
+  function startStage1() {
+    S.stage = 1; S.qIdx = 0; updateHUD();
+    setDirective('1. OYUN · KUBBE TAŞLARI', 'Taştaki kelime yeni bir anlam türettiyse YAPIM EKİ kemerine, anlamı değişmediyse ÇEKİM EKİ kemerine dokun!', 'sesler/selimiye_y1.mp3');
+    const items = [
+      { w: 'Usta - lık', cat: 'yapim', a: 'sesler/s1_ustalik.mp3', t: 'Ustalık. Usta kelimesinden ustalık türemiş.', hint: '-lık eki yeni bir kelime türetti (Yapım Eki).' },
+      { w: 'Minare - ler', cat: 'cekim', a: 'sesler/s1_minareler.mp3', t: 'Minareler. Sadece çoğul olmuş.', hint: '-ler çoğul ekidir, anlam değişmedi (Çekim Eki).' },
+      { w: 'Çini - li', cat: 'yapim', a: 'sesler/s1_cinili.mp3', t: 'Çinili. Çini döşenmiş anlamında yeni kelime.', hint: '-li eki yeni anlam türetti (Yapım Eki).' },
+      { w: 'Edirne’ - de', cat: 'cekim', a: 'sesler/s1_edirnede.mp3', t: 'Edirnede. Bulunma eki almış.', hint: '-de bulunma ekidir, anlam değişmedi (Çekim Eki).' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage2(); return; }
+      const cur = items[S.qIdx];
+      $('workspace').innerHTML = `
+        <div class="arches-row">
+          <div class="arch-dropzone" id="archYapim">
+            <span style="font-size:36px;">⚒️</span>
+            <h3>YAPIM EKİ KEMERİ</h3>
+            <p>Yeni anlam türeten ekler (-lık, -li, -cı)</p>
+          </div>
+          <div class="arch-dropzone" id="archCekim">
+            <span style="font-size:36px;">🔗</span>
+            <h3>ÇEKİM EKİ KEMERİ</h3>
+            <p>Anlamı değiştirmeyen ekler (-ler, -de)</p>
+          </div>
+        </div>
+        <div class="active-stone-card">
+          <span>🪨 ${cur.w}</span>
+          ${spkHTML(cur.a, cur.t)}
+        </div>
+      `;
+      say(cur.a, cur.t);
+      const check = (picked) => {
+        if (picked === cur.cat) {
+          reward(25, `Doğru taş! ${cur.w} kubbeye yerleşti.`);
+          S.qIdx++;
+          setTimeout(render, 850);
+        } else {
+          penalize(cur.hint);
+        }
+      };
+      $('archYapim').onclick = () => check('yapim');
+      $('archCekim').onclick = () => check('cekim');
+    }
+    render();
+  }
+
+  /* --- 2. MEKANİK: 4 MİNARE KANDİL ANAHTARI (NİTELEME vs BELİRTME SIFATI) --- */
+  function startStage2() {
+    S.stage = 2; S.qIdx = 0; updateHUD();
+    setDirective('2. OYUN · MİNARE KANDİLLERİ', 'Tamlamadaki renkli kelime “Nasıl?” sorusunu yanıtlıyorsa NİTELEME, sayı/işaret bildiriyorsa BELİRTME kandilini yak!', 'sesler/selimiye_y2.mp3');
+    const items = [
+      { phrase: 'ZARİF minare', type: 'nit', a: 'sesler/s2_zarif.mp3', t: 'Zarif minare. Nasıl minare? Zarif.', hint: 'Nasıl minare? Zarif (Niteleme Sıfatı).' },
+      { phrase: 'DÖRT minare', type: 'bel', a: 'sesler/s2_dort.mp3', t: 'Dört minare. Kaç minare? Dört.', hint: 'Sayı bildiren dört kelimesi Belirtme Sıfatıdır.' },
+      { phrase: 'DEVASA kubbe', type: 'nit', a: 'sesler/s2_devasa.mp3', t: 'Devasa kubbe. Nasıl kubbe? Devasa.', hint: 'Varlığın biçimini anlatan Niteleme Sıfatıdır.' },
+      { phrase: 'BU şaheser', type: 'bel', a: 'sesler/s2_bu.mp3', t: 'Bu şaheser. Hangi şaheser? Bu.', hint: 'İşaret bildiren bu kelimesi Belirtme Sıfatıdır.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage3(); return; }
+      const cur = items[S.qIdx];
+      $('workspace').innerHTML = `
+        <div class="active-stone-card" style="margin-bottom:18px;">
+          <span>🕯️ “${cur.phrase}”</span>
+          ${spkHTML(cur.a, cur.t)}
+        </div>
+        <div class="minarets-stage">
+          <div class="minaret-tower-btn" id="btnNit">
+            <span class="candle-icon">🎨</span>
+            <b style="font-family:'Cinzel',serif; font-size:19px; color:var(--gold-bright);">NİTELEME SIFATI</b>
+            <small style="color:#cbd5e1;">“Nasıl?” sorusuna cevap verir</small>
+          </div>
+          <div class="minaret-tower-btn" id="btnBel">
+            <span class="candle-icon">🔢</span>
+            <b style="font-family:'Cinzel',serif; font-size:19px; color:var(--gold-bright);">BELİRTME SIFATI</b>
+            <small style="color:#cbd5e1;">Sayı veya işaret bildirir (Kaç? Hangi?)</small>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.t);
+      const check = (picked) => {
+        if (picked === cur.type) {
+          reward(25, `Kandil yandı! “${cur.phrase}” doğru aydınlandı.`);
+          S.qIdx++;
+          setTimeout(render, 850);
+        } else {
+          penalize(cur.hint);
+        }
+      };
+      $('btnNit').onclick = () => check('nit');
+      $('btnBel').onclick = () => check('bel');
+    }
+    render();
+  }
+
+  /* --- 3. MEKANİK: TERS LALE BÜYÜTECİ & MÜHÜR (ÖZEL ADLAR VE BÜYÜK HARF) --- */
+  function startStage3() {
+    S.stage = 3; S.qIdx = 0; updateHUD();
+    setDirective('3. OYUN · TERS LALE KİTABESİ', 'Mermerdeki Ters Lale büyütecinde doğru büyük harf ve kesme işaretiyle yazılmış ÖZEL ADI mühürle!', 'sesler/selimiye_y3.mp3');
+    const items = [
+      { q: 'Hangi şehir ve ülke adı DOĞRU yazılmıştır?', good: "Edirne, Türkiye'nin incisi", bad: "edirne, türkiyenin incisi", a: 'sesler/s3_1.mp3', hint: 'Edirne ve Türkiye özel addır; büyük harfle başlar, ek kesmeyle ayrılır.' },
+      { q: 'Büyük mimarımızın adı hangi mühürde DOĞRU yazılmıştır?', good: "Mimar Sinan'ın eseri", bad: "mimar sinanın eseri", a: 'sesler/s3_2.mp3', hint: 'Kişi adları ve unvanları büyük harfle başlar, eki kesme işaretiyle ayrılır.' },
+      { q: 'Caminin adı hangi seçenekte DOĞRU yazılmıştır?', good: "Selimiye Camii'nde", bad: "selimiye camiinde", a: 'sesler/s3_3.mp3', hint: 'Tarihî eser ve cami adları özel addır; her kelimesi büyük harfle başlar.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage4(); return; }
+      const cur = items[S.qIdx];
+      const swap = S.qIdx % 2 === 1;
+      const leftTxt = swap ? cur.bad : cur.good;
+      const rightTxt = swap ? cur.good : cur.bad;
+      $('workspace').innerHTML = `
+        <div class="marble-inspection">
+          <div class="lale-lens">
+            🌷 🔍 ${cur.q}
+            ${spkHTML(cur.a, cur.q)}
+          </div>
+          <div class="seal-stamps-row">
+            <button type="button" class="seal-btn" id="sealL">💮 ${leftTxt}</button>
+            <button type="button" class="seal-btn" id="sealR">💮 ${rightTxt}</button>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.q);
+      const check = (txt) => {
+        if (txt === cur.good) {
+          reward(30, `Mühür basıldı: “${cur.good}” doğru özel ad yazımı!`);
+          S.qIdx++;
+          setTimeout(render, 850);
+        } else {
+          penalize(cur.hint);
+        }
+      };
+      $('sealL').onclick = () => check(leftTxt);
+      $('sealR').onclick = () => check(rightTxt);
+    }
+    render();
+  }
+
+  /* --- 4. MEKANİK: KUBBE AKUSTİK FREKANS KADRANI (NEDEN-SONUÇ vs AMAÇ-SONUÇ) --- */
+  function startStage4() {
+    S.stage = 4; S.qIdx = 0; updateHUD();
+    setDirective('4. OYUN · KUBBE AKUSTİĞİ', 'Sürgüyü kaydırarak cümlenin frekansını ayarla: “Çünkü” varsa NEDEN (90 MHz), “Amacıyla / İçin” varsa AMAÇ (105 MHz)!', 'sesler/selimiye_y4.mp3');
+    const items = [
+      { s: 'Sinan, sesi her yere yaymak AMACIYLA kubbeye küpler koydu.', target: 105, label: 'AMAÇ-SONUÇ (105 MHz)', a: 'sesler/s4_1.mp3', hint: '“Yaymak amacıyla” hedef bildirdiği için 105 MHz (Amaç-Sonuç) seçilmeli.' },
+      { s: 'Selimiye çok sağlamdır ÇÜNKÜ sekiz güçlü sütuna oturur.', target: 90, label: 'NEDEN-SONUÇ (90 MHz)', a: 'sesler/s4_2.mp3', hint: '“Çünkü” sebep bildirdiği için 90 MHz (Neden-Sonuç) seçilmeli.' },
+      { s: 'Minareleri görmek İÇİN dünyanın her yerinden turistler gelir.', target: 105, label: 'AMAÇ-SONUÇ (105 MHz)', a: 'sesler/s4_3.mp3', hint: '“Görmek için” amaç bildirdiği için 105 MHz (Amaç-Sonuç) seçilmeli.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { showCertificateScreen(); return; }
+      const cur = items[S.qIdx];
+      $('workspace').innerHTML = `
+        <div class="acoustic-console">
+          <div style="font-family:'Lora',serif; font-size:20px; font-weight:700; color:#fff;">
+            🔔 “${cur.s}” ${spkHTML(cur.a, cur.s)}
+          </div>
+          <div class="freq-bars" id="freqBars">${'<i></i>'.repeat(14)}</div>
+          <div style="font-size:22px; font-weight:800; color:var(--turq);" id="freqReadout">97.5 MHz</div>
+          <input type="range" min="90" max="105" step="7.5" value="97.5" class="dial-slider" id="freqDial">
+          <div class="dial-labels">
+            <span>⬅ 90 MHz: NEDEN-SONUÇ (Çünkü)</span>
+            <span>105 MHz: AMAÇ-SONUÇ (İçin) ➡</span>
+          </div>
+          <div>
+            <button type="button" class="gold-cta" id="btnLockFreq" style="font-size:15px; padding:10px 22px;">📡 FREKANSI KİLİTLE</button>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.s);
+      const dial = $('freqDial');
+      const updBars = () => {
+        const val = parseFloat(dial.value);
+        $('freqReadout').textContent = val.toFixed(1) + ' MHz';
+        const match = Math.abs(val - cur.target) < 1;
+        $('freqBars').querySelectorAll('i').forEach((b, k) => {
+          b.classList.toggle('lit', match || k % 2 === 0);
+          b.style.height = (match ? (60 + (k % 3) * 15) : (20 + (k % 4) * 10)) + '%';
+        });
+      };
+      dial.oninput = updBars;
+      updBars();
+      $('btnLockFreq').onclick = () => {
+        if (Math.abs(parseFloat(dial.value) - cur.target) < 1) {
+          reward(35, `Harika rezonans! ${cur.label} doğrulandı.`);
+          S.qIdx++;
+          setTimeout(render, 850);
+        } else {
+          penalize(cur.hint);
+        }
+      };
+    }
+    render();
+  }
+
+  /* --- FİNAL VE SERTİFİKA EKRANI --- */
+  function showCertificateScreen() {
+    S.domeProgress = 100; updateHUD(); SFX.win(); launchConfetti();
+    setDirective('TEBRİKLER!', 'Selimiye Camii Başmimarlık Beratını kazandın!', 'sesler/selimiye_final.mp3');
+    $('workspace').innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+        <canvas id="certCanvas" width="840" height="480"></canvas>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="gold-cta" id="btnDlCert" style="font-size:15px; padding:10px 20px;">⬇ Sertifikayı İndir (JPG)</button>
+          <a href="index.html" class="gold-cta" style="font-size:15px; padding:10px 20px; background:var(--turq); color:#fff;">🗺️ Haritaya Dön (index.html)</a>
+        </div>
+      </div>
+    `;
+    const c = $('certCanvas'), ctx = c.getContext('2d');
+    ctx.fillStyle = '#071324'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#e5c158'; ctx.lineWidth = 6; ctx.strokeRect(18, 18, c.width - 36, c.height - 36);
+    ctx.fillStyle = '#e5c158'; ctx.font = '700 18px Cinzel, serif'; ctx.textAlign = 'center';
+    ctx.fillText('ÜLKEM YANIMDA · TÜRKÇE VE TÜRK KÜLTÜRÜ', c.width / 2, 72);
+    ctx.fillStyle = '#ffffff'; ctx.font = '800 32px Cinzel, serif';
+    ctx.fillText('SELİMİYE CAMİİ BAŞMİMARLIK BERATI', c.width / 2, 126);
+    ctx.fillStyle = '#ffd966'; ctx.font = '800 38px Montserrat, sans-serif';
+    ctx.fillText(S.name, c.width / 2, 205);
+    ctx.fillStyle = '#cbd5e1'; ctx.font = '600 17px Lora, serif';
+    ctx.fillText('Yapım-Çekim Ekleri, Sıfatlar, Özel Adlar ve Cümlede Anlam', c.width / 2, 265);
+    ctx.fillText('görevlerini tamamlayarak Selimiye Kubbesini inşa etmiştir.', c.width / 2, 295);
+    ctx.fillStyle = '#14b8a6'; ctx.font = '800 20px Montserrat, sans-serif';
+    ctx.fillText(`Toplam Puan: ${S.score} ⭐  |  Öğrenci Katkısı: Pırıl Güreller`, c.width / 2, 375);
+
+    $('btnDlCert').onclick = () => {
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/jpeg', 0.95);
+      a.download = `Selimiye_Sertifika_${S.name.replace(/\s+/g, '_')}.jpg`;
+      a.click();
+    };
+  }
+
+  function launchConfetti() {
+    const cv = $('confetti'), cx = cv.getContext('2d');
+    cv.width = innerWidth; cv.height = innerHeight;
+    const p = Array.from({ length: 90 }, () => ({
+      x: Math.random() * cv.width, y: -20 - Math.random() * 120,
+      vx: (Math.random() - 0.5) * 4, vy: 2.5 + Math.random() * 3.5,
+      c: ['#e5c158', '#14b8a6', '#ffffff', '#f59e0b'][Math.floor(Math.random() * 4)], s: 6 + Math.random() * 6
+    }));
+    let f = 0;
+    function loop() {
+      f++; cx.clearRect(0, 0, cv.width, cv.height);
+      p.forEach(i => { i.x += i.vx; i.y += i.vy; cx.fillStyle = i.c; cx.fillRect(i.x, i.y, i.s, i.s); });
+      if (f < 160) requestAnimationFrame(loop); else cx.clearRect(0, 0, cv.width, cv.height);
+    }
+    loop();
+  }
+
+  $('btnMute').onclick = () => {
+    S.mute = !S.mute;
+    $('btnMute').textContent = S.mute ? '🔇' : '🔊';
+    if (S.mute) bgm.pause(); else bgm.play().catch(() => {});
+  };
+
+  showIntro();
+})();
+</script>
+</body>
+</html>

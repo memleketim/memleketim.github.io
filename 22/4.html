@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>4. Oyun: Kırkpınar Yağlı Güreşleri — Sarayiçi Er Meydanı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800&family=Lora:ital,wght@0,600;0,700;1,500&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --turf-dark: #052e16;
+  --turf-mid: #14532d;
+  --turf-light: #dcfce7;
+  --gold: #facc15;
+  --leather: #78350f;
+  --crimson: #dc2626;
+  --ink: #052e16;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+html, body {
+  width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background:
+    radial-gradient(circle at 50% 0%, #166534 0%, #052e16 80%),
+    url('gorseller/kirkpinar_meydan_bg.png') center/cover no-repeat;
+  color: #fff;
+}
+
+#logo {
+  position: fixed; top: 10px; left: 14px; height: 46px; width: auto;
+  z-index: 950; pointer-events: none !important;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+}
+#confetti { position: fixed; inset: 0; pointer-events: none !important; z-index: 900; }
+
+/* Stadyum Skorbord İskeleti */
+.arena-app {
+  width: 100vw; height: 100dvh;
+  display: grid;
+  grid-template-rows: 62px auto 1fr 44px;
+  gap: 8px;
+  padding: 0 16px 10px 16px;
+}
+
+.scoreboard-header {
+  margin: 0 -16px;
+  padding: 0 18px 0 160px;
+  background: linear-gradient(90deg, #022c22, #14532d, #022c22);
+  border-bottom: 4px solid var(--gold);
+  display: flex; align-items: center; justify-content: space-between;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+}
+.flag-tabs { display: flex; gap: 8px; overflow-x: auto; }
+.f-tab {
+  padding: 5px 12px; border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1.5px solid rgba(250,204,21,0.35);
+  font-size: 12px; font-weight: 800; color: #bbf7d0; white-space: nowrap;
+}
+.f-tab.active { background: var(--gold); color: var(--turf-dark); border-color: #fff; }
+.f-tab.done { background: #10b981; color: #fff; }
+
+.score-leds { display: flex; gap: 8px; align-items: center; }
+.led-box {
+  background: #000; border: 2px solid var(--gold);
+  border-radius: 10px; padding: 4px 12px;
+  font-weight: 800; font-size: 14px; color: var(--gold);
+}
+
+.spk-btn {
+  width: 35px; height: 35px; border-radius: 50%;
+  background: var(--gold); color: var(--turf-dark);
+  border: 2px solid #fff; font-size: 16px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 0 #854d0e; flex-shrink: 0;
+}
+.spk-btn:hover { transform: scale(1.1); }
+
+.cazgir-bar {
+  background: linear-gradient(90deg, #78350f, #92400e);
+  border: 2.5px solid var(--gold);
+  border-radius: 16px; padding: 8px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+.cazgir-tag {
+  background: var(--gold); color: var(--turf-dark);
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 12px;
+  padding: 4px 10px; border-radius: 8px; white-space: nowrap;
+}
+
+.meadow-field {
+  background: radial-gradient(circle at 50% 50%, rgba(22,101,52,0.92), rgba(5,46,22,0.96));
+  border: 3px solid var(--gold);
+  border-radius: 26px;
+  padding: 16px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.5);
+}
+
+.arena-footer {
+  background: rgba(2,44,34,0.95);
+  border: 2px solid var(--gold);
+  border-radius: 999px;
+  padding: 4px 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-size: 13px; font-weight: 700;
+}
+
+.pehlivan-btn {
+  background: linear-gradient(180deg, #facc15, #ca8a04);
+  color: var(--turf-dark);
+  border: 2.5px solid #fff; border-radius: 16px;
+  padding: 12px 24px; font-family: 'Cinzel', serif;
+  font-weight: 800; font-size: 17px; cursor: pointer;
+  box-shadow: 0 5px 0 #713f12;
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+}
+.pehlivan-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #713f12; }
+
+/* MEKANİK 1: DAVUL RİTİM HALKASI (İKİLEMELER) */
+.drum-arena {
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 22px;
+  width: min(720px, 100%); align-items: center;
+}
+.drum-circle {
+  width: 185px; height: 185px; margin: auto;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fde68a 0 52%, #92400e 53% 100%);
+  border: 6px solid var(--gold);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--turf-dark); font-weight: 800;
+  cursor: pointer; box-shadow: 0 0 30px rgba(250,204,21,0.4);
+  transition: transform 0.12s;
+}
+.drum-circle:active { transform: scale(0.92); }
+.twin-btn {
+  background: rgba(255,255,255,0.12);
+  border: 2px solid var(--gold); border-radius: 14px;
+  padding: 13px 20px; color: #fff; font-weight: 800; font-size: 18px;
+  cursor: pointer; transition: 0.2s;
+}
+.twin-btn:hover { background: var(--gold); color: var(--turf-dark); }
+
+/* MEKANİK 2: KİSPET KARGO BANDI (İSİM KÖKÜ vs FİİL KÖKÜ) */
+.conveyor-belt-grid {
+  width: min(760px, 100%); height: 245px;
+  display: grid; grid-template-columns: 135px 1fr 135px; gap: 14px; align-items: stretch;
+}
+.side-chute {
+  background: repeating-linear-gradient(0deg, #14532d 0 22px, #166534 22px 44px);
+  border: 3px solid var(--gold); border-radius: 18px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 10px; font-family: 'Cinzel', serif; font-weight: 800;
+  cursor: pointer;
+}
+.side-chute:hover { filter: brightness(1.2); }
+.kispet-parcel {
+  margin: auto; width: min(360px, 100%);
+  background: linear-gradient(145deg, #78350f, #451a03);
+  border: 3px solid var(--gold); border-radius: 22px;
+  padding: 20px; text-align: center;
+  box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+  transition: transform 0.4s ease, opacity 0.35s ease;
+}
+
+/* MEKANİK 3: CAZGIR PEKİŞTİRME HARF ÇARKI (M, P, R, S) */
+.wheel-arena {
+  display: flex; flex-direction: column; align-items: center; gap: 18px;
+  width: min(660px, 100%);
+}
+.mprs-wheel {
+  display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+}
+.letter-orb {
+  width: 78px; height: 78px; border-radius: 50%;
+  background: linear-gradient(135deg, #facc15, #ca8a04);
+  border: 3px solid #fff; color: var(--turf-dark);
+  font-family: 'Cinzel', serif; font-size: 32px; font-weight: 800;
+  cursor: pointer; box-shadow: 0 6px 0 #713f12;
+  display: flex; align-items: center; justify-content: center;
+}
+.letter-orb:hover { transform: translateY(-4px) scale(1.06); }
+
+/* MEKANİK 4: 3B ALTIN KEMER MÜCEVHER YUVASI */
+.belt-3d-wrap {
+  width: min(740px, 100%);
+  display: grid; grid-template-columns: 1fr 1.2fr; gap: 16px; align-items: center;
+}
+#belt3dCanvas {
+  width: 100%; height: 210px;
+  border-radius: 18px; border: 2.5px solid var(--gold);
+  background: radial-gradient(circle, #14532d, #052e16);
+  display: block;
+}
+
+@media (max-width: 780px) {
+  .scoreboard-header { padding-left: 65px; }
+  .drum-arena, .conveyor-belt-grid, .belt-3d-wrap { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<img id="logo" src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+<canvas id="confetti"></canvas>
+
+<div class="arena-app">
+  <header class="scoreboard-header">
+    <div class="flag-tabs" id="flagTabs">
+      <span class="f-tab active">1. 🥁 Davul (İkileme)</span>
+      <span class="f-tab">2. 📦 Kispet Bandı (Kök)</span>
+      <span class="f-tab">3. 📢 Cazgır (M-P-R-S)</span>
+      <span class="f-tab">4. 🏅 3B Kemer (Deyim)</span>
+    </div>
+    <div class="score-leds">
+      <div class="led-box">🤼 <span id="scoreVal">0</span></div>
+      <div class="led-box" id="heartsVal">❤️❤️❤️</div>
+      <button type="button" class="spk-btn" id="btnMute">🔊</button>
+    </div>
+  </header>
+
+  <div class="cazgir-bar">
+    <span class="cazgir-tag" id="dirTag">ER MEYDANI</span>
+    <p style="flex:1; font-family:'Lora',serif; font-weight:700; font-size:clamp(14.5px,1.8vw,18.5px);" id="dirText">
+      660 yıllık Kırkpınar Er Meydanı’na hoş geldin pehlivan!
+    </p>
+    <button type="button" class="spk-btn" id="dirSpk">🔊</button>
+  </div>
+
+  <main class="meadow-field" id="meadowField"></main>
+
+  <footer class="arena-footer">
+    <span id="fbText" style="color:var(--gold);">🥁 Davul zurna çalıyor, er meydanı seni bekliyor!</span>
+    <a href="https://drive.google.com/file/d/1m5tY36QfCURJ-peon9Z9YkyLN7qBx-on/view?usp=drive_link"
+       target="_blank" rel="noopener noreferrer" style="color:#fde047; text-decoration:underline;">
+      📜 Pırıl Güreller'in çalışmasının tamamına ulaşmak için tıklayın. ↗
+    </a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const S = { name: '', score: 0, lives: 3, stage: 0, qIdx: 0, mute: false, cleanups: [] };
+
+  let AC = null;
+  function getAC() {
+    try {
+      if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+      if (AC && AC.state === 'suspended') AC.resume();
+    } catch (e) {}
+    return AC;
+  }
+  function tone(f1, f2, d, type = 'triangle', v = 0.18, delay = 0) {
+    if (S.mute) return;
+    const c = getAC(); if (!c) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f2, 20), t + d * 0.9);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + d + 0.02);
+  }
+  const fxCache = {};
+  function playFX(file, fbFn) {
+    if (S.mute) return;
+    const a = fxCache[file] || (fxCache[file] = new Audio(file));
+    let done = false;
+    const fb = () => { if (!done) { done = true; fbFn(); } };
+    a.onerror = fb;
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play(); if (p && p.catch) p.catch(fb);
+  }
+  const SFX = {
+    drum() { playFX('sesler/davul_tokmak.mp3', () => tone(135, 55, 0.18, 'sine', 0.28)); },
+    ok() { playFX('sesler/dogru.mp3', () => [523, 659, 784].forEach((f, i) => tone(f, f, 0.15, 'triangle', 0.2, i * 0.08))); },
+    bad() { playFX('sesler/yanlis.mp3', () => tone(210, 115, 0.28, 'sawtooth', 0.15)); },
+    win() { playFX('sesler/alkis.mp3', () => [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.2, 'triangle', 0.22, i * 0.1))); }
+  };
+
+  const bgm = new Audio('sesler/davul_zurna_fon.mp3');
+  bgm.loop = true; bgm.volume = 0.14;
+  bgm.addEventListener('error', () => {});
+
+  let voice = null;
+  function say(file, text) {
+    if (S.mute) return;
+    if (voice) { try { voice.pause(); } catch (e) {} voice = null; }
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    const tts = () => {
+      try {
+        if (!text || !window.speechSynthesis) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'tr-TR'; u.rate = 0.92;
+        window.speechSynthesis.speak(u);
+      } catch (e) {}
+    };
+    if (!file) { tts(); return; }
+    const a = new Audio(file); voice = a;
+    a.addEventListener('error', tts, { once: true });
+    const p = a.play(); if (p && p.catch) p.catch(tts);
+  }
+  const spk = (file, txt) => `<button type="button" class="spk-btn" data-a="${file}" data-t="${String(txt).replace(/"/g, '&quot;')}">🔊</button>`;
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.spk-btn[data-t]');
+    if (b) { e.stopPropagation(); say(b.dataset.a, b.dataset.t); }
+  }, true);
+
+  function cleanAll() {
+    S.cleanups.forEach(fn => { try { fn(); } catch (e) {} });
+    S.cleanups = [];
+  }
+
+  function updateHUD() {
+    $('scoreVal').textContent = S.score;
+    $('heartsVal').textContent = [0, 1, 2].map(i => i < S.lives ? '❤️' : '🖤').join('');
+    document.querySelectorAll('#flagTabs .f-tab').forEach((el, idx) => {
+      el.classList.toggle('active', idx === S.stage - 1);
+      el.classList.toggle('done', idx < S.stage - 1);
+    });
+  }
+
+  function setDir(tag, txt, file) {
+    $('dirTag').textContent = tag;
+    $('dirText').textContent = txt;
+    $('dirSpk').onclick = () => say(file, txt);
+  }
+
+  function good(pts, msg) {
+    SFX.ok(); S.score += pts; updateHUD();
+    $('fbText').innerHTML = `✅ ${msg}`;
+  }
+  function bad(msg) {
+    SFX.bad(); S.lives = Math.max(1, S.lives - 1); updateHUD();
+    $('fbText').innerHTML = `💡 ${msg}`;
+  }
+
+  /* --- GİRİŞ EKRANI --- */
+  function showIntro() {
+    cleanAll(); S.stage = 0;
+    setDir('KIRKPINAR', 'Dünyanın en eski güreş şöleni Kırkpınar’da Başpehlivan olmaya hazır mısın?', 'sesler/kirkpinar_giris.mp3');
+    $('meadowField').innerHTML = `
+      <div style="max-width:640px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div style="font-size:52px;">🤼 🥁 🏅</div>
+        <h1 style="font-family:'Cinzel',serif; font-size:clamp(24px,3.6vw,40px); color:var(--gold);">
+          Kırkpınar Yağlı Güreşleri
+        </h1>
+        <p style="font-family:'Lora',serif; font-size:17px; line-height:1.45; background:rgba(255,255,255,0.1); border:2px solid var(--gold); border-radius:16px; padding:12px 18px;">
+          Pehlivanlar deri <b>kispet</b> giyer, zeytinyağı ile yağlanır ve davul-zurna eşliğinde <b>Altın Kemer</b> için güreşir!
+          ${spk('sesler/kirkpinar_bilgi.mp3', 'Pehlivanlar deri kispet giyer, zeytinyağı ile yağlanır ve davul zurna eşliğinde Altın Kemer için güreşir!')}
+        </p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+          <input id="inName" type="text" maxlength="24" placeholder="Pehlivan adını yaz…"
+                 style="padding:12px 16px; border:2.5px solid var(--gold); border-radius:14px; font-weight:800; font-size:17px; width:220px; color:#052e16;">
+          <button type="button" class="pehlivan-btn" id="btnStart">MEYDANA ÇIK ▶</button>
+        </div>
+      </div>
+    `;
+    $('btnStart').onclick = () => {
+      getAC();
+      S.name = $('inName').value.trim() || 'Genç Başpehlivan';
+      if (!S.mute) bgm.play().catch(() => {});
+      startStage1();
+    };
+  }
+
+  /* --- 1. MEKANİK: DAVUL RİTİM HALKASI (İKİLEMELER) --- */
+  function startStage1() {
+    cleanAll(); S.stage = 1; S.qIdx = 0; updateHUD();
+    setDir('1. OYUN · DAVUL RİTMİ', 'Önce 🥁 DAVULA VUR, sonra cümledeki İKİLEMEYİ tamamlayan kardeş kelimeyi seç!', 'sesler/kirkpinar_y1.mp3');
+    const items = [
+      { s: 'Pehlivanlar meydanda AĞIR [ ___ ] yürüdü.', ans: 'AĞIR', opts: ['AĞIR', 'KOŞA', 'UÇA'], a: 'sesler/kp1_1.mp3', hint: '“Ağır ağır” aynı kelimenin tekrarıyla yapılan ikilemedir.' },
+      { s: 'Er meydanına GÜÇLÜ [ ___ ] yiğitler çıktı.', ans: 'KUVVETLİ', opts: ['ZAYIF', 'KUVVETLİ', 'SESSİZ'], a: 'sesler/kp1_2.mp3', hint: '“Güçlü kuvvetli” yakın anlamlı ikilemedir.' },
+      { s: 'Tunca Nehri çayırın yanından ŞIRIL [ ___ ] akar.', ans: 'ŞIRIL', opts: ['ŞIRIL', 'KÜT', 'PAT'], a: 'sesler/kp1_3.mp3', hint: '“Şırıl şırıl” su sesinden doğan yansıma ikilemedir.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage2(); return; }
+      const cur = items[S.qIdx];
+      $('meadowField').innerHTML = `
+        <div class="drum-arena">
+          <div class="drum-circle" id="drumPad">
+            <span style="font-size:48px;">🥁</span>
+            <span>DAVULA VUR!</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:14px; text-align:center;">
+            <div style="font-family:'Lora',serif; font-size:22px; font-weight:700;">
+              “${cur.s}” ${spk(cur.a, cur.s)}
+            </div>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;" id="twinOpts">
+              ${cur.opts.map(o => `<button type="button" class="twin-btn" data-v="${o}">${o}</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.s);
+      $('drumPad').onclick = () => SFX.drum();
+      $('twinOpts').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          SFX.drum();
+          if (b.dataset.v === cur.ans) {
+            good(25, `Davul gümledi! İkileme tamamlandı: ${cur.ans}`);
+            S.qIdx++;
+            setTimeout(render, 850);
+          } else {
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    render();
+  }
+
+  /* --- 2. MEKANİK: KİSPET KARGO BANDI (İSİM KÖKÜ vs FİİL KÖKÜ) --- */
+  function startStage2() {
+    cleanAll(); S.stage = 2; S.qIdx = 0; updateHUD();
+    setDir('2. OYUN · KİSPET BANDI', 'Kelimenin kökü “-mak / -mek” alabiliyorsa FİİL KÖKÜ bandına, alamıyorsa İSİM KÖKÜ bandına gönder!', 'sesler/kirkpinar_y2.mp3');
+    const items = [
+      { w: 'YAĞ - LI', root: 'Kökü: YAĞ', type: 'isim', a: 'sesler/kp2_1.mp3', hint: 'Zeytinyağı anlamındaki “yağ” İsim Köküdür.' },
+      { w: 'GÜREŞ - Çİ', root: 'Kökü: GÜREŞ-', type: 'fiil', a: 'sesler/kp2_2.mp3', hint: '“Güreş-mek” diyebildiğimiz için Fiil Köküdür.' },
+      { w: 'MEYDAN - DA', root: 'Kökü: MEYDAN', type: 'isim', a: 'sesler/kp2_3.mp3', hint: '“Meydan-mak” denmez; Meydan İsim Köküdür.' },
+      { w: 'BİL - MEYEN', root: 'Kökü: BİL-', type: 'fiil', a: 'sesler/kp2_4.mp3', hint: '“Bil-mek” diyebildiğimiz için Fiil Köküdür.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage3(); return; }
+      const cur = items[S.qIdx];
+      $('meadowField').innerHTML = `
+        <div class="conveyor-belt-grid">
+          <div class="side-chute" id="chuteIsim">
+            <span style="font-size:32px;">⬅️ 🏛️</span>
+            <span>İSİM KÖKÜ</span>
+            <small style="font-size:11px; color:#fde047;">(-mak almaz)</small>
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px;">
+            <div class="kispet-parcel" id="parcelBox">
+              <div style="font-size:36px;">📦</div>
+              <div style="font-size:26px; font-weight:800; color:var(--gold);">${cur.w}</div>
+              <div style="font-size:14px; color:#fde68a; margin:4px 0;">(${cur.root})</div>
+              ${spk(cur.a, cur.w + '. ' + cur.root)}
+            </div>
+            <div style="display:flex; gap:12px;">
+              <button type="button" class="twin-btn" id="btnGoL">⬅ İsim Kökü</button>
+              <button type="button" class="twin-btn" id="btnGoR">Fiil Kökü ➡</button>
+            </div>
+          </div>
+          <div class="side-chute" id="chuteFiil">
+            <span style="font-size:32px;">⚡ ➡️</span>
+            <span>FİİL KÖKÜ</span>
+            <small style="font-size:11px; color:#fde047;">(-mak / -mek alır)</small>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.w);
+      const send = (picked) => {
+        const box = $('parcelBox');
+        if (picked === cur.type) {
+          box.style.transform = `translateX(${picked === 'isim' ? '-160px' : '160px'}) scale(0.5)`;
+          box.style.opacity = '0';
+          good(25, `Kispet doğru banda gitti: ${cur.w}!`);
+          S.qIdx++;
+          setTimeout(render, 700);
+        } else {
+          bad(cur.hint);
+        }
+      };
+      $('chuteIsim').onclick = $('btnGoL').onclick = () => send('isim');
+      $('chuteFiil').onclick = $('btnGoR').onclick = () => send('fiil');
+    }
+    render();
+  }
+
+  /* --- 3. MEKANİK: CAZGIR PEKİŞTİRME HARF ÇARKI (M, P, R, S) --- */
+  function startStage3() {
+    cleanAll(); S.stage = 3; S.qIdx = 0; updateHUD();
+    setDir('3. OYUN · CAZGIR ÇARKI', 'Kelimeyi pekiştirmek için ortadaki boşluğa M, P, R, S harflerinden hangisi gelmelidir?', 'sesler/kirkpinar_y3.mp3');
+    const items = [
+      { pattern: 'YE [ _ ] YEŞİL çayır', letter: 'M', full: 'YEMYEŞİL', a: 'sesler/kp3_1.mp3', hint: 'Çok yeşil anlamında YEMYEŞİL (M harfi) kullanılır.' },
+      { pattern: 'SA [ _ ] SAĞLAM kispet', letter: 'P', full: 'SAPSAĞLAM', a: 'sesler/kp3_2.mp3', hint: 'Çok sağlam anlamında SAPSAĞLAM (P harfi) kullanılır.' },
+      { pattern: 'TE [ _ ] TEMİZ yürek', letter: 'R', full: 'TERTEMİZ', a: 'sesler/kp3_3.mp3', hint: 'Çok temiz anlamında TERTEMİZ (R harfi) kullanılır.' },
+      { pattern: 'MA [ _ ] MAVİ gökyüzü', letter: 'S', full: 'MASMAVİ', a: 'sesler/kp3_4.mp3', hint: 'Çok mavi anlamında MASMAVİ (S harfi) kullanılır.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage4(); return; }
+      const cur = items[S.qIdx];
+      $('meadowField').innerHTML = `
+        <div class="wheel-arena">
+          <div style="font-family:'Cinzel',serif; font-size:28px; color:var(--gold); background:rgba(0,0,0,0.35); padding:14px 26px; border-radius:18px; border:2px solid var(--gold);">
+            📢 ${cur.pattern} ${spk(cur.a, cur.full)}
+          </div>
+          <div class="mprs-wheel" id="letterWheel">
+            ${['M', 'P', 'R', 'S'].map(L => `<button type="button" class="letter-orb" data-l="${L}">${L}</button>`).join('')}
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.full);
+      $('letterWheel').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          if (b.dataset.l === cur.letter) {
+            good(25, `Cazgır haykırdı: “${cur.full}!”`);
+            S.qIdx++;
+            setTimeout(render, 800);
+          } else {
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    render();
+  }
+
+  /* --- 4. MEKANİK: 3B ALTIN KEMER MÜCEVHER YUVASI (GÜREŞ DEYİMLERİ) --- */
+  function startStage4() {
+    cleanAll(); S.stage = 4; S.qIdx = 0; updateHUD();
+    setDir('4. OYUN · 3B ALTIN KEMER', 'Anlamı verilen GÜREŞ DEYİMİNİ seçerek 3B Başpehlivanlık Altın Kemerine mücevheri tak!', 'sesler/kirkpinar_y4.mp3');
+    const items = [
+      { meaning: '“Güreşte hiç yenilmemek, gücünü korumak” anlamındaki deyimimiz hangisidir?', ans: '💎 Sırtı yere gelmemek', opts: ['💎 Sırtı yere gelmemek', '💎 Gözden düşmek'], a: 'sesler/kp4_1.mp3', hint: 'Güreşte sırtı yere değmeyen yenilmez: Sırtı yere gelmemek.' },
+      { meaning: '“Yiğitlerin mertçe yarıştığı alan” anlamındaki deyimimiz hangisidir?', ans: '💎 Er meydanı', opts: ['💎 İğne deliği', '💎 Er meydanı'], a: 'sesler/kp4_2.mp3', hint: 'Pehlivanların güreştiği çayıra Er Meydanı denir.' },
+      { meaning: '“Çok güçlü olmak, kimseye yenilmemek” anlamındaki deyimimiz hangisidir?', ans: '💎 Bileği bükülmemek', opts: ['💎 Bileği bükülmemek', '💎 Kulak asmamak'], a: 'sesler/kp4_3.mp3', hint: 'Bileği bükülmemek yenilmezliği anlatır.' }
+    ];
+
+    $('meadowField').innerHTML = `
+      <div class="belt-3d-wrap">
+        <canvas id="belt3dCanvas"></canvas>
+        <div style="display:flex; flex-direction:column; gap:14px; text-align:center;">
+          <div style="font-family:'Lora',serif; font-size:19px; font-weight:700;" id="beltPrompt"></div>
+          <div id="beltSpk"></div>
+          <div style="display:flex; flex-direction:column; gap:10px;" id="gemBtns"></div>
+        </div>
+      </div>
+    `;
+
+    // Three.js 3B Dönen Altın Kemer
+    const cvs = $('belt3dCanvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1.3, 0.1, 100);
+    camera.position.set(0, 2, 8.5);
+    camera.lookAt(0, 0, 0);
+    const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dl = new THREE.DirectionalLight(0xffe066, 1.5);
+    dl.position.set(5, 10, 8);
+    scene.add(dl);
+
+    const beltGroup = new THREE.Group();
+    const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.88, roughness: 0.15 });
+    const torus = new THREE.Mesh(new THREE.TorusGeometry(2.1, 0.42, 20, 48), goldMat);
+    beltGroup.add(torus);
+    const gems = [0, 2.1, 4.2].map(ang => {
+      const g = new THREE.Mesh(new THREE.OctahedronGeometry(0.45, 0), new THREE.MeshStandardMaterial({ color: 0xdc2626, emissive: 0x7f1d1d }));
+      g.position.set(Math.cos(ang) * 2.1, Math.sin(ang) * 2.1, 0.35);
+      beltGroup.add(g);
+      return g;
+    });
+    scene.add(beltGroup);
+
+    let rafId = 0;
+    function resize() {
+      const r = cvs.getBoundingClientRect();
+      if (r.width && r.height) {
+        camera.aspect = r.width / r.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(r.width, r.height);
+      }
+    }
+    resize();
+    function loop() {
+      rafId = requestAnimationFrame(loop);
+      beltGroup.rotation.y += 0.02;
+      beltGroup.rotation.z += 0.005;
+      renderer.render(scene, camera);
+    }
+    loop();
+    S.cleanups.push(() => cancelAnimationFrame(rafId));
+
+    function renderQ() {
+      if (S.qIdx >= items.length) { showCertificate(); return; }
+      const cur = items[S.qIdx];
+      $('beltPrompt').textContent = cur.meaning;
+      $('beltSpk').innerHTML = spk(cur.a, cur.meaning);
+      say(cur.a, cur.meaning);
+      $('gemBtns').innerHTML = cur.opts.map(o => `<button type="button" class="twin-btn" data-v="${o}">${o}</button>`).join('');
+      $('gemBtns').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          if (b.dataset.v === cur.ans) {
+            gems[S.qIdx].scale.setScalar(1.5);
+            good(35, `Altın Kemer parladı: ${cur.ans}!`);
+            S.qIdx++;
+            setTimeout(renderQ, 850);
+          } else {
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    renderQ();
+  }
+
+  /* --- SERTİFİKA EKRANI --- */
+  function showCertificate() {
+    cleanAll(); SFX.win(); launchConfetti();
+    setDir('BAŞPEHLİVAN!', 'Kırkpınar Altın Kemer Başpehlivanlık Beratını kazandın!', 'sesler/kirkpinar_final.mp3');
+    $('meadowField').innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+        <canvas id="certCanvas" width="840" height="450" style="max-width:510px; width:100%; height:auto; border:3px solid var(--gold); border-radius:16px;"></canvas>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="pehlivan-btn" id="btnDlCert" style="font-size:15px; padding:10px 18px;">⬇ Sertifikayı İndir (JPG)</button>
+          <a href="index.html" class="pehlivan-btn" style="font-size:15px; padding:10px 18px; background:#10b981; color:#fff;">🗺️ Haritaya Dön (index.html)</a>
+        </div>
+      </div>
+    `;
+    const c = $('certCanvas'), ctx = c.getContext('2d');
+    ctx.fillStyle = '#052e16'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#facc15'; ctx.lineWidth = 8; ctx.strokeRect(18, 18, c.width - 36, c.height - 36);
+    ctx.fillStyle = '#facc15'; ctx.font = '800 18px Cinzel, serif'; ctx.textAlign = 'center';
+    ctx.fillText('ÜLKEM YANIMDA · TÜRKÇE VE TÜRK KÜLTÜRÜ', c.width / 2, 68);
+    ctx.fillStyle = '#ffffff'; ctx.font = '800 32px Cinzel, serif';
+    ctx.fillText('KIRKPINAR ALTIN KEMER BAŞPEHLİVANLIK BERATI', c.width / 2, 122);
+    ctx.fillStyle = '#fde047'; ctx.font = '800 38px Montserrat, sans-serif';
+    ctx.fillText(S.name, c.width / 2, 198);
+    ctx.fillStyle = '#dcfce7'; ctx.font = '600 17px Lora, serif';
+    ctx.fillText('İkilemeler, İsim/Fiil Kökleri, Pekiştirmeler ve Güreş Deyimleri', c.width / 2, 255);
+    ctx.fillText('görevlerini başarıyla tamamlayarak Altın Kemeri kuşanmıştır.', c.width / 2, 285);
+    ctx.fillStyle = '#facc15'; ctx.font = '800 20px Montserrat, sans-serif';
+    ctx.fillText(`Toplam Puan: ${S.score} ⭐  |  Öğrenci Katkısı: Pırıl Güreller`, c.width / 2, 360);
+
+    $('btnDlCert').onclick = () => {
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/jpeg', 0.95);
+      a.download = `Kirkpinar_Sertifika_${S.name.replace(/\s+/g, '_')}.jpg`;
+      a.click();
+    };
+  }
+
+  function launchConfetti() {
+    const cv = $('confetti'), cx = cv.getContext('2d');
+    cv.width = innerWidth; cv.height = innerHeight;
+    const p = Array.from({ length: 85 }, () => ({
+      x: Math.random() * cv.width, y: -20 - Math.random() * 120,
+      vx: (Math.random() - 0.5) * 4, vy: 2.5 + Math.random() * 3.5,
+      c: ['#facc15', '#10b981', '#ffffff', '#ef4444'][Math.floor(Math.random() * 4)], s: 6 + Math.random() * 6
+    }));
+    let f = 0;
+    function loop() {
+      f++; cx.clearRect(0, 0, cv.width, cv.height);
+      p.forEach(i => { i.x += i.vx; i.y += i.vy; cx.fillStyle = i.c; cx.fillRect(i.x, i.y, i.s, i.s); });
+      if (f < 160) requestAnimationFrame(loop); else cx.clearRect(0, 0, cv.width, cv.height);
+    }
+    loop();
+  }
+
+  $('btnMute').onclick = () => {
+    S.mute = !S.mute;
+    $('btnMute').textContent = S.mute ? '🔇' : '🔊';
+    if (S.mute) bgm.pause(); else bgm.play().catch(() => {});
+  };
+
+  showIntro();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>3. Oyun: Meriç Nehri ve Köprüsü — Nehir Seyir Defteri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Lora:ital,wght@0,500;0,700;1,500&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --ink: #0f172a;
+  --river: #0284c7;
+  --teal: #0d9488;
+  --sunset: #f97316;
+  --gold: #f59e0b;
+  --paper: #f8fafc;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+html, body {
+  width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background:
+    linear-gradient(160deg, rgba(224,242,254,0.82), rgba(254,243,199,0.82)),
+    url('gorseller/meric_suluboya_bg.png') center/cover no-repeat;
+  color: var(--ink);
+}
+
+#logo {
+  position: fixed; top: 10px; left: 14px; height: 44px; width: auto;
+  z-index: 950; pointer-events: none !important;
+  filter: drop-shadow(0 3px 0 rgba(15,23,42,0.25));
+}
+#confetti { position: fixed; inset: 0; pointer-events: none !important; z-index: 900; }
+
+/* Suluboya Seyir Defteri İskeleti */
+.atlas-app {
+  width: 100vw; height: 100dvh;
+  display: grid;
+  grid-template-rows: 58px auto 1fr 42px;
+  gap: 8px;
+  padding: 0 14px 8px 14px;
+}
+
+.atlas-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-left: 155px;
+  border-bottom: 3px solid var(--ink);
+  background: rgba(255,255,255,0.86);
+  backdrop-filter: blur(6px);
+  margin: 0 -14px; padding-right: 16px;
+}
+.compass-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: #fff; border: 2.5px solid var(--ink);
+  border-radius: 999px; padding: 4px 14px;
+  box-shadow: 0 3px 0 var(--ink); font-weight: 800; font-size: 13px;
+}
+.dot-step {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2px solid var(--ink); background: #fff;
+}
+.dot-step.on { background: var(--gold); transform: scale(1.25); }
+.dot-step.done { background: var(--teal); }
+
+.spk-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--gold); color: var(--ink);
+  border: 2px solid var(--ink); box-shadow: 0 3px 0 var(--ink);
+  font-size: 15px; cursor: pointer; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.spk-btn:hover { transform: scale(1.1); }
+
+.directive-strip {
+  background: #fef3c7;
+  border: 2.5px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 8px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.d-badge {
+  background: var(--river); color: #fff;
+  border: 2px solid var(--ink); border-radius: 10px;
+  padding: 3px 10px; font-family: 'Cinzel', serif; font-weight: 800; font-size: 12px;
+}
+
+.atlas-main {
+  background: rgba(255,255,255,0.88);
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 6px 6px 0 var(--ink);
+  padding: 14px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+
+.atlas-foot {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: #fff; border: 2.5px solid var(--ink); border-radius: 999px;
+  padding: 4px 16px; box-shadow: 3px 3px 0 var(--ink);
+  font-size: 13px; font-weight: 800;
+}
+
+.comic-btn {
+  background: var(--teal); color: #fff;
+  border: 2.5px solid var(--ink); border-radius: 16px;
+  padding: 11px 22px; font-weight: 800; font-size: 17px;
+  box-shadow: 0 5px 0 var(--ink); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+}
+.comic-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--ink); }
+
+/* MEKANİK 1: 3B MERİÇ KAYIĞI KEMER GEÇİŞİ */
+.boat-3d-wrap {
+  width: min(740px, 100%);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+#river3dCanvas {
+  width: 100%; height: 195px;
+  border-radius: 16px; border: 2.5px solid var(--ink);
+  background: linear-gradient(180deg, #fdba74 0%, #38bdf8 55%, #0369a1 100%);
+  display: block;
+}
+
+/* MEKANİK 2: TAŞ KÖPRÜ BİLET GİŞESİ & PUL YAPIŞTIRMA */
+.booth-grid {
+  width: min(720px, 100%);
+  display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px; align-items: center;
+}
+.bridge-ticket {
+  background: #fef3c7; border: 3px dashed var(--river);
+  border-radius: 18px; padding: 20px; text-align: center;
+  font-family: 'Lora', serif; font-size: 22px; font-weight: 700;
+  position: relative;
+}
+.stamp-seal {
+  position: absolute; right: 14px; bottom: 10px;
+  width: 78px; height: 78px; border-radius: 50%;
+  border: 3px solid #dc2626; color: #dc2626;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 11px;
+  display: flex; align-items: center; justify-content: center;
+  transform: rotate(-15deg) scale(0); transition: transform 0.35s;
+}
+.stamp-seal.on { transform: rotate(-15deg) scale(1); }
+.postage-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.postage-stamp {
+  background: var(--river); color: #fff;
+  border: 2.5px solid var(--ink); border-radius: 12px;
+  padding: 14px 10px; font-weight: 800; font-size: 20px;
+  text-align: center; cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+}
+.postage-stamp:hover { background: var(--gold); color: var(--ink); transform: rotate(-2deg) scale(1.04); }
+
+/* MEKANİK 3: MANTAR PANO & KIRMIZI İP BAĞLAMA */
+.cork-pano {
+  position: relative;
+  width: min(740px, 100%); height: 270px;
+  background: repeating-radial-gradient(circle at 20% 30%, #b45309 0 2px, #92400e 3px 6px);
+  border: 4px solid #451a03; border-radius: 18px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.4), 4px 4px 0 var(--ink);
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(2, 1fr);
+  gap: 12px; padding: 14px;
+}
+.polaroid {
+  position: relative; background: #fff;
+  border: 2px solid var(--ink); border-radius: 10px;
+  padding: 14px 8px 6px; text-align: center;
+  box-shadow: 3px 4px 0 rgba(0,0,0,0.35);
+  cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font-size: 13.5px; font-weight: 800;
+}
+.polaroid.sel { outline: 4px solid var(--gold); transform: scale(1.05); }
+.polaroid.linked { background: #dcfce7; }
+.red-pin {
+  position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #dc2626; border: 2px solid var(--ink);
+}
+#ropeSvg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+
+/* MEKANİK 4: SEYİR KÖŞKÜ YÜKSELEN KARTPOSTALLAR */
+.stream-grid {
+  width: min(720px, 100%); height: 265px;
+  display: grid; grid-template-columns: 0.9fr 1.2fr; gap: 14px;
+}
+.pavilion-box {
+  background: #f0fdfa; border: 2.5px solid var(--ink);
+  border-radius: 16px; padding: 14px;
+  display: flex; flex-direction: column; justify-content: center; gap: 10px;
+}
+.postcard-lane {
+  position: relative; overflow: hidden;
+  background: linear-gradient(180deg, #0f172a, #1e3a5f);
+  border: 2.5px solid var(--ink); border-radius: 16px;
+}
+.rising-card {
+  position: absolute; left: 10%; right: 10%;
+  background: #fff; border: 2.5px solid var(--ink);
+  border-radius: 12px; padding: 10px 14px;
+  font-weight: 800; font-size: 14.5px;
+  box-shadow: 0 4px 0 var(--ink); cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+@media (max-width: 780px) {
+  .atlas-top { padding-left: 65px; }
+  .booth-grid, .stream-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<img id="logo" src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+<canvas id="confetti"></canvas>
+
+<div class="atlas-app">
+  <header class="atlas-top">
+    <div class="compass-pill">
+      <div style="display:flex; gap:4px;" id="stepDots">
+        <span class="dot-step on"></span><span class="dot-step"></span><span class="dot-step"></span><span class="dot-step"></span>
+      </div>
+      <span id="stageLabel">Meriç Seyir Defteri</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <div class="compass-pill">🌉 <b id="scoreVal">0</b></div>
+      <div class="compass-pill" id="heartsVal">❤️❤️❤️</div>
+      <button type="button" class="spk-btn" id="btnMute">🔊</button>
+    </div>
+  </header>
+
+  <div class="directive-strip">
+    <span class="d-badge" id="dirTag">MERİÇ NEHRİ</span>
+    <p style="flex:1; font-family:'Lora',serif; font-weight:700; font-size:clamp(14.5px,1.8vw,18.5px);" id="dirText">
+      Bulgaristan’dan doğup Edirne’ye akan Meriç Nehri ve taş köprüsünü keşfedelim!
+    </p>
+    <button type="button" class="spk-btn" id="dirSpk">🔊</button>
+  </div>
+
+  <main class="atlas-main" id="atlasMain"></main>
+
+  <footer class="atlas-foot">
+    <span id="fbText">🚣 Sesleri dinlemek için 🔊 düğmesine dokun!</span>
+    <a href="https://drive.google.com/file/d/1kxCICPL_ENF9BNPMESnTYBul8WplTHeY/view?usp=drive_link"
+       target="_blank" rel="noopener noreferrer" style="color:var(--river); text-decoration:underline;">
+      📜 Mesut Küçük'ün çalışmasının tamamına ulaşmak için tıklayın. ↗
+    </a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const S = { name: '', score: 0, lives: 3, stage: 0, qIdx: 0, mute: false, cleanups: [] };
+
+  let AC = null;
+  function getAC() {
+    try {
+      if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+      if (AC && AC.state === 'suspended') AC.resume();
+    } catch (e) {}
+    return AC;
+  }
+  function tone(f1, f2, d, type = 'triangle', v = 0.18, delay = 0) {
+    if (S.mute) return;
+    const c = getAC(); if (!c) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f2, 20), t + d * 0.9);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + d + 0.02);
+  }
+  const fxCache = {};
+  function playFX(file, fbFn) {
+    if (S.mute) return;
+    const a = fxCache[file] || (fxCache[file] = new Audio(file));
+    let done = false;
+    const fb = () => { if (!done) { done = true; fbFn(); } };
+    a.onerror = fb;
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play(); if (p && p.catch) p.catch(fb);
+  }
+  const SFX = {
+    wave() { playFX('sesler/kurek_su.mp3', () => tone(360, 480, 0.12, 'sine', 0.12)); },
+    ok() { playFX('sesler/dogru.mp3', () => [523, 659, 784].forEach((f, i) => tone(f, f, 0.15, 'triangle', 0.2, i * 0.08))); },
+    bad() { playFX('sesler/yanlis.mp3', () => tone(210, 115, 0.28, 'sawtooth', 0.15)); },
+    win() { playFX('sesler/alkis.mp3', () => [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.2, 'triangle', 0.22, i * 0.1))); }
+  };
+
+  const bgm = new Audio('sesler/meric_fon.mp3');
+  bgm.loop = true; bgm.volume = 0.14;
+  bgm.addEventListener('error', () => {});
+
+  let voice = null;
+  function say(file, text) {
+    if (S.mute) return;
+    if (voice) { try { voice.pause(); } catch (e) {} voice = null; }
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    const tts = () => {
+      try {
+        if (!text || !window.speechSynthesis) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'tr-TR'; u.rate = 0.92;
+        window.speechSynthesis.speak(u);
+      } catch (e) {}
+    };
+    if (!file) { tts(); return; }
+    const a = new Audio(file); voice = a;
+    a.addEventListener('error', tts, { once: true });
+    const p = a.play(); if (p && p.catch) p.catch(tts);
+  }
+  const spk = (file, txt) => `<button type="button" class="spk-btn" data-a="${file}" data-t="${String(txt).replace(/"/g, '&quot;')}">🔊</button>`;
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.spk-btn[data-t]');
+    if (b) { e.stopPropagation(); say(b.dataset.a, b.dataset.t); }
+  }, true);
+
+  function cleanAll() {
+    S.cleanups.forEach(fn => { try { fn(); } catch (e) {} });
+    S.cleanups = [];
+  }
+
+  function updateHUD() {
+    $('scoreVal').textContent = S.score;
+    $('heartsVal').textContent = [0, 1, 2].map(i => i < S.lives ? '❤️' : '🖤').join('');
+    document.querySelectorAll('#stepDots .dot-step').forEach((el, idx) => {
+      el.classList.toggle('on', idx === S.stage - 1);
+      el.classList.toggle('done', idx < S.stage - 1);
+    });
+  }
+
+  function setDir(tag, txt, file) {
+    $('dirTag').textContent = tag;
+    $('dirText').textContent = txt;
+    $('dirSpk').onclick = () => say(file, txt);
+  }
+
+  function good(pts, msg) {
+    SFX.ok(); S.score += pts; updateHUD();
+    $('fbText').innerHTML = `✅ ${msg}`;
+  }
+  function bad(msg) {
+    SFX.bad(); S.lives = Math.max(1, S.lives - 1); updateHUD();
+    $('fbText').innerHTML = `💡 ${msg}`;
+  }
+
+  /* --- GİRİŞ EKRANI --- */
+  function showIntro() {
+    cleanAll(); S.stage = 0;
+    setDir('MERİÇ ATLAS', 'Balkanlar’dan doğup Edirne’ye akan Meriç Nehri’nde kültür yolculuğuna çıkalım!', 'sesler/meric_giris.mp3');
+    $('atlasMain').innerHTML = `
+      <div style="max-width:640px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:12px;">
+        <div style="font-size:50px;">🌉 🚣 🌅</div>
+        <h1 style="font-family:'Cinzel',serif; font-size:clamp(24px,3.6vw,38px); color:var(--river);">
+          Meriç Nehri ve Taş Köprü
+        </h1>
+        <p style="font-family:'Lora',serif; font-size:17px; line-height:1.45; background:#e0f2fe; border:2.5px solid var(--ink); border-radius:16px; padding:12px 16px; box-shadow:4px 4px 0 var(--ink);">
+          <b>Meriç Nehri</b> Bulgaristan’dan doğar, Edirne’ye bereket taşır. Üzerindeki 12 kemerli <b>Meriç Köprüsü</b> gün batımında harika görünür!
+          ${spk('sesler/meric_bilgi.mp3', 'Meriç Nehri Bulgaristandan doğar, Edirneye bereket taşır. Üzerindeki 12 kemerli Meriç Köprüsü gün batımında harika görünür!')}
+        </p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+          <input id="inName" type="text" maxlength="24" placeholder="Kaptan adını yaz…"
+                 style="padding:11px 16px; border:2.5px solid var(--ink); border-radius:14px; font-weight:800; font-size:17px; width:220px;">
+          <button type="button" class="comic-btn" id="btnStart">KAYIĞA BİN ▶</button>
+        </div>
+      </div>
+    `;
+    $('btnStart').onclick = () => {
+      getAC();
+      S.name = $('inName').value.trim() || 'Meriç Kaptanı';
+      if (!S.mute) bgm.play().catch(() => {});
+      startStage1();
+    };
+  }
+
+  /* --- 1. MEKANİK: 3B MERİÇ KAYIĞI KEMER GEÇİŞİ (SESTEŞ SÖZCÜKLER) --- */
+  function startStage1() {
+    cleanAll(); S.stage = 1; S.qIdx = 0; updateHUD();
+    $('stageLabel').textContent = '1/4: 3B Kayık (Sesteş)';
+    setDir('1. OYUN · 3B KAYIK', 'Altı çizili EŞ SESLİ (SESTEŞ) kelimenin cümledeki doğru anlamını seçerek 3B kayığı o kemerden geçir!', 'sesler/meric_y1.mp3');
+
+    const items = [
+      { s: 'Meriç Nehri’nde ördekler YÜZÜYORDU.', ans: '🏊 Suda ilerlemek', wrong: '🔢 100 sayısı', a: 'sesler/mer1_yuz.mp3', hint: 'Ördeklerin suda ilerlemesi anlatılıyor.' },
+      { s: 'Nehir kıyısındaki söğüt ağacının DALI eğildi.', ans: '🌿 Ağacın kolu', wrong: '🤿 Suya dalmak', a: 'sesler/mer1_dal.mp3', hint: 'Ağacın gövdesinden ayrılan kolu (Dal) anlatılıyor.' },
+      { s: 'Baharda Meriç kenarındaki yeşil KIRLAR çiçek açtı.', ans: '🌼 Yeşil doğa alanı', wrong: '🔨 Eşyayı kırmak', a: 'sesler/mer1_kir.mp3', hint: 'Kır burada çiçekli yeşil doğa alanı demektir.' }
+    ];
+
+    $('atlasMain').innerHTML = `
+      <div class="boat-3d-wrap">
+        <div style="font-family:'Lora',serif; font-size:21px; font-weight:700; display:flex; align-items:center; gap:10px;">
+          <span id="boatSentence"></span>
+          <span id="boatSpk"></span>
+        </div>
+        <canvas id="river3dCanvas"></canvas>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; justify-content:center;" id="archBtns"></div>
+      </div>
+    `;
+
+    const cvs = $('river3dCanvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 3, 0.1, 100);
+    camera.position.set(0, 5.5, 14);
+    camera.lookAt(0, 0.5, 0);
+    const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dl = new THREE.DirectionalLight(0xffb703, 1.3);
+    dl.position.set(4, 12, -10);
+    scene.add(dl);
+
+    // 3B Taş Köprü ve 2 Kemer
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0xe2d6c5 });
+    const bridgeDeck = new THREE.Mesh(new THREE.BoxGeometry(16, 1.1, 2.5), stoneMat);
+    bridgeDeck.position.set(0, 2.2, -2);
+    scene.add(bridgeDeck);
+    [-6, 0, 6].forEach(px => {
+      const pier = new THREE.Mesh(new THREE.BoxGeometry(1.3, 4.2, 2.8), stoneMat);
+      pier.position.set(px, 0, -2);
+      scene.add(pier);
+    });
+
+    // 3B Ahşap Kayık
+    const boat = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.55, 3.0), new THREE.MeshStandardMaterial({ color: 0x78350f }));
+    boat.position.set(0, -1.2, 4.5);
+    scene.add(boat);
+
+    let boatTargetX = 0, rafId = 0, t = 0;
+    function resize() {
+      const r = cvs.getBoundingClientRect();
+      if (r.width && r.height) {
+        camera.aspect = r.width / r.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(r.width, r.height);
+      }
+    }
+    resize();
+    function loop() {
+      rafId = requestAnimationFrame(loop);
+      t += 0.05;
+      boat.position.x += (boatTargetX - boat.position.x) * 0.12;
+      boat.position.y = -1.2 + Math.sin(t * 2) * 0.12;
+      boat.rotation.z = Math.sin(t * 1.5) * 0.05;
+      renderer.render(scene, camera);
+    }
+    loop();
+    S.cleanups.push(() => cancelAnimationFrame(rafId));
+
+    function renderQ() {
+      if (S.qIdx >= items.length) { startStage2(); return; }
+      const cur = items[S.qIdx];
+      $('boatSentence').textContent = `“${cur.s}”`;
+      $('boatSpk').innerHTML = spk(cur.a, cur.s);
+      say(cur.a, cur.s);
+      const swap = S.qIdx % 2 === 1;
+      const leftOpt = swap ? cur.wrong : cur.ans;
+      const rightOpt = swap ? cur.ans : cur.wrong;
+      $('archBtns').innerHTML = `
+        <button type="button" class="comic-btn" id="archL" style="background:var(--river);">⬅ Sol Kemer: ${leftOpt}</button>
+        <button type="button" class="comic-btn" id="archR" style="background:var(--sunset);">Sağ Kemer: ${rightOpt} ➡</button>
+      `;
+      const pick = (val, xPos) => {
+        boatTargetX = xPos;
+        SFX.wave();
+        if (val === cur.ans) {
+          good(25, `Kayık doğru kemerden geçti: ${cur.ans}!`);
+          S.qIdx++;
+          setTimeout(renderQ, 850);
+        } else {
+          bad(cur.hint);
+        }
+      };
+      $('archL').onclick = () => pick(leftOpt, -3.2);
+      $('archR').onclick = () => pick(rightOpt, 3.2);
+    }
+    renderQ();
+  }
+
+  /* --- 2. MEKANİK: KÖPRÜ BİLET GİŞESİ PUL YAPIŞTIRMA (mı/mi ve de/da) --- */
+  function startStage2() {
+    cleanAll(); S.stage = 2; S.qIdx = 0; updateHUD();
+    $('stageLabel').textContent = '2/4: Bilet Gişesi (mı/de)';
+    setDir('2. OYUN · KÖPRÜ GİŞESİ', 'Biletteki boşluğa uygun PULU seçerek Meriç Köprüsü geçiş biletini damgala!', 'sesler/meric_y2.mp3');
+
+    const items = [
+      { s: 'Meriç Köprüsü’nü gördün ___', ans: 'mü?', opts: ['mü?', '-da', 'de', 'mi?'], a: 'sesler/mer2_1.mp3', hint: '“Gördün mü?” soru eki ayrı yazılır.' },
+      { s: 'Meriç Nehri Edirne’ye ___ bereket katar.', ans: 'de', opts: ['mı?', 'de', '-da', 'mi?'], a: 'sesler/mer2_2.mp3', hint: '“Edirne’ye de” bağlaç olan de ayrı yazılır.' },
+      { s: 'Köprünün ortasın___ mermer köşk vardır.', ans: '-da', opts: ['mi?', 'mü?', '-da', 'de'], a: 'sesler/mer2_3.mp3', hint: '“Ortasında” bulunma eki bitişik yazılır.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage3(); return; }
+      const cur = items[S.qIdx];
+      $('atlasMain').innerHTML = `
+        <div class="booth-grid">
+          <div class="bridge-ticket">
+            <div style="font-size:13px; color:var(--river); font-weight:800; margin-bottom:6px;">🎫 MERİÇ KÖPRÜSÜ GEÇİŞ BİLETİ</div>
+            <div id="tkText">${cur.s.replace('___', '<span style="color:var(--sunset); border-bottom:3px dashed var(--ink); padding:0 8px;">?</span>')}</div>
+            <div style="margin-top:10px;">${spk(cur.a, cur.s)}</div>
+            <div class="stamp-seal" id="sealBox">ONAYLANDI</div>
+          </div>
+          <div class="postage-grid" id="stampGrid">
+            ${cur.opts.map(o => `<div class="postage-stamp" data-v="${o}">${o}</div>`).join('')}
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.s);
+      $('stampGrid').querySelectorAll('.postage-stamp').forEach(st => {
+        st.onclick = () => {
+          if (st.dataset.v === cur.ans) {
+            $('sealBox').classList.add('on');
+            good(30, `Bilet damgalandı! Doğru pul: “${cur.ans}”`);
+            S.qIdx++;
+            setTimeout(render, 900);
+          } else {
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    render();
+  }
+
+  /* --- 3. MEKANİK: MANTAR PANO & KIRMIZI İP BAĞLAMA (SU VE KÖPRÜ DEYİMLERİ) --- */
+  function startStage3() {
+    cleanAll(); S.stage = 3; updateHUD();
+    $('stageLabel').textContent = '3/4: Mantar Pano (Deyimler)';
+    setDir('3. OYUN · MANTAR PANO', 'Su ile ilgili DEYİM veya ATASÖZÜNÜ anlamıyla eşleştirmek için iki karta sırayla dokun ve kırmızı iple bağla!', 'sesler/meric_y3.mp3');
+
+    const cardsData = [
+      { id: 1, pair: 'A', title: '💧 Su gibi aziz ol!', sub: 'Deyim', a: 'sesler/mer3_a1.mp3' },
+      { id: 2, pair: 'B', title: '🌊 Akan su yosun tutmaz.', sub: 'Atasözü', a: 'sesler/mer3_b1.mp3' },
+      { id: 3, pair: 'C', title: '🪣 Damlaya damlaya göl olur.', sub: 'Atasözü', a: 'sesler/mer3_c1.mp3' },
+      { id: 4, pair: 'A', title: '“Su gibi temiz ve değerli ol” duası', sub: 'Anlamı', a: 'sesler/mer3_a2.mp3' },
+      { id: 5, pair: 'B', title: '“Çalışkan insan tembellik etmez”', sub: 'Anlamı', a: 'sesler/mer3_b2.mp3' },
+      { id: 6, pair: 'C', title: '“Küçük birikimler büyüyüp çoğalır”', sub: 'Anlamı', a: 'sesler/mer3_c2.mp3' }
+    ];
+
+    $('atlasMain').innerHTML = `
+      <div class="cork-pano" id="corkPano">
+        <svg id="ropeSvg"></svg>
+        ${cardsData.map(c => `
+          <div class="polaroid" data-pair="${c.pair}" data-id="${c.id}">
+            <span class="red-pin"></span>
+            <b>${c.title}</b>
+            <small style="color:var(--river);">${c.sub}</small>
+            ${spk(c.a, c.title)}
+          </div>
+        `).join('')}
+      </div>
+    `;
+
+    let first = null, matched = 0;
+    const links = [];
+    const pano = $('corkPano'), svg = $('ropeSvg');
+
+    function drawRopes() {
+      const b = pano.getBoundingClientRect();
+      svg.setAttribute('viewBox', `0 0 ${b.width} ${b.height}`);
+      svg.innerHTML = links.map(([el1, el2]) => {
+        const r1 = el1.querySelector('.red-pin').getBoundingClientRect();
+        const r2 = el2.querySelector('.red-pin').getBoundingClientRect();
+        const x1 = r1.left + r1.width / 2 - b.left, y1 = r1.top + r1.height / 2 - b.top;
+        const x2 = r2.left + r2.width / 2 - b.left, y2 = r2.top + r2.height / 2 - b.top;
+        return `<path d="M${x1} ${y1} Q${(x1 + x2) / 2} ${(y1 + y2) / 2 + 28} ${x2} ${y2}" fill="none" stroke="#dc2626" stroke-width="4" stroke-linecap="round"/>`;
+      }).join('');
+    }
+
+    pano.querySelectorAll('.polaroid').forEach(card => {
+      card.onclick = () => {
+        if (card.classList.contains('linked')) return;
+        if (!first) {
+          first = card;
+          card.classList.add('sel');
+          return;
+        }
+        if (first === card) {
+          card.classList.remove('sel');
+          first = null;
+          return;
+        }
+        if (first.dataset.pair === card.dataset.pair) {
+          first.classList.remove('sel');
+          first.classList.add('linked');
+          card.classList.add('linked');
+          links.push([first, card]);
+          first = null;
+          matched++;
+          drawRopes();
+          good(30, 'Kırmızı ip bağlandı! Deyim ve anlamı eşleşti.');
+          if (matched === 3) setTimeout(startStage4, 1000);
+        } else {
+          first.classList.remove('sel');
+          first = null;
+          bad('Bu iki kartın anlamı farklı. Tekrar dene!');
+        }
+      };
+    });
+  }
+
+  /* --- 4. MEKANİK: SEYİR KÖŞKÜ YÜKSELEN KARTPOSTALLAR (HİKÂYE UNSURLARI) --- */
+  function startStage4() {
+    cleanAll(); S.stage = 4; S.qIdx = 0; updateHUD();
+    $('stageLabel').textContent = '4/4: Seyir Köşkü (Hikâye)';
+    setDir('4. OYUN · SEYİR KÖŞKÜ', 'Sol kutuda istenen HİKÂYE UNSURUNA (Yer, Zaman, Kişi) ait kartpostala sağdaki akışta dokun!', 'sesler/meric_y4.mp3');
+
+    const tasks = [
+      { targetType: 'YER', prompt: '📍 Öyküdeki YER (MEKÂN) hangisidir?', ans: '🌉 Meriç Taş Köprüsü', cards: ['🌉 Meriç Taş Köprüsü', '🌅 Akşamüstü vakti', '🧒 Mesut ve Pırıl'], a: 'sesler/mer4_1.mp3' },
+      { targetType: 'ZAMAN', prompt: '⏳ Öyküdeki ZAMAN hangisidir?', ans: '🌅 Gün batımı akşamı', cards: ['🌅 Gün batımı akşamı', '🌉 Edirne şehri', '🚣 Kayıkçı Dede'], a: 'sesler/mer4_2.mp3' },
+      { targetType: 'KİŞİ', prompt: '👥 Öyküdeki KİŞİLER kimlerdir?', ans: '🧒 Mesut, Pırıl ve Kayıkçı', cards: ['🧒 Mesut, Pırıl ve Kayıkçı', '🌊 Meriç Nehri kıyısı', '☀️ Pazar sabahı'], a: 'sesler/mer4_3.mp3' }
+    ];
+
+    function render() {
+      if (S.qIdx >= tasks.length) { showCertificate(); return; }
+      const cur = tasks[S.qIdx];
+      $('atlasMain').innerHTML = `
+        <div class="stream-grid">
+          <div class="pavilion-box">
+            <div style="font-size:32px;">🏛️</div>
+            <b style="font-family:'Cinzel',serif; color:var(--river); font-size:16px;">SEYİR KÖŞKÜ GÖREVİ</b>
+            <div style="font-family:'Lora',serif; font-size:19px; font-weight:700;">${cur.prompt}</div>
+            <div>${spk(cur.a, cur.prompt)}</div>
+          </div>
+          <div class="postcard-lane" id="cardLane"></div>
+        </div>
+      `;
+      say(cur.a, cur.prompt);
+      const lane = $('cardLane');
+      cur.cards.forEach((txt, idx) => {
+        const el = document.createElement('div');
+        el.className = 'rising-card';
+        el.style.top = (22 + idx * 78) + 'px';
+        el.innerHTML = `<span>📮 ${txt}</span> <span style="color:var(--river);">📌 Seç</span>`;
+        el.onclick = () => {
+          if (txt === cur.ans) {
+            el.style.background = '#dcfce7';
+            good(35, `Doğru hikâye unsuru sabitlendi: ${txt}`);
+            S.qIdx++;
+            setTimeout(render, 850);
+          } else {
+            el.style.background = '#fecdd3';
+            bad(`İstenen unsur: ${cur.targetType}. Tekrar bak!`);
+          }
+        };
+        lane.appendChild(el);
+      });
+    }
+    render();
+  }
+
+  /* --- SERTİFİKA EKRANI --- */
+  function showCertificate() {
+    cleanAll(); SFX.win(); launchConfetti();
+    $('stageLabel').textContent = 'Tamamlandı!';
+    setDir('TEBRİKLER!', 'Meriç Nehri Kültür Kaptanı Sertifikan hazır!', 'sesler/meric_final.mp3');
+    $('atlasMain').innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+        <canvas id="certCanvas" width="840" height="450" style="max-width:510px; width:100%; height:auto; border:3px solid var(--ink); border-radius:16px; box-shadow:4px 4px 0 var(--ink);"></canvas>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="comic-btn" id="btnDlCert" style="font-size:15px; padding:9px 18px;">⬇ Sertifikayı İndir (JPG)</button>
+          <a href="index.html" class="comic-btn" style="font-size:15px; padding:9px 18px; background:var(--sunset);">🗺️ Haritaya Dön (index.html)</a>
+        </div>
+      </div>
+    `;
+    const c = $('certCanvas'), ctx = c.getContext('2d');
+    ctx.fillStyle = '#f0f9ff'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#0284c7'; ctx.lineWidth = 8; ctx.strokeRect(18, 18, c.width - 36, c.height - 36);
+    ctx.fillStyle = '#0284c7'; ctx.font = '800 18px Montserrat, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('ÜLKEM YANIMDA · TÜRKÇE VE TÜRK KÜLTÜRÜ', c.width / 2, 68);
+    ctx.fillStyle = '#0f172a'; ctx.font = '800 32px Cinzel, serif';
+    ctx.fillText('MERİÇ NEHRİ VE KÖPRÜSÜ KAPTANLIK BERATI', c.width / 2, 122);
+    ctx.fillStyle = '#f97316'; ctx.font = '800 38px Montserrat, sans-serif';
+    ctx.fillText(S.name, c.width / 2, 198);
+    ctx.fillStyle = '#1e293b'; ctx.font = '600 17px Lora, serif';
+    ctx.fillText('Sesteş Sözcükler, mı/mi ve de/da Yazımı, Deyimler ve Hikâye Unsurları', c.width / 2, 255);
+    ctx.fillText('oyunlarını başarıyla tamamlayarak Meriç Kültür Kaptanı olmuştur.', c.width / 2, 285);
+    ctx.fillStyle = '#0d9488'; ctx.font = '800 20px Montserrat, sans-serif';
+    ctx.fillText(`Toplam Puan: ${S.score} ⭐  |  Öğrenci Katkısı: Mesut Küçük`, c.width / 2, 360);
+
+    $('btnDlCert').onclick = () => {
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/jpeg', 0.95);
+      a.download = `Meric_Nehri_${S.name.replace(/\s+/g, '_')}.jpg`;
+      a.click();
+    };
+  }
+
+  function launchConfetti() {
+    const cv = $('confetti'), cx = cv.getContext('2d');
+    cv.width = innerWidth; cv.height = innerHeight;
+    const p = Array.from({ length: 85 }, () => ({
+      x: Math.random() * cv.width, y: -20 - Math.random() * 120,
+      vx: (Math.random() - 0.5) * 4, vy: 2.5 + Math.random() * 3.5,
+      c: ['#0284c7', '#f97316', '#0d9488', '#f59e0b'][Math.floor(Math.random() * 4)], s: 6 + Math.random() * 6
+    }));
+    let f = 0;
+    function loop() {
+      f++; cx.clearRect(0, 0, cv.width, cv.height);
+      p.forEach(i => { i.x += i.vx; i.y += i.vy; cx.fillStyle = i.c; cx.fillRect(i.x, i.y, i.s, i.s); });
+      if (f < 160) requestAnimationFrame(loop); else cx.clearRect(0, 0, cv.width, cv.height);
+    }
+    loop();
+  }
+
+  $('btnMute').onclick = () => {
+    S.mute = !S.mute;
+    $('btnMute').textContent = S.mute ? '🔇' : '🔊';
+    if (S.mute) bgm.pause(); else bgm.play().catch(() => {});
+  };
+
+  showIntro();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>5. Oyun: Edirnekâri Sanatı — Osmanlı Nakkaşhane Atölyesi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Lora:ital,wght@0,500;0,700;1,500&family=Montserrat:wght@600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --parchment: #fdfaf3;
+  --walnut: #3e1f0d;
+  --crimson: #9f1239;
+  --gold: #d97706;
+  --gold-bright: #f59e0b;
+  --lapis: #1e3a8a;
+  --emerald: #047857;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-user-select: none; }
+html, body {
+  width: 100vw; height: 100vh; height: 100dvh; overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(253,250,243,0.92), rgba(245,235,214,0.95)),
+    url('gorseller/nakkashane_bg.png') center/cover no-repeat;
+  color: var(--walnut);
+}
+
+#logo {
+  position: fixed; top: 12px; left: 16px; height: 44px; width: auto;
+  z-index: 950; pointer-events: none !important;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.25));
+}
+#confetti { position: fixed; inset: 0; pointer-events: none !important; z-index: 900; }
+
+/* Ceviz Çerçeveli Nakkaşhane Sanat Defteri */
+.nakkas-frame {
+  width: 100vw; height: 100dvh;
+  padding: 10px 14px;
+  display: grid;
+  grid-template-rows: 58px auto 1fr 44px;
+  gap: 8px;
+  border: 10px solid var(--walnut);
+  box-shadow: inset 0 0 0 3px var(--gold-bright);
+}
+
+.nakkas-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-left: 145px;
+  border-bottom: 2px solid rgba(159,18,57,0.3);
+}
+.motif-badges { display: flex; gap: 6px; overflow-x: auto; }
+.m-badge {
+  padding: 5px 12px; border-radius: 999px;
+  background: #fff; border: 2px solid var(--walnut);
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 11.5px;
+  color: var(--walnut); white-space: nowrap;
+}
+.m-badge.active { background: var(--crimson); color: #fff; border-color: var(--gold-bright); }
+.m-badge.done { background: var(--emerald); color: #fff; }
+
+.spk-btn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--gold-bright); color: var(--walnut);
+  border: 2px solid var(--walnut); box-shadow: 0 3px 0 var(--walnut);
+  font-size: 15px; cursor: pointer; flex-shrink: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.spk-btn:hover { transform: scale(1.1); }
+
+.scroll-directive {
+  background: linear-gradient(90deg, #fffbeb, #fef3c7, #fffbeb);
+  border: 2.5px solid var(--crimson);
+  border-radius: 16px;
+  padding: 8px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 4px 12px rgba(159,18,57,0.12);
+}
+.s-tag {
+  background: var(--crimson); color: #fff;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 12px;
+  padding: 4px 10px; border-radius: 8px; white-space: nowrap;
+}
+
+.easel-canvas {
+  background: #fff;
+  border: 3px double var(--crimson);
+  border-radius: 22px;
+  padding: 14px 18px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  box-shadow: 0 10px 28px rgba(62,31,13,0.12);
+}
+
+.nakkas-footer {
+  background: var(--walnut); color: #fef3c7;
+  border-radius: 999px; padding: 4px 18px;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  font-size: 12.5px; font-weight: 700;
+}
+
+.crimson-btn {
+  background: linear-gradient(135deg, #be123c, #881337);
+  color: #fff; border: 2.5px solid var(--gold-bright);
+  border-radius: 16px; padding: 11px 24px;
+  font-family: 'Cinzel', serif; font-weight: 800; font-size: 17px;
+  cursor: pointer; box-shadow: 0 5px 0 var(--walnut);
+  display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+}
+.crimson-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--walnut); }
+
+/* MEKANİK 1: 3B DÖNEN AHŞAP MOTİF KARTLARI (FLIP CARDS - BİRLEŞİK SÖZCÜKLER) */
+.flip-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  width: min(760px, 100%); height: 220px;
+}
+.wood-card { perspective: 800px; cursor: pointer; }
+.wood-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform 0.6s;
+}
+.wood-card.flipped .wood-inner { transform: rotateY(180deg); }
+.wood-front, .wood-back {
+  position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border: 2.5px solid var(--walnut); border-radius: 16px;
+  padding: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 6px; box-shadow: 0 6px 0 var(--walnut);
+}
+.wood-front { background: linear-gradient(160deg, #fef3c7, #fde68a); }
+.wood-back {
+  background: linear-gradient(160deg, #881337, #4c0519); color: #fff;
+  transform: rotateY(180deg);
+}
+
+/* MEKANİK 2: KÖK BOYA KÜPLERİNE ÇİÇEK YERLEŞTİRME (BENZETME vs KİŞİLEŞTİRME) */
+.dye-vats-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  width: min(680px, 100%); margin-top: 12px;
+}
+.dye-vat {
+  background: #fffbeb; border: 3px dashed var(--crimson);
+  border-radius: 22px; padding: 16px; text-align: center;
+  cursor: pointer; transition: 0.2s;
+}
+.dye-vat:hover { background: #fef3c7; transform: translateY(-3px); }
+
+/* MEKANİK 3: ALTIN VARAK NOKTALAMA FIRÇASI */
+.scroll-board {
+  background: #fef3c7; border: 3px solid var(--walnut);
+  border-radius: 20px; padding: 20px 24px;
+  font-family: 'Lora', serif; font-size: 22px; font-weight: 700;
+  text-align: center; margin-bottom: 16px;
+  box-shadow: 0 6px 0 var(--walnut);
+}
+.ink-pots { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.ink-pot-btn {
+  width: 74px; height: 74px; border-radius: 50%;
+  background: radial-gradient(circle, #fde047, #d97706);
+  border: 3px solid var(--walnut); color: var(--walnut);
+  font-size: 28px; font-weight: 800; cursor: pointer;
+  box-shadow: 0 5px 0 var(--walnut);
+}
+.ink-pot-btn:hover { transform: scale(1.1); }
+
+/* MEKANİK 4: 3B ÇEYİZ SANDIĞI KİLİDİ — KELİME TRENİ (KURALLI CÜMLE) */
+.chest-3d-grid {
+  width: min(750px, 100%);
+  display: grid; grid-template-columns: 0.9fr 1.2fr; gap: 16px; align-items: center;
+}
+#chest3dCanvas {
+  width: 100%; height: 210px;
+  border-radius: 18px; border: 2.5px solid var(--walnut);
+  background: radial-gradient(circle, #4c0519, #1c090d);
+  display: block;
+}
+.word-slot-bar {
+  min-height: 52px; background: #fef3c7;
+  border: 2.5px dashed var(--crimson); border-radius: 14px;
+  padding: 10px; font-family: 'Lora', serif; font-size: 19px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+}
+.wood-tile-btn {
+  background: var(--walnut); color: #fef3c7;
+  border: 2px solid var(--gold-bright); border-radius: 12px;
+  padding: 9px 16px; font-weight: 800; font-size: 16px; cursor: pointer;
+}
+.wood-tile-btn:disabled { opacity: 0.35; cursor: default; }
+
+@media (max-width: 780px) {
+  .nakkas-header { padding-left: 60px; }
+  .flip-grid { grid-template-columns: repeat(2, 1fr); }
+  .dye-vats-grid, .chest-3d-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<img id="logo" src="orjinal.svg" alt="Logo" onerror="this.style.display='none'">
+<canvas id="confetti"></canvas>
+
+<div class="nakkas-frame">
+  <header class="nakkas-header">
+    <div class="motif-badges" id="motifBadges">
+      <span class="m-badge active">1. 🃏 Motif Kartları (Birleşik)</span>
+      <span class="m-badge">2. 🏺 Boya Küpleri (Söz Sanatı)</span>
+      <span class="m-badge">3. 🖌️ Altın Varak (Noktalama)</span>
+      <span class="m-badge">4. 🗝️ 3B Sandık (Kurallı Cümle)</span>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="m-badge">🎨 <b id="scoreVal">0</b></span>
+      <span class="m-badge" id="heartsVal">❤️❤️❤️</span>
+      <button type="button" class="spk-btn" id="btnMute">🔊</button>
+    </div>
+  </header>
+
+  <div class="scroll-directive">
+    <span class="s-tag" id="dirTag">NAKKAŞHANE</span>
+    <p style="flex:1; font-family:'Lora',serif; font-weight:700; font-size:clamp(14.5px,1.8vw,18.5px);" id="dirText">
+      Ahşap üzerine lale, gül ve sümbül işlenen Edirnekâri sanat atölyesine hoş geldin!
+    </p>
+    <button type="button" class="spk-btn" id="dirSpk">🔊</button>
+  </div>
+
+  <main class="easel-canvas" id="easelCanvas"></main>
+
+  <footer class="nakkas-footer">
+    <span id="fbText">🌷 Fırçanı hazırla, Edirne kırmızısı ve altın varakla bezeme yapalım!</span>
+    <a href="https://drive.google.com/file/d/1m5tY36QfCURJ-peon9Z9YkyLN7qBx-on/view?usp=drive_link"
+       target="_blank" rel="noopener noreferrer" style="color:#fde047; text-decoration:underline;">
+      📜 Pırıl Güreller'in çalışmasının tamamına ulaşmak için tıklayın. ↗
+    </a>
+  </footer>
+</div>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const S = { name: '', score: 0, lives: 3, stage: 0, qIdx: 0, mute: false, cleanups: [] };
+
+  let AC = null;
+  function getAC() {
+    try {
+      if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+      if (AC && AC.state === 'suspended') AC.resume();
+    } catch (e) {}
+    return AC;
+  }
+  function tone(f1, f2, d, type = 'triangle', v = 0.18, delay = 0) {
+    if (S.mute) return;
+    const c = getAC(); if (!c) return;
+    const t = c.currentTime + delay, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(f1, t);
+    o.frequency.exponentialRampToValueAtTime(Math.max(f2, 20), t + d * 0.9);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(v, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g); g.connect(c.destination);
+    o.start(t); o.stop(t + d + 0.02);
+  }
+  const fxCache = {};
+  function playFX(file, fbFn) {
+    if (S.mute) return;
+    const a = fxCache[file] || (fxCache[file] = new Audio(file));
+    let done = false;
+    const fb = () => { if (!done) { done = true; fbFn(); } };
+    a.onerror = fb;
+    try { a.currentTime = 0; } catch (e) {}
+    const p = a.play(); if (p && p.catch) p.catch(fb);
+  }
+  const SFX = {
+    brush() { playFX('sesler/firca_darbesi.mp3', () => tone(540, 720, 0.11, 'sine', 0.12)); },
+    ok() { playFX('sesler/dogru.mp3', () => [523, 659, 784].forEach((f, i) => tone(f, f, 0.15, 'triangle', 0.2, i * 0.08))); },
+    bad() { playFX('sesler/yanlis.mp3', () => tone(210, 115, 0.28, 'sawtooth', 0.15)); },
+    win() { playFX('sesler/alkis.mp3', () => [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.2, 'triangle', 0.22, i * 0.1))); }
+  };
+
+  const bgm = new Audio('sesler/ney_klasik_fon.mp3');
+  bgm.loop = true; bgm.volume = 0.14;
+  bgm.addEventListener('error', () => {});
+
+  let voice = null;
+  function say(file, text) {
+    if (S.mute) return;
+    if (voice) { try { voice.pause(); } catch (e) {} voice = null; }
+    try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+    const tts = () => {
+      try {
+        if (!text || !window.speechSynthesis) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'tr-TR'; u.rate = 0.92;
+        window.speechSynthesis.speak(u);
+      } catch (e) {}
+    };
+    if (!file) { tts(); return; }
+    const a = new Audio(file); voice = a;
+    a.addEventListener('error', tts, { once: true });
+    const p = a.play(); if (p && p.catch) p.catch(tts);
+  }
+  const spk = (file, txt) => `<button type="button" class="spk-btn" data-a="${file}" data-t="${String(txt).replace(/"/g, '&quot;')}">🔊</button>`;
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.spk-btn[data-t]');
+    if (b) { e.stopPropagation(); say(b.dataset.a, b.dataset.t); }
+  }, true);
+
+  function cleanAll() {
+    S.cleanups.forEach(fn => { try { fn(); } catch (e) {} });
+    S.cleanups = [];
+  }
+
+  function updateHUD() {
+    $('scoreVal').textContent = S.score;
+    $('heartsVal').textContent = [0, 1, 2].map(i => i < S.lives ? '❤️' : '🖤').join('');
+    document.querySelectorAll('#motifBadges .m-badge').forEach((el, idx) => {
+      if (idx < 4) {
+        el.classList.toggle('active', idx === S.stage - 1);
+        el.classList.toggle('done', idx < S.stage - 1);
+      }
+    });
+  }
+
+  function setDir(tag, txt, file) {
+    $('dirTag').textContent = tag;
+    $('dirText').textContent = txt;
+    $('dirSpk').onclick = () => say(file, txt);
+  }
+
+  function good(pts, msg) {
+    SFX.ok(); S.score += pts; updateHUD();
+    $('fbText').innerHTML = `✅ ${msg}`;
+  }
+  function bad(msg) {
+    SFX.bad(); S.lives = Math.max(1, S.lives - 1); updateHUD();
+    $('fbText').innerHTML = `💡 ${msg}`;
+  }
+
+  /* --- GİRİŞ EKRANI --- */
+  function showIntro() {
+    cleanAll(); S.stage = 0;
+    setDir('EDİRNEKÂRİ', 'Osmanlı’nın ahşap ve çiçek süsleme sanatı Edirnekâri Atölyesine hoş geldin!', 'sesler/edirnekari_giris.mp3');
+    $('easelCanvas').innerHTML = `
+      <div style="max-width:640px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:14px;">
+        <div style="font-size:52px;">🎨 🌷 🗝️</div>
+        <h1 style="font-family:'Playfair Display',serif; font-size:clamp(26px,3.8vw,42px); color:var(--crimson);">
+          Edirnekâri Süsleme Sanatı
+        </h1>
+        <p style="font-family:'Lora',serif; font-size:17px; line-height:1.45; background:#fef3c7; border:2px solid var(--walnut); border-radius:16px; padding:12px 18px;">
+          <b>Edirnekâri</b>; ahşap sandık ve tavanlara kök boyalarla <b>gül, lale, sümbül</b> motifleri işlenen zarif bir Osmanlı sanatıdır!
+          ${spk('sesler/edirnekari_bilgi.mp3', 'Edirnekari; ahşap sandık ve tavanlara kök boyalarla gül, lale, sümbül motifleri işlenen zarif bir Osmanlı sanatıdır!')}
+        </p>
+        <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+          <input id="inName" type="text" maxlength="24" placeholder="Nakkaş adını yaz…"
+                 style="padding:12px 16px; border:2.5px solid var(--walnut); border-radius:14px; font-weight:800; font-size:17px; width:220px;">
+          <button type="button" class="crimson-btn" id="btnStart">FIRÇAYI AL ▶</button>
+        </div>
+      </div>
+    `;
+    $('btnStart').onclick = () => {
+      getAC();
+      S.name = $('inName').value.trim() || 'Usta Nakkaş';
+      if (!S.mute) bgm.play().catch(() => {});
+      startStage1();
+    };
+  }
+
+  /* --- 1. MEKANİK: 3B DÖNEN AHŞAP KARTLAR (BİRLEŞİK SÖZCÜKLER) --- */
+  function startStage1() {
+    cleanAll(); S.stage = 1; updateHUD();
+    setDir('1. OYUN · MOTİF KARTLARI', '4 ahşap kartın üzerine dokunarak çevir ve iki kelimenin nasıl BİRLEŞİK SÖZCÜK olduğunu öğren!', 'sesler/edirnekari_y1.mp3');
+    const cards = [
+      { e: '🎡', parts: 'Çark + Felek', word: 'ÇARKIFELEK', desc: 'Dönen tavan göbeği motifi.', a: 'sesler/ek1_1.mp3' },
+      { e: '🏛️', parts: 'Baş + Kent', word: 'BAŞKENT', desc: 'Edirne 92 yıl başkentlik yaptı.', a: 'sesler/ek1_2.mp3' },
+      { e: '🎨', parts: 'Cam + Göbeği', word: 'CAMGÖBEĞİ', desc: 'Yeşilimsi mavi kök boya rengi.', a: 'sesler/ek1_3.mp3' },
+      { e: '🌸', parts: 'Hanım + Eli', word: 'HANIMELİ', desc: 'Sandıklara işlenen kokulu çiçek.', a: 'sesler/ek1_4.mp3' }
+    ];
+    $('easelCanvas').innerHTML = `
+      <div class="flip-grid" id="flipGrid">
+        ${cards.map((c, i) => `
+          <div class="wood-card" data-i="${i}">
+            <div class="wood-inner">
+              <div class="wood-front">
+                <span style="font-size:40px;">${c.e}</span>
+                <b>${c.parts}</b>
+                <small>Dokun ve Birleştir ↻</small>
+              </div>
+              <div class="wood-back">
+                <b style="color:#fde047; font-size:18px;">${c.word}</b>
+                <p style="font-size:13px;">${c.desc}</p>
+                ${spk(c.a, c.parts + ' birleşir ve ' + c.word + ' olur. ' + c.desc)}
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div style="margin-top:12px;" id="flipNextWrap"></div>
+    `;
+    const seen = new Set();
+    $('flipGrid').querySelectorAll('.wood-card').forEach(card => {
+      card.onclick = () => {
+        const i = +card.dataset.i;
+        card.classList.toggle('flipped');
+        SFX.brush();
+        if (card.classList.contains('flipped')) {
+          say(cards[i].a, cards[i].word + '. ' + cards[i].desc);
+          if (!seen.has(i)) {
+            seen.add(i);
+            good(15, `Birleşik sözcük açıldı: ${cards[i].word}`);
+            if (seen.size === 4) {
+              $('flipNextWrap').innerHTML = `<button type="button" class="crimson-btn" id="btnGo2">2. Oyuna Geç ▶</button>`;
+              $('btnGo2').onclick = startStage2;
+            }
+          }
+        }
+      };
+    });
+  }
+
+  /* --- 2. MEKANİK: KÖK BOYA KÜPLERİ (BENZETME vs KİŞİLEŞTİRME) --- */
+  function startStage2() {
+    cleanAll(); S.stage = 2; S.qIdx = 0; updateHUD();
+    setDir('2. OYUN · BOYA KÜPLERİ', 'Cümlede “gibi / kadar” varsa BENZETME küpüne, çiçeğe insan özelliği verildiyse KİŞİLEŞTİRME küpüne dokun!', 'sesler/edirnekari_y2.mp3');
+    const items = [
+      { s: '🌷 “Sandıktaki laleler bize neşeyle GÜLÜMSÜYOR.”', type: 'kisi', a: 'sesler/ek2_1.mp3', hint: 'Gülümsemek insana ait bir özelliktir (Kişileştirme).' },
+      { s: '🌹 “Motifler ahşaba İNCİ GİBİ zarifçe dizilmiş.”', type: 'benzet', a: 'sesler/ek2_2.mp3', hint: '“İnci gibi” denilerek Benzetme yapılmıştır.' },
+      { s: '🪻 “Mor sümbüller misafirlere SELAM VERİYOR.”', type: 'kisi', a: 'sesler/ek2_3.mp3', hint: 'Selam vermek insana ait bir özelliktir (Kişileştirme).' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage3(); return; }
+      const cur = items[S.qIdx];
+      $('easelCanvas').innerHTML = `
+        <div class="scroll-board">
+          ${cur.s} ${spk(cur.a, cur.s)}
+        </div>
+        <div class="dye-vats-grid">
+          <div class="dye-vat" id="vatBenzet">
+            <div style="font-size:38px;">💎</div>
+            <b style="color:var(--crimson); font-size:18px;">BENZETME KÜPÜ</b>
+            <p style="font-size:13px;">“Gibi / Kadar” ile yapılan benzetme</p>
+          </div>
+          <div class="dye-vat" id="vatKisi">
+            <div style="font-size:38px;">🌸</div>
+            <b style="color:var(--crimson); font-size:18px;">KİŞİLEŞTİRME KÜPÜ</b>
+            <p style="font-size:13px;">Varlığa insana ait özellik verme</p>
+          </div>
+        </div>
+      `;
+      say(cur.a, cur.s);
+      const pick = (t) => {
+        if (t === cur.type) {
+          good(30, 'Doğru boya küpü! Motif renklendi.');
+          S.qIdx++;
+          setTimeout(render, 850);
+        } else {
+          bad(cur.hint);
+        }
+      };
+      $('vatBenzet').onclick = () => pick('benzet');
+      $('vatKisi').onclick = () => pick('kisi');
+    }
+    render();
+  }
+
+  /* --- 3. MEKANİK: ALTIN VARAK NOKTALAMA FIRÇASI ( .  ,  ?  ! ) --- */
+  function startStage3() {
+    cleanAll(); S.stage = 3; S.qIdx = 0; updateHUD();
+    setDir('3. OYUN · ALTIN VARAK', 'Cümledeki boşluğa uygun NOKTALAMA İŞARETİ hokkasına fırçanı batır!', 'sesler/edirnekari_y3.mp3');
+    const items = [
+      { s: 'Nakkaş ahşaba gül [ _ ] lale ve sümbül çizdi.', ans: ',', a: 'sesler/ek3_1.mp3', hint: 'Eş görevli kelimeler (gül, lale) arasına VİRGÜL (,) konur.' },
+      { s: 'Ne kadar da parlak bir altın sandık [ _ ]', ans: '!', a: 'sesler/ek3_2.mp3', hint: 'Hayranlık ve heyecan bildiren cümlenin sonuna ÜNLEM (!) konur.' },
+      { s: 'Edirnekâri sandığı beğendin mi [ _ ]', ans: '?', a: 'sesler/ek3_3.mp3', hint: 'Soru bildiren cümlenin sonuna SORU İŞARETİ (?) konur.' }
+    ];
+    function render() {
+      if (S.qIdx >= items.length) { startStage4(); return; }
+      const cur = items[S.qIdx];
+      $('easelCanvas').innerHTML = `
+        <div class="scroll-board">
+          🖌️ “${cur.s}” ${spk(cur.a, cur.s)}
+        </div>
+        <div class="ink-pots" id="inkPots">
+          ${[',', '!', '?', '.'].map(sign => `<button type="button" class="ink-pot-btn" data-s="${sign}">${sign}</button>`).join('')}
+        </div>
+      `;
+      say(cur.a, cur.s);
+      $('inkPots').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          SFX.brush();
+          if (b.dataset.s === cur.ans) {
+            good(30, `Altın varakla “${cur.ans}” işlendi!`);
+            S.qIdx++;
+            setTimeout(render, 850);
+          } else {
+            bad(cur.hint);
+          }
+        };
+      });
+    }
+    render();
+  }
+
+  /* --- 4. MEKANİK: 3B ÇEYİZ SANDIĞI KİLİDİ — KELİME TRENİ (KURALLI CÜMLE) --- */
+  function startStage4() {
+    cleanAll(); S.stage = 4; S.qIdx = 0; updateHUD();
+    setDir('4. OYUN · 3B ÇEYİZ SANDIĞI', 'Ahşap kelimelere doğru sırayla dokunarak yüklemi sonda olan KURALLI CÜMLE kur ve 3B sandığı aç!', 'sesler/edirnekari_y4.mp3');
+
+    const sentences = [
+      { words: ['Nakkaş', 'sandığa', 'lale', 'çizdi.'], a: 'sesler/ek4_1.mp3' },
+      { words: ['Edirnekâri', 'çok', 'zarif', 'bir sanattır.'], a: 'sesler/ek4_2.mp3' }
+    ];
+
+    $('easelCanvas').innerHTML = `
+      <div class="chest-3d-grid">
+        <canvas id="chest3dCanvas"></canvas>
+        <div style="display:flex; flex-direction:column; gap:12px; text-align:center;">
+          <div style="font-weight:800; color:var(--crimson);">🗝️ Kelimeleri Sırayla Diz:</div>
+          <div class="word-slot-bar" id="builtBar">…</div>
+          <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;" id="tilePool"></div>
+        </div>
+      </div>
+    `;
+
+    // Three.js 3B Ceviz Çeyiz Sandığı
+    const cvs = $('chest3dCanvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1.3, 0.1, 100);
+    camera.position.set(0, 4.5, 11);
+    camera.lookAt(0, 0, 0);
+    const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    const dl = new THREE.DirectionalLight(0xffd580, 1.4);
+    dl.position.set(5, 10, 8);
+    scene.add(dl);
+
+    const chestGroup = new THREE.Group();
+    const body = new THREE.Mesh(new THREE.BoxGeometry(4.4, 2.2, 2.8), new THREE.MeshStandardMaterial({ color: 0x5c2410 }));
+    body.position.y = -0.8;
+    chestGroup.add(body);
+    const lidPivot = new THREE.Group();
+    lidPivot.position.set(0, 0.3, -1.4);
+    const lid = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.7, 2.9), new THREE.MeshStandardMaterial({ color: 0x9f1239 }));
+    lid.position.set(0, 0.35, 1.45);
+    lidPivot.add(lid);
+    chestGroup.add(lidPivot);
+    scene.add(chestGroup);
+
+    let lidOpenTarget = 0, rafId = 0;
+    function resize() {
+      const r = cvs.getBoundingClientRect();
+      if (r.width && r.height) {
+        camera.aspect = r.width / r.height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(r.width, r.height);
+      }
+    }
+    resize();
+    function loop() {
+      rafId = requestAnimationFrame(loop);
+      chestGroup.rotation.y += 0.01;
+      lidPivot.rotation.x += (lidOpenTarget - lidPivot.rotation.x) * 0.1;
+      renderer.render(scene, camera);
+    }
+    loop();
+    S.cleanups.push(() => cancelAnimationFrame(rafId));
+
+    function renderQ() {
+      if (S.qIdx >= sentences.length) { showCertificate(); return; }
+      const cur = sentences[S.qIdx];
+      const picked = [];
+      $('builtBar').textContent = 'Kelimelere sırayla dokun…';
+      say(cur.a, cur.words.join(' '));
+      const order = [2, 0, 3, 1];
+      $('tilePool').innerHTML = order.map(idx =>
+        `<button type="button" class="wood-tile-btn" data-w="${cur.words[idx]}">${cur.words[idx]}</button>`
+      ).join('');
+      $('tilePool').querySelectorAll('button').forEach(b => {
+        b.onclick = () => {
+          SFX.brush();
+          b.disabled = true;
+          picked.push(b.dataset.w);
+          $('builtBar').textContent = picked.join(' ');
+          if (picked.length === cur.words.length) {
+            if (picked.every((w, i) => w === cur.words[i])) {
+              lidOpenTarget = -0.85;
+              good(40, '3B Çeyiz Sandığı açıldı! Kurallı cümle doğru.');
+              S.qIdx++;
+              setTimeout(() => { lidOpenTarget = 0; renderQ(); }, 1000);
+            } else {
+              bad('Yüklem en sonda olmalı! Tekrar dizelim.');
+              setTimeout(renderQ, 800);
+            }
+          }
+        };
+      });
+    }
+    renderQ();
+  }
+
+  /* --- SERTİFİKA EKRANI --- */
+  function showCertificate() {
+    cleanAll(); SFX.win(); launchConfetti();
+    setDir('BAŞNAKKAŞ!', 'Edirnekâri Nakkaşhanesi Başnakkaşlık Beratını kazandın!', 'sesler/edirnekari_final.mp3');
+    $('easelCanvas').innerHTML = `
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px; width:100%;">
+        <canvas id="certCanvas" width="840" height="450" style="max-width:510px; width:100%; height:auto; border:3px solid var(--crimson); border-radius:16px;"></canvas>
+        <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
+          <button type="button" class="crimson-btn" id="btnDlCert" style="font-size:15px; padding:10px 18px;">⬇ Sertifikayı İndir (JPG)</button>
+          <a href="index.html" class="crimson-btn" style="font-size:15px; padding:10px 18px; background:var(--emerald);">🗺️ Haritaya Dön (index.html)</a>
+        </div>
+      </div>
+    `;
+    const c = $('certCanvas'), ctx = c.getContext('2d');
+    ctx.fillStyle = '#fdfaf3'; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#9f1239'; ctx.lineWidth = 8; ctx.strokeRect(18, 18, c.width - 36, c.height - 36);
+    ctx.fillStyle = '#9f1239'; ctx.font = '800 18px Cinzel, serif'; ctx.textAlign = 'center';
+    ctx.fillText('ÜLKEM YANIMDA · TÜRKÇE VE TÜRK KÜLTÜRÜ', c.width / 2, 68);
+    ctx.fillStyle = '#3e1f0d'; ctx.font = '800 32px "Playfair Display", serif';
+    ctx.fillText('EDİRNEKÂRİ SANATI BAŞNAKKAŞLIK BERATI', c.width / 2, 122);
+    ctx.fillStyle = '#d97706'; ctx.font = '800 38px Montserrat, sans-serif';
+    ctx.fillText(S.name, c.width / 2, 198);
+    ctx.fillStyle = '#3e1f0d'; ctx.font = '600 17px Lora, serif';
+    ctx.fillText('Birleşik Sözcükler, Söz Sanatları, Noktalama ve Kurallı Cümle', c.width / 2, 255);
+    ctx.fillText('görevlerini tamamlayarak Edirnekâri Başnakkaşı olmuştur.', c.width / 2, 285);
+    ctx.fillStyle = '#047857'; ctx.font = '800 20px Montserrat, sans-serif';
+    ctx.fillText(`Toplam Puan: ${S.score} ⭐  |  Öğrenci Katkısı: Pırıl Güreller`, c.width / 2, 360);
+
+    $('btnDlCert').onclick = () => {
+      const a = document.createElement('a');
+      a.href = c.toDataURL('image/jpeg', 0.95);
+      a.download = `Edirnekari_Sertifika_${S.name.replace(/\s+/g, '_')}.jpg`;
+      a.click();
+    };
+  }
+
+  function launchConfetti() {
+    const cv = $('confetti'), cx = cv.getContext('2d');
+    cv.width = innerWidth; cv.height = innerHeight;
+    const p = Array.from({ length: 85 }, () => ({
+      x: Math.random() * cv.width, y: -20 - Math.random() * 120,
+      vx: (Math.random() - 0.5) * 4, vy: 2.5 + Math.random() * 3.5,
+      c: ['#9f1239', '#f59e0b', '#047857', '#1e3a8a'][Math.floor(Math.random() * 4)], s: 6 + Math.random() * 6
+    }));
+    let f = 0;
+    function loop() {
+      f++; cx.clearRect(0, 0, cv.width, cv.height);
+      p.forEach(i => { i.x += i.vx; i.y += i.vy; cx.fillStyle = i.c; cx.fillRect(i.x, i.y, i.s, i.s); });
+      if (f < 160) requestAnimationFrame(loop); else cx.clearRect(0, 0, cv.width, cv.height);
+    }
+    loop();
+  }
+
+  $('btnMute').onclick = () => {
+    S.mute = !S.mute;
+    $('btnMute').textContent = S.mute ? '🔇' : '🔊';
+    if (S.mute) bgm.pause(); else bgm.play().catch(() => {});
+  };
+
+  showIntro();
+})();
+</script>
+</body>
+</html>
