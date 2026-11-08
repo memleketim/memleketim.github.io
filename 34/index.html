@@ -3,29 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sayfa 34</title>
+    <title>İstanbul'un Kültürel ve Doğal Zenginlikleri</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
+            margin: 0; padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
         }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
+
+        .container {
+            max-width: 1400px; width: 98%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px; padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
-        a:hover {
-            background-color: #2980b9;
+
+        h1 { text-align: center; color: white; margin-bottom: 20px; font-size: 2.2em; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); }
+
+        .instructions {
+            text-align: center; color: white; margin-bottom: 20px; font-size: 1em;
+            background: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+
+        .map-container {
+            position: relative; border-radius: 15px; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: white; padding: 15px;
+            max-width: 1000px; margin: 0 auto;
+        }
+
+        .map-image { width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 10px; }
+
+        .quiz-point {
+            position: absolute; width: 60px; height: 60px; border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px); border: 2px solid white;
+            cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5;
+        }
+
+        .quiz-point:hover { transform: scale(1.3); z-index: 20; background: rgba(255, 255, 255, 0.6); }
+
+        .quiz-point-icon {
+            width: 75px; height: 75px; object-fit: contain;
+            animation: bounce 1.2s infinite alternate;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-6px); } }
+
+        .tooltip {
+            position: absolute; background: rgba(0, 0, 0, 0.85); color: white;
+            padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: bold;
+            top: -35px; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+        }
+        .quiz-point:hover .tooltip { opacity: 1; }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 1000; justify-content: center; align-items: center;
+        }
+        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 15px 50px rgba(0,0,0,0.5); }
+        .modal-content h2 { color: #764ba2; margin-bottom: 15px; font-size: 1.6em; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
+        .modal-content p { color: #444; line-height: 1.6; text-align: justify; font-size: 1.05em; margin-bottom: 25px; }
+        
+        .btn { padding: 12px 30px; border-radius: 30px; cursor: pointer; font-weight: bold; text-decoration: none; display: inline-block; transition: 0.3s; }
+        .btn-primary { background: linear-gradient(45deg, #667eea, #764ba2); color: white; border: none; }
+        .btn-primary:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4); }
+        .btn-secondary { background: #eee; color: #555; border: none; margin-left: 10px; }
+
+        /* 🗺️ Güncellenmiş Koordinatlar */
+        
+        #p1  { top: 68%; left: 40%; } /* Katmanlı Tarih (Eski Havalimanları konumu) */
+        #p2  { top: 45%; left: 60%; } /* Mabetler (Eski Raylı Sistemler konumu) */
+        #p3  { top: 48%; left: 22%; } /* Saraylar */
+        #p4  { top: 68%; left: 25%; } /* Kuleler ve Surlar */
+        #p5  { top: 38%; left: 30%; } /* Denizcilik */
+        #p6  { top: 52%; left: 35%; } /* Ulaşım Projeleri */
+        #p7  { top: 38%; left: 15%; } /* Havalimanları (Eski Katmanlı Tarih konumu) */
+        #p8  { top: 42%; left: 45%; } /* Su Medeniyeti */
+        #p9  { top: 60%; left: 52%; } /* Çarşılar ve Hanlar */
+        #p10 { top: 58%; left: 12%; } /* Raylı Sistemler (Eski Mabetler konumu) */
+        #p11 { top: 65%; left: 85%; } /* Semt Lezzetleri (Eski Spor Kültürü konumu) */
+        #p12 { top: 58%; left: 72%; } /* Sanat ve Kültür */
+        #p13 { top: 82%; left: 58%; } /* Doğa ve Adalar */
+        #p14 { top: 72%; left: 65%; } /* Spor Kültürü (Eski Semt Lezzetleri konumu) */
+        #p15 { top: 52%; left: 82%; } /* Modern İstanbul (Hafif sol alta alındı) */
+        
     </style>
 </head>
 <body>
-    <h1>Bu sayfa henüz tasarım aşamasında: 34</h1>
-    <a href="http://memleketim.github.io/">Anasayfaya Dön</a>
+
+<div class="container">
+    <div style="width: 100%; position: relative;">
+        <h1>İstanbul'un Tarihi, Kültürel ve Doğal Zenginlikleri</h1>
+        <a href="https://memleketim.github.io" class="btn btn-primary" style="position: absolute; top: 0; right: 0;">Ana Sayfa</a>
+    </div>
+
+    <div class="instructions">Haritadaki ikonlara tıklayarak dünyanın incisi, iki kıtanın birleştiği dev metropol İstanbul'u 15 farklı başlıkta keşfedebilirsiniz. 🌉</div>
+
+    <div class="map-container">
+        <img src="map.png" alt="İstanbul Haritası" class="map-image">
+
+        <div class="quiz-point" id="p1" data-title="⏳ İstanbul'un 8500 Yıllık Katmanlı Tarihi" 
+             data-description="Yenikapı kazılarıyla yerleşim tarihi 8.500 yıl geriye uzanan bu metropol; Roma, Doğu Roma ve Osmanlı'ya başkentlik yapmıştır. 1453 fethi tarihi bir başlangıç değil, kentin çok katmanlı küresel yapısının en önemli dönüm noktalarından biridir." 
+             data-link="1.html"><div class="tooltip">Katmanlı Tarih</div><img src="1.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p2" data-title="🕌 Tarihi Yarımada ve Mabetler" 
+             data-description="Ayasofya, Sultanahmet ve Süleymaniye camileri ile Hipodrom, Dikilitaş ve Yılanlı Sütun tarihi yarımadanın ruhudur. Farklı inançların mimari mirası ve dikilitaşlar, Roma'dan günümüze bu meydanlarda yan yana yaşamaya devam eder." 
+             data-link="2.html"><div class="tooltip">Mabetler</div><img src="2.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p3" data-title="🏰 İmparatorluk Yönetimi ve Saraylar" 
+             data-description="Osmanlı devlet aklının merkezi Topkapı ile Batı mimarisinin etkisindeki Dolmabahçe Sarayı idari gücün simgeleridir. Yıldız ve Beylerbeyi sarayları da eklendiğinde, imparatorluğun asırlar içindeki bürokratik ve mimari dönüşümü tam olarak anlaşılır." 
+             data-link="3.html"><div class="tooltip">Saraylar</div><img src="3.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p4" data-title="🗼 Savunma Mirası: Kuleler, Hisarlar, Surlar" 
+             data-description="Ceneviz mirası Galata Kulesi ve Kız Kulesi şehrin görsel simgeleridir. Şehrin denizden ve karadan savunulmasını sağlayan Rumeli Hisarı, Anadolu Hisarı ve Yedikule kara surları ise dönemin askeri mühendisliğinin en somut kanıtlarıdır." 
+             data-link="4.html"><div class="tooltip">Savunma Mirası</div><img src="4.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p5" data-title="⛴️ Boğaz, Haliç ve Denizcilik Kültürü" 
+             data-description="Karadeniz ile Marmara'yı bağlayan Boğaziçi ve doğal bir liman olan Haliç kentin ticari can damarıdır. Uluslararası deniz lojistiği, yolcu vapurları ve kıyı yaşamı, metropolün denizle kurduğu asırlık, stratejik ve kopmaz bağı temsil eder." 
+             data-link="5.html"><div class="tooltip">Denizcilik</div><img src="5.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p6" data-title="🌉 Kıtalararası Mega Ulaşım Projeleri" 
+             data-description="Asya ve Avrupa'yı bağlayan 3 devasa asma köprünün yanı sıra, deniz tabanının altından geçen demiryolu tüp geçidi Marmaray ve çift katlı karayolu tüneli Avrasya; modern Türkiye'nin mühendislik alanında ulaştığı küresel vizyonu kanıtlar." 
+             data-link="6.html"><div class="tooltip">Ulaşım Projeleri</div><img src="6.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p7" data-title="✈️ Dünyaya Açılan Kapı: Havalimanları" 
+             data-description="Anadolu yakasındaki Sabiha Gökçen ve Avrupa yolcu trafiğinde zirvede yer alan İstanbul Havalimanı, kentin uluslararası bağlantı noktalarıdır. İki kıtadaki bu merkezler, şehri dünyanın en önemli küresel havacılık ve transfer üslerinden biri yapar." 
+             data-link="7.html"><div class="tooltip">Havalimanları</div><img src="7.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p8" data-title="💧 Yeraltındaki Mühendislik: Su Medeniyeti" 
+             data-description="Kuşatmalar sırasında kentin su ihtiyacını karşılayan Yerebatan ve Şerefiye sarnıçları ile Bozdoğan Su Kemeri eşsizdir. Yüzlerce sütunlu bu yapılar ve Osmanlı'nın tarihi çeşmeleri, su idaresinin nasıl büyük bir medeniyet unsuru olduğunu gösterir." 
+             data-link="8.html"><div class="tooltip">Su Medeniyeti</div><img src="8.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p9" data-title="🏺 Tarihi Ticaretin Kalbi: Çarşılar ve Hanlar" 
+             data-description="Küresel ticaretin ilk kapalı AVM'si Kapalıçarşı ve baharatın merkezi Mısır Çarşısı ticari hareketliliğin odaklarıdır. İpek Yolu'nun bitiş noktasındaki tarihi hanlar, bedestenler ve Sahaflar Çarşısı, kentin ticaret ve zanaat hafızasını oluşturur." 
+             data-link="9.html"><div class="tooltip">Çarşılar ve Hanlar</div><img src="9.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p10" data-title="🚋 Semtler, Raylı Sistemler ve Gündelik Yaşam" 
+             data-description="Nostaljik tramvay, dünyanın en eski 2. metrosu tarihi Tünel ve Orient Express'in durağı Sirkeci Garı ulaşım hafızasıdır. Balat'ın mimarisi, Kadıköy, pazarlar, kediler kentin çok renkli yaşayan ruhudur." 
+             data-link="10.html"><div class="tooltip">Raylı Sistemler</div><img src="10.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p11" data-title="🥨 İstanbul Mutfağı ve Semt Lezzetleri" 
+             data-description="Boğaz'da balık-ekmek, vapurda çay-simit ve kumpir, metropolün hızlı sokak beslenme kültürüdür. Semtlerle özdeşleşen bu tatlar, kahve kültüründen Osmanlı saray mutfağına kadar uzanan çok katmanlı, devasa bir gastronomi endüstrisi yaratmıştır." 
+             data-link="11.html"><div class="tooltip">Semt Lezzetleri</div><img src="11.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p12" data-title="🎨 Kültür, Sanat ve UNESCO Tasarım Şehri" 
+             data-description="Hat, ebru ve minyatür sanatları kentin estetik kökleridir. Barış Manço Evi, Atatürk Kültür Merkezi (AKM), Oyuncak Müzesi, tiyatrolar ve modern sanat merkezleri; 2017'de UNESCO Yaratıcı Şehirler Ağı'na 'Tasarım Şehri' olarak kabul edilen İstanbul'un kültürel gücünü temsil eder." 
+             data-link="12.html"><div class="tooltip">Sanat ve Kültür</div><img src="12.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p13" data-title="🌲 İstanbul'un Yeşil Yüzü: Doğa ve Adalar" 
+             data-description="Elektrikli araçlarla gezilen Prens Adaları, metropol içinde ekolojik bir sığınaktır. Kentin ormanları, lale ve erguvan kültürü ile Boğaz'ın önemli bir kuş göç yolu üzerinde bulunması doğal zenginliğini ortaya koyar." 
+             data-link="13.html"><div class="tooltip">Doğa ve Adalar</div><img src="13.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p14" data-title="🏅 Spor Endüstrisi ve Taraftarlık Kültürü" 
+             data-description="Beşiktaş, Fenerbahçe ve Galatasaray'ın kıtalararası derbileri kentin sosyal dinamosudur. Şampiyonlar Ligi finallerine, dünya şampiyonalarına ve dev voleybol organizasyonlarına ev sahipliği yapması, şehri küresel spor endüstrisinde bir marka yapmıştır." 
+             data-link="14.html"><div class="tooltip">Spor Kültürü</div><img src="14.png" class="quiz-point-icon"></div>
+
+        <div class="quiz-point" id="p15" data-title="🏙️ Modern İstanbul ve Küresel Metropol" 
+             data-description="İş merkezlerindeki devasa gökdelenler ve uluslararası sermayenin merkezi İstanbul Finans Merkezi, şehrin modern vizyonudur. Nüfusuyla dev bir metropol olan kent, tarihi mirasını küresel ekonomi ve modern büyükşehir dinamikleriyle harmanlar." 
+             data-link="15.html"><div class="tooltip">Modern İstanbul</div><img src="15.png" class="quiz-point-icon"></div>
+    </div>
+</div>
+
+<div id="infoModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div class="modal-buttons">
+            <a href="#" id="activityLinkBtn" class="btn btn-primary">Etkinliğe Git</a>
+            <button class="btn btn-secondary" id="closeModalBtn">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const quizPoints = document.querySelectorAll('.quiz-point');
+    const modal = document.getElementById('infoModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const activityLinkBtn = document.getElementById('activityLinkBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    quizPoints.forEach(point => {
+        point.addEventListener('click', function() {
+            modalTitle.textContent = this.getAttribute('data-title');
+            modalText.textContent = this.getAttribute('data-description');
+            activityLinkBtn.href = this.getAttribute('data-link');
+            modal.style.display = 'flex';
+        });
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.style.display = 'none');
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+</script>
+
 </body>
 </html>
